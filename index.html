@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>映画えんとつ町のプペル子ども招待プロジェクト IN 三重</title>
+    <meta name="description" content="2026年5月30日、109シネマズ明和にて開催。子ども200名無料招待！声出しOKの応援上映です。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/index.css">
+</head>
+<body>
+    <div class="stars-bg"></div>
+    
+    <header class="hero">
+        <div class="hero-content">
+            <span class="badge">声出しOK！応援上映会</span>
+            <h1>映画えんとつ町のプペル<br>子ども招待プロジェクト IN 三重</h1>
+            <h2 class="subtitle">『えんとつ町のプペル〜約束の時計台〜』応援上演会</h2>
+            <p class="hero-lead">子ども200名様を無料でご招待します。</p>
+            <div class="hero-buttons">
+                <a href="#reservation" class="btn btn-primary">今すぐ申し込む</a>
+                <a href="#details" class="btn btn-outline">詳細を見る</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="details" class="section glass-card">
+            <h2 class="section-title">開催概要</h2>
+            <div class="details-grid">
+                <div class="details-item">
+                    <span class="icon">📅</span>
+                    <div class="content">
+                        <h3>日時</h3>
+                        <p>2026年5月30日（土）</p>
+                        <p class="note">※時間は決まり次第お知らせします</p>
+                    </div>
+                </div>
+                <div class="details-item">
+                    <span class="icon">📍</span>
+                    <div class="content">
+                        <h3>場所</h3>
+                        <p>109シネマズ明和</p>
+                    </div>
+                </div>
+                <div class="details-item">
+                    <span class="icon">🎫</span>
+                    <div class="content">
+                        <h3>参加費</h3>
+                        <p>大人：1,600円</p>
+                        <p>子ども：<strong>無料招待（先着200名）</strong></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rules" class="section">
+            <h2 class="section-title">応援上映の楽しみ方</h2>
+            <div class="rules-container">
+                <div class="rule-card">
+                    <h3>声出しOK！</h3>
+                    <p>劇中のセリフに合わせて声をかけたり、歌ったりして盛り上がりましょう！</p>
+                </div>
+                <div class="rule-card">
+                    <h3>持ち込み大歓迎！</h3>
+                    <p>ペンライト、ランタン、鈴などの光り物や楽器の持ち込みが可能です。</p>
+                </div>
+                <div class="rule-card">
+                    <h3>拍手・手拍子</h3>
+                    <p>素敵なシーンや歌の場面では、思いっきり手を叩いて応援しましょう！</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="reservation" class="section glass-card reservation-section">
+            <h2 class="section-title">先行予約お申し込み</h2>
+            <p class="form-lead">以下のフォームより、必要事項を入力してお申し込みください。</p>
+            
+            <form id="booking-form" class="reservation-form">
+                <div class="form-group">
+                    <label for="name">お名前</label>
+                    <input type="text" id="name" name="name" required placeholder="例：山田 太郎">
+                </div>
+                <div class="form-group">
+                    <label for="email">メールアドレス</label>
+                    <input type="email" id="email" name="email" required placeholder="例：poupelle@example.com">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adult-count">大人（有料）人数</label>
+                        <input type="number" id="adult-count" name="adult_count" min="0" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="child-count">子ども（無料）人数</label>
+                        <input type="number" id="child-count" name="child_count" min="0" value="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="message">メッセージ・ご質問（任意）</label>
+                    <textarea id="message" name="message" rows="3" placeholder="ご要望などあればご記入ください"></textarea>
+                </div>
+                
+                <div id="capacity-warning" class="warning-msg hidden">
+                    ※申し訳ございませんが、子どもの無料枠が残りわずか、または満席です。
+                </div>
+                
+                <button type="submit" class="btn btn-submit" id="submit-btn">
+                    <span class="btn-text">この内容でお申し込み</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </form>
+            
+            <div id="success-message" class="success-card hidden">
+                <h3>お申し込みありがとうございます！</h3>
+                <p>内容を確認し、折り返しご連絡いたします。</p>
+                <button onclick="location.reload()" class="btn btn-outline">戻る</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 映画えんとつ町のプペル子ども招待プロジェクト IN 三重</p>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+</body>
+</html>
