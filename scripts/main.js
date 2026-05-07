@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(form);
         const data = {
             name: formData.get('name'),
-            email: formData.get('email'),
+            tel: formData.get('tel'),
             adult_count: formData.get('adult_count'),
             child_count: formData.get('child_count'),
             message: formData.get('message'),
