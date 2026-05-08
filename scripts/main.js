@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const successMsg = document.getElementById('success-message');
     
     // Replace this URL with your actual GAS Web App URL after deployment
-    const GAS_URL = 'YOUR_GAS_WEB_APP_URL_HERE';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw04uKYyojtd0uJ3CMTm4oG7a4-bUrhTo9Lol7dYnAL4GCBTK8Ew-zhU6ydalF318Pf/exec';
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData(form);
         const data = {
+            action: 'book',
             name: formData.get('name'),
             tel: formData.get('tel'),
             adult_count: formData.get('adult_count'),

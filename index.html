@@ -35,7 +35,8 @@
                     <div class="content">
                         <h3>日時</h3>
                         <p>2026年5月30日（土）</p>
-                        <p class="note">※時間は決まり次第お知らせします</p>
+                        <p style="margin-top: 5px; color: var(--primary-color);"><strong>9:30〜 チケット引き換え開始</strong></p>
+                        <p class="note" style="margin-top: 4px;">※席の確保が必要です。<strong>上映時間の30分前には必ずお越しください。</strong></p>
                     </div>
                 </div>
                 <div class="details-item">
@@ -43,13 +44,13 @@
                     <div class="content">
                         <h3>場所</h3>
                         <p>109シネマズ明和</p>
+                        <p class="note" style="margin-top: 4px;">※当日は直接、109シネマズ明和へお越しください。</p>
                     </div>
                 </div>
                 <div class="details-item">
                     <span class="icon">🎫</span>
                     <div class="content">
                         <h3>参加費</h3>
-                        <p>大人：1,600円</p>
                         <p>子ども：<strong>無料招待（先着200名）</strong></p>
                     </div>
                 </div>
@@ -65,7 +66,7 @@
                 </div>
                 <div class="rule-card">
                     <h3>持ち込み大歓迎！</h3>
-                    <p>ペンライト、ランタン、鈴などの光り物や楽器の持ち込みが可能です。</p>
+                    <p>ペンライト、鈴などの光り物や楽器の持ち込みが可能です。</p>
                 </div>
                 <div class="rule-card">
                     <h3>拍手・手拍子</h3>
@@ -78,6 +79,11 @@
             <h2 class="section-title">先行予約お申し込み</h2>
             <p class="form-lead">以下のフォームより、必要事項を入力してお申し込みください。</p>
             
+            <div class="cancellation-notice">
+                ⚠️ <strong>ご注意</strong><br>
+                お子様の無料枠に限りがあるため、キャンセルの場合は必ず <strong>080-4223-1203（松本）</strong> までご連絡をお願いいたします。
+            </div>
+
             <form id="booking-form" class="reservation-form">
                 <div class="form-group">
                     <label for="name">お名前</label>
@@ -89,7 +95,7 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="adult-count">大人（有料）人数</label>
+                        <label for="adult-count">大人 人数</label>
                         <input type="number" id="adult-count" name="adult_count" min="0" value="1" required>
                     </div>
                     <div class="form-group">
@@ -114,7 +120,7 @@
             
             <div id="success-message" class="success-card hidden">
                 <h3>お申し込みありがとうございます！</h3>
-                <p>内容を確認し、折り返しご連絡いたします。</p>
+                <p>当日、会場でお待ちしております。</p>
                 <button onclick="location.reload()" class="btn btn-outline">戻る</button>
             </div>
         </section>

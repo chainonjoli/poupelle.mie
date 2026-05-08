@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【管理者専用】予約管理 - えんとつ町のプペル</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/index.css">
+</head>
+<body>
+    <div class="stars-bg"></div>
+    
+    <main style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <section class="section glass-card" style="width: 100%; max-width: 600px; margin: 0;">
+            <h2 class="section-title" style="font-size: 1.8rem;">管理者専用ダッシュボード</h2>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <p style="font-size: 1.2rem; color: var(--text-muted);">現在の子ども予約合計</p>
+                <div style="font-size: 3rem; font-weight: bold; color: var(--primary-color);">
+                    <span id="current-count">--</span> <span style="font-size: 1.5rem; color: var(--text-color);">/ 200名</span>
+                </div>
+                <button id="refresh-btn" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.9rem; margin-top: 10px;">🔄 最新の人数を取得</button>
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+
+            <h3 style="margin-bottom: 15px; color: #ff6b6b; text-align: center;">予約の取り消し（キャンセル）</h3>
+            <p style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">
+                キャンセルの電話があった場合、ここで取り消す人数を入力して減らしてください。<br>
+                ※この操作は元に戻せません。
+            </p>
+
+            <form id="cancel-form" class="reservation-form">
+                <div class="form-group">
+                    <label for="cancel-count" style="text-align: center;">取り消す子どもの人数</label>
+                    <input type="number" id="cancel-count" name="cancel_count" min="1" max="200" value="1" required style="font-size: 1.2rem; text-align: center;">
+                </div>
+                
+                <div id="admin-message" class="warning-msg hidden"></div>
+                
+                <button type="submit" class="btn btn-submit" id="submit-btn" style="background-color: #ff6b6b; color: white;">
+                    <span class="btn-text">この人数を取り消す</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="index.html" style="color: var(--text-muted); text-decoration: underline;">一般向けページに戻る</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="scripts/admin.js"></script>
+</body>
+</html>

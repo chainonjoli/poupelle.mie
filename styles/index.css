@@ -282,6 +282,20 @@ input:focus, textarea:focus {
     font-size: 0.9rem;
 }
 
+.cancellation-notice {
+    color: #fca5a5;
+    background: rgba(127, 29, 29, 0.2);
+    border-left: 4px solid #ef4444;
+    padding: 15px;
+    border-radius: 4px 8px 8px 4px;
+    margin: 0 auto 25px auto;
+    font-size: 0.95rem;
+    font-weight: 500;
+    max-width: 600px;
+    text-align: left;
+    line-height: 1.8;
+}
+
 .success-card {
     text-align: center;
     padding: 40px;
