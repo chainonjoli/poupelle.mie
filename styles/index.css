@@ -282,18 +282,62 @@ input:focus, textarea:focus {
     font-size: 0.9rem;
 }
 
+.info-notice {
+    background: rgba(252, 211, 77, 0.1);
+    border-left: 4px solid var(--primary-color);
+    padding: 15px 20px;
+    border-radius: 4px 8px 8px 4px;
+    margin: 0 auto 20px auto;
+    font-size: 0.95rem;
+    max-width: 600px;
+    text-align: left;
+    line-height: 1.6;
+}
+
 .cancellation-notice {
     color: #fca5a5;
     background: rgba(127, 29, 29, 0.2);
     border-left: 4px solid #ef4444;
-    padding: 15px;
+    padding: 15px 20px;
     border-radius: 4px 8px 8px 4px;
     margin: 0 auto 25px auto;
     font-size: 0.95rem;
-    font-weight: 500;
     max-width: 600px;
     text-align: left;
-    line-height: 1.8;
+    line-height: 1.6;
+}
+
+.notice-title {
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+    color: #fff;
+}
+
+.notice-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.notice-list li {
+    margin-bottom: 8px;
+    padding-left: 1.2em;
+    text-indent: -1.2em;
+}
+
+.notice-list li::before {
+    content: "・";
+}
+
+.notice-list li:last-child {
+    margin-bottom: 0;
+}
+
+.note-small {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    display: inline-block;
+    text-indent: 0;
 }
 
 .success-card {
