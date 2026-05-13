@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             action: 'book',
             name: formData.get('name'),
             tel: formData.get('tel'),
+            adult_free_count: formData.get('adult_free_count'),
             adult_count: formData.get('adult_count'),
             child_count: formData.get('child_count'),
             message: formData.get('message'),

@@ -52,6 +52,7 @@
                     <div class="content">
                         <h3>参加費</h3>
                         <p>子ども：<strong>無料招待（先着200名）</strong></p>
+                        <p style="margin-top: 5px;">大人：<strong>無料招待 追加60名（子育て応援枠：1家族1名限り）</strong></p>
                     </div>
                 </div>
             </div>
@@ -83,7 +84,7 @@
                 <p class="notice-title">【人数について】</p>
                 <ul class="notice-list">
                     <li><strong>こども(高校生以下)</strong>：無料招待枠確保のためお伺いします。</li>
-                    <li><strong>大人</strong>：当日の空席状況の参考としてお伺いします。</li>
+                    <li><strong>大人</strong>：無料招待（子育て応援枠：1家族1名限り、先着60名）および当日の空席状況の参考としてお伺いします。</li>
                 </ul>
             </div>
 
@@ -91,7 +92,7 @@
                 <p class="notice-title">【注意事項】</p>
                 <ul class="notice-list">
                     <li>先行予約は「座席の確保」ではございません。当日、ご自身で座席指定(発券)を行っていただく形となります。</li>
-                    <li>こども(高校生以下)の方の人数が変更になる場合のみ、お電話にてご連絡いただきますようお願いいたします。<br><span class="note-small">(大人の方の人数変更については、ご連絡には及びません。)</span></li>
+                    <li>こども(高校生以下) または 大人(無料枠) の人数が変更になる場合は、必ずお電話（<strong>080-4223-1203 松本まで</strong>）にてご連絡いただきますようお願いいたします。<br><span class="note-small">(大人(通常枠)の人数変更については、ご連絡には及びません。)</span></li>
                     <li>先行予約は5月27日22:00まで受付いたします。また、当日枠もございますので、当日お早めに専用窓口までお越しくださいませ。</li>
                 </ul>
             </div>
@@ -107,13 +108,17 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="adult-count">大人 人数</label>
-                        <input type="number" id="adult-count" name="adult_count" min="0" value="1" required>
+                        <label for="adult-free-count">大人（無料枠）人数<br><span class="note-small" style="display: block; margin-top: 4px;">※子育て応援枠：1家族1名まで</span></label>
+                        <input type="number" id="adult-free-count" name="adult_free_count" min="0" max="1" value="0" required>
                     </div>
                     <div class="form-group">
-                        <label for="child-count">子ども（無料）人数</label>
-                        <input type="number" id="child-count" name="child_count" min="0" value="0" required>
+                        <label for="adult-count">大人（通常）人数<br><span class="note-small" style="display: block; margin-top: 4px;">※2名目以降はこちら</span></label>
+                        <input type="number" id="adult-count" name="adult_count" min="0" value="0" required>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="child-count">子ども（無料）人数</label>
+                    <input type="number" id="child-count" name="child_count" min="0" value="0" required>
                 </div>
                 <div class="form-group">
                     <label for="message">メッセージ・ご質問（任意）</label>
