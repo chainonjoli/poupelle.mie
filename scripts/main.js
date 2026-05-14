@@ -109,11 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
+            const params = new URLSearchParams();
+            params.append('payload', JSON.stringify(data));
+
             await fetch(GAS_URL, {
-                method:  'POST',
-                mode:    'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body:    JSON.stringify(data)
+                method: 'POST',
+                mode:   'no-cors',
+                body:   params
             });
 
             form.classList.add('hidden');
