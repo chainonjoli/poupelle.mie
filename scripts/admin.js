@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === 管理者はここでGASのURLを設定します ===
     // main.js と同じURLを設定してください
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwYuEBIYd7YONyoYcClmEX2iXyW1SCIa45z5C5nKbPl-svQy2pEmNBEehQy-d80XhHm/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzXp-D7-ZSp_riRNJmQdF1ApYIJ57JvB1rdcjWuJcDlZmD7QkEpdHUNxXJJhT7Fthk6/exec';
     
     const countDisplay = document.getElementById('current-count');
     const refreshBtn = document.getElementById('refresh-btn');

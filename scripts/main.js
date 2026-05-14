@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn  = document.getElementById('submit-btn');
     const successMsg = document.getElementById('success-message');
 
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwYuEBIYd7YONyoYcClmEX2iXyW1SCIa45z5C5nKbPl-svQy2pEmNBEehQy-d80XhHm/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzXp-D7-ZSp_riRNJmQdF1ApYIJ57JvB1rdcjWuJcDlZmD7QkEpdHUNxXJJhT7Fthk6/exec';
 
     // ─── 残り枠の状態（ページ読み込み時に取得） ───
     let remainingChildren    = 200; // GAS取得まで最大値で初期化
