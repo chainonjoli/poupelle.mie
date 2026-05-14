@@ -386,3 +386,116 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* Select styling */
+select {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    transition: var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(252, 211, 77, 0.2);
+}
+
+select:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+select option {
+    background: #1a1a3e;
+    color: #fff;
+}
+
+/* Adult free warning */
+/* (removed - replaced by sub-count-note) */
+
+/* Sub-count display (うち無料) */
+.sub-count-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: rgba(252, 211, 77, 0.06);
+    border-left: 3px solid rgba(252, 211, 77, 0.4);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.sub-count-label {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.sub-count-value {
+    font-weight: 700;
+    color: var(--primary-color);
+    min-width: 36px;
+}
+
+.sub-count-note {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Count Summary Box */
+.count-summary {
+    background: rgba(252, 211, 77, 0.07);
+    border: 1px solid rgba(252, 211, 77, 0.3);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 25px;
+}
+
+.count-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.count-summary-row:last-child {
+    border-bottom: none;
+}
+
+.count-summary-row.total-row {
+    margin-top: 4px;
+    padding-top: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.count-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.count-value {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 50px;
+    text-align: right;
+}
+
+.count-summary-row.total-row .count-value {
+    font-size: 1.15rem;
+}

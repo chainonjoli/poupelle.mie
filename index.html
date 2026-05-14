@@ -106,19 +106,39 @@
                     <label for="tel">電話番号</label>
                     <input type="tel" id="tel" name="tel" required placeholder="例：090-1234-5678">
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="adult-free-count">大人（無料枠）人数<br><span class="note-small" style="display: block; margin-top: 4px;">※子育て応援枠：1家族1名まで</span></label>
-                        <input type="number" id="adult-free-count" name="adult_free_count" min="0" max="1" value="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="adult-count">大人（通常）人数<br><span class="note-small" style="display: block; margin-top: 4px;">※2名目以降はこちら</span></label>
-                        <input type="number" id="adult-count" name="adult_count" min="0" value="0" required>
+                <div class="form-group">
+                    <label for="child-count">こどもの人数（高校生以下）</label>
+                    <input type="number" id="child-count" name="child_count" min="0" value="0" required>
+                    <div class="sub-count-display">
+                        <span class="sub-count-label">└ うち無料：</span>
+                        <span class="sub-count-value" id="child-free-display">0 名</span>
+                        <span class="sub-count-note" id="child-free-note"></span>
                     </div>
                 </div>
+
                 <div class="form-group">
-                    <label for="child-count">子ども（無料）人数</label>
-                    <input type="number" id="child-count" name="child_count" min="0" value="0" required>
+                    <label for="adult-count">大人の人数</label>
+                    <input type="number" id="adult-count" name="adult_count" min="0" value="0" required>
+                    <div class="sub-count-display">
+                        <span class="sub-count-label">└ うち無料：</span>
+                        <span class="sub-count-value" id="adult-free-display">0 名</span>
+                        <span class="sub-count-note" id="adult-free-note"></span>
+                    </div>
+                </div>
+
+                <div class="count-summary">
+                    <div class="count-summary-row">
+                        <span class="count-label">🧒 こども合計</span>
+                        <span class="count-value" id="total-children">0 名</span>
+                    </div>
+                    <div class="count-summary-row">
+                        <span class="count-label">🧑 大人合計</span>
+                        <span class="count-value" id="total-adults">0 名</span>
+                    </div>
+                    <div class="count-summary-row total-row">
+                        <span class="count-label">👨‍👩‍👧‍👦 全体合計</span>
+                        <span class="count-value" id="total-all">0 名</span>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="message">メッセージ・ご質問（任意）</label>
