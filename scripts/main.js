@@ -90,45 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
     adultCountInput.addEventListener('input', updateDisplays);
 
     // ─── フォーム送信 ────────────────────────────
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    form.addEventListener('submit', (e) => {
+        // タイムスタンプをhiddenフィールドにセット
+        document.getElementById('timestamp-field').value =
+            new Date().toLocaleString('ja-JP');
 
+        // ボタンをローディング状態に
         submitBtn.disabled = true;
         submitBtn.querySelector('.btn-text').textContent = '送信中...';
         submitBtn.querySelector('.loader').classList.remove('hidden');
 
-        const formData = new FormData(form);
-        const data = {
-            action:      'book',
-            name:        formData.get('name'),
-            tel:         formData.get('tel'),
-            child_count: formData.get('child_count'),
-            adult_count: formData.get('adult_count'),
-            message:     formData.get('message'),
-            timestamp:   new Date().toLocaleString('ja-JP')
-        };
-
-        try {
-            const params = new URLSearchParams();
-            params.append('payload', JSON.stringify(data));
-
-            await fetch(GAS_URL, {
-                method: 'POST',
-                mode:   'no-cors',
-                body:   params
-            });
-
+        // フォームはiframeにそのまま送信される（e.preventDefault()しない）
+        // 1秒後に成功画面を表示
+        setTimeout(() => {
             form.classList.add('hidden');
             successMsg.classList.remove('hidden');
             window.scrollTo({ top: successMsg.offsetTop - 100, behavior: 'smooth' });
-
-        } catch (error) {
-            console.error('Error:', error);
-            alert('送信中にエラーが発生しました。時間をおいて再度お試しください。');
-            submitBtn.disabled = false;
-            submitBtn.querySelector('.btn-text').textContent = 'この内容でお申し込み';
-            submitBtn.querySelector('.loader').classList.add('hidden');
-        }
+        }, 1000);
     });
 
     // ─── スムーススクロール ───────────────────────
