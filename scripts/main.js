@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             childFreeNote.textContent = `（残り${remainingChildren}名のみ無料）`;
             childFreeNote.style.color = '#fca5a5';
         } else {
-            childFreeNote.textContent = `（先着${200}名まで入力数と同じ）`;
+            childFreeNote.textContent = '';
             childFreeNote.style.color = '';
         }
 
@@ -65,16 +65,20 @@ document.addEventListener('DOMContentLoaded', () => {
         let adultFree = 0;
         let adultNote = '';
 
-        if (children === 0) {
-            adultNote = '※こどもが1人以上の場合に自動付与';
-            adultNote && (adultFreeNote.style.color = '#fca5a5');
+        if (adults === 0) {
+            adultFree = 0;
+            adultNote = '';
+        } else if (children === 0) {
+            adultFree = 0;
+            adultNote = '';
         } else if (remainingFreeAdults <= 0) {
+            adultFree = 0;
             adultNote = '（無料枠は満席です）';
             adultFreeNote.style.color = '#fca5a5';
         } else {
             adultFree = 1;
-            adultNote = '（子育て応援枠・送信時に確定）';
-            adultFreeNote.style.color = 'rgba(255,255,255,0.5)';
+            adultNote = '';
+            adultFreeNote.style.color = '';
         }
         adultFreeDisplay.textContent = `${adultFree} 名`;
         adultFreeNote.textContent    = adultNote;
