@@ -264,8 +264,11 @@ const AdvEngine = (() => {
 
     function recordResult(ok, hinted, revealed, step) {
         session.results.push({ ok, hinted, revealed });
-        state.perf.push({ ok, hinted, tier: session.tier, d: today() });
-        if (state.perf.length > 40) state.perf = state.perf.slice(-40);
+        // 難易度判定に使うのは正誤のある問いだけ（heart/freeは成績に含めない）
+        if (step.type === 'choice' || step.type === 'number') {
+            state.perf.push({ ok, hinted, tier: session.tier, d: today() });
+            if (state.perf.length > 40) state.perf = state.perf.slice(-40);
+        }
 
         // スキル更新：正解で上がり、ヒントありでも少し上がる（挑戦したこと自体が学び）
         const skills = session.quest.skills || [];
