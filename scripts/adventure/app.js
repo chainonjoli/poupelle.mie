@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function charOf(sp, npcName) {
-        if (sp === 'npc') return { name: npcName || '町の人', icon: '🧑‍🔧' };
+        if (sp === 'npc') return { name: npcName || '町の人', art: 'npc' };
         return ADV_DATA.characters[sp] || ADV_DATA.characters.narrator;
     }
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderObWelcome() {
         obShell(`
-            <div class="ob-buddy">🎃👦</div>
+            <div class="ob-buddy">${ADV_CHARA.face('pupelle', 'mini-chara-lg')}${ADV_CHARA.face('lubicchi', 'mini-chara-lg')}</div>
             <h2>ようこそ、えんとつ町へ</h2>
             <p class="ob-lead">『えんとつ町のプペル』の世界で、お子さまが物語の主人公になる学びの冒険です。プペルとルビッチが相棒として、その子だけの冒険をつくります。</p>
             <p class="ob-note">はじめに、保護者の方が「冒険のしおり」を作成してください（約1分）。入力した情報はこの端末の中にだけ保存されます。</p>
@@ -108,9 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="ob-lead">好きなものに近いクエストが、冒険に多く登場するようになります。（いくつでも）</p>
             <div class="chip-grid" id="ob-chips">
                 ${ADV_DATA.interests.map(i => `
-                    <button class="chip ${d.interests.includes(i.id)?'chip-on':''}" data-id="${i.id}">
-                        <span class="chip-icon">${i.icon}</span>${i.label}
-                    </button>`).join('')}
+                    <button class="chip ${d.interests.includes(i.id)?'chip-on':''}" data-id="${i.id}">${i.label}</button>`).join('')}
             </div>
             <button class="btn btn-primary btn-wide" id="ob-next">つぎへ</button>
         `, 50);
@@ -151,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderObDone() {
         const d = wizard.data;
         obShell(`
-            <div class="ob-buddy">🏮</div>
+            <div class="ob-buddy">${ADV_CHARA.mark('lantern', 'adv-mark-lg')}</div>
             <h2>冒険のしおりが できました</h2>
             <p class="ob-lead">ここからは <strong>${esc(d.nickname)}</strong> さんの番です。プペルとルビッチが広場で待っています。端末をお子さまに渡してあげてください。</p>
             <button class="btn btn-primary btn-wide" id="ob-start">ぼうけんを はじめる</button>
@@ -177,33 +175,33 @@ document.addEventListener('DOMContentLoaded', () => {
             <header class="town-header">
                 <div>
                     <h1 class="town-title">えんとつ町探検団</h1>
-                    <p class="town-sub">たんけんか：<strong>${esc(p.nickname)}</strong>さん ${st.streak >= 2 ? `｜🔥 ${st.streak}日れんぞく` : ''}</p>
+                    <p class="town-sub">たんけんか：<strong>${esc(p.nickname)}</strong>さん ${st.streak >= 2 ? `｜${ADV_CHARA.mark('flame')} ${st.streak}日れんぞく` : ''}</p>
                 </div>
-                <button class="btn-mini" id="btn-parent">👪 おうちのかたへ</button>
+                <button class="btn-mini" id="btn-parent">おうちのかたへ</button>
             </header>
 
             <div class="buddy-bubble glass-card">
-                <span class="buddy-face">🎃</span>
+                ${ADV_CHARA.face('pupelle')}
                 <p>${esc(greeting)}</p>
             </div>
 
             <div class="light-meter glass-card">
                 <div class="light-meter-head">
-                    <span>🏮 町にもどった光：<strong>${st.light}</strong></span>
+                    <span>${ADV_CHARA.mark('lantern')} 町にもどった光：<strong>${st.light}</strong></span>
                     <span class="light-next">${nextArea ? `つぎのエリアまで あと${nextArea.light - st.light}` : '町じゅうが 光でいっぱい！'}</span>
                 </div>
                 <div class="light-bar"><div class="light-bar-fill" style="width:${lightPct}%"></div></div>
                 <div class="virtue-row">
                     ${Object.entries(ADV_DATA.virtues).map(([k, v]) =>
-                        `<span class="virtue-pill" title="${v.label}">${v.icon} ${st.virtues[k] || 0}</span>`).join('')}
+                        `<span class="virtue-pill" title="${v.label}">${ADV_CHARA.virtue(k)} ${st.virtues[k] || 0}</span>`).join('')}
                 </div>
             </div>
 
             ${rec ? `
             <div class="today-quest glass-card">
-                <p class="today-label">✨ きょうの ぼうけん</p>
+                <p class="today-label">きょうの ぼうけん</p>
                 <div class="today-quest-body">
-                    <span class="today-icon">${rec.icon}</span>
+                    <span class="icon-chip">${rec.icon}</span>
                     <div>
                         <h3>${esc(rec.title)}</h3>
                         <p class="today-area">${esc(areas.find(a => a.id === rec.area).label)}</p>
@@ -212,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="btn btn-primary btn-wide" id="btn-start-rec">この ぼうけんに でかける</button>
             </div>` : ''}
 
-            <h2 class="town-section-title">🗺️ えんとつ町のちず</h2>
+            <h2 class="town-section-title">えんとつ町のちず</h2>
             <div class="area-grid">
                 ${areas.map(a => {
                     const open = unlocked.includes(a.id);
@@ -220,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const done = quests.filter(q => AdvEngine.state.completed[q.id]).length;
                     return `
                     <div class="area-card glass-card ${open ? '' : 'area-locked'}" data-area="${a.id}">
-                        <div class="area-icon">${open ? a.icon : '🔒'}</div>
+                        <div class="area-icon">${open ? a.icon : ADV_CHARA.mark('lock')}</div>
                         <h3>${a.label}</h3>
                         ${open
                             ? `<p class="area-desc">${esc(a.desc)}</p><p class="area-progress">クエスト ${done}/${quests.length}</p>`
@@ -230,8 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <div class="town-footer">
-                <button class="btn btn-outline" id="btn-album">📔 ぼうけんアルバム</button>
-                <a class="btn btn-outline" href="index.html">🎬 上映会ページへ</a>
+                <button class="btn btn-outline" id="btn-album">ぼうけんアルバム</button>
+                <a class="btn btn-outline" href="index.html">上映会ページへ</a>
             </div>
         </div>`;
 
@@ -269,16 +267,16 @@ document.addEventListener('DOMContentLoaded', () => {
         sheet.innerHTML = `
         <div class="sheet glass-card">
             <div class="sheet-head">
-                <h3>${area.icon} ${area.label}</h3>
-                <button class="btn-mini" id="sheet-close">とじる ✕</button>
+                <h3><span class="icon-chip icon-chip-sm">${area.icon}</span> ${area.label}</h3>
+                <button class="btn-mini" id="sheet-close">とじる</button>
             </div>
             <p class="area-desc">${esc(area.desc)}</p>
             <div class="sheet-quests">
                 ${quests.map(q => `
                     <button class="quest-row" data-q="${q.id}">
-                        <span class="quest-row-icon">${q.icon}</span>
+                        <span class="icon-chip icon-chip-sm">${q.icon}</span>
                         <span class="quest-row-title">${esc(q.title)}</span>
-                        <span class="quest-row-state">${st.completed[q.id] ? '⭐ クリア' : 'あたらしい！'}</span>
+                        <span class="quest-row-state">${st.completed[q.id] ? ADV_CHARA.mark('star') + ' クリア' : 'あたらしい！'}</span>
                     </button>`).join('')}
             </div>
         </div>`;
@@ -302,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="quest-wrap">
             <header class="quest-header">
                 <button class="btn-mini" id="quest-quit">← 町にもどる</button>
-                <span class="quest-title-mini">${session.quest.icon} ${esc(session.quest.title)}</span>
+                <span class="quest-title-mini">${esc(session.quest.title)}</span>
             </header>
             <div id="quest-stage"></div>
         </div>`;
@@ -331,13 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${line.sp === 'narrator'
                     ? `<p class="narrator-text">${esc(line.t)}</p>`
                     : `<div class="dialog glass-card">
-                         <div class="dialog-face">${ch.icon}</div>
+                         ${ADV_CHARA.face(ch.art)}
                          <div class="dialog-body">
                            <p class="dialog-name">${esc(ch.name)}</p>
                            <p class="dialog-text">${esc(line.t)}</p>
                          </div>
                        </div>`}
-                <button class="btn btn-primary btn-wide" id="story-next">つぎへ ▶</button>
+                <button class="btn btn-primary btn-wide" id="story-next">つぎへ</button>
             </div>`;
             $('#story-next').onclick = () => { questCtx.lineIndex++; show(); };
         };
@@ -355,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="step-scene">
             <p class="step-count">もんだい ${s.stepIndex + 1} / ${total}</p>
             <div class="dialog glass-card">
-                <div class="dialog-face">${ch.icon}</div>
+                ${ADV_CHARA.face(ch.art)}
                 <div class="dialog-body">
                     <p class="dialog-name">${esc(ch.name)}</p>
                     <p class="dialog-text">${esc(step.story)}</p>
@@ -431,12 +429,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             stepDone(msg, step.virtue, true);
         } else if (res.action === 'retry') {
-            showFeedback('🎃 プペル「' + AdvEngine.pickRetryPhrase() + '」', 'retry');
+            showFeedback('プペル「' + AdvEngine.pickRetryPhrase() + '」', 'retry');
         } else if (res.action === 'hint') {
-            showFeedback('🎃 プペル「大丈夫。ゆっくり考えてみよう。ヒント：' + (step.hint || 'もういちど もんだいを よんでみよう。') + '」', 'hint');
+            showFeedback('プペル「大丈夫。ゆっくり考えてみよう。ヒント：' + (step.hint || 'もういちど もんだいを よんでみよう。') + '」', 'hint');
         } else if (res.action === 'reveal') {
             const ans = step.type === 'choice' ? `こたえは「${step.options[step.answer]}」。` : `こたえは ${step.answer}${step.unit || ''}。`;
-            stepDone('🎃 ' + AdvEngine.pickRevealPhrase() + ' ' + ans + ' ' + (step.explain || ''), null, false);
+            stepDone('プペル「' + AdvEngine.pickRevealPhrase() + '」 ' + ans + ' ' + (step.explain || ''), null, false);
         }
     }
 
@@ -446,8 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showFeedback(message, earned ? 'good' : 'reveal');
         const actions = $('#step-actions');
         actions.innerHTML = `
-            ${vd ? `<p class="virtue-earned">${vd.icon} 「${vd.label}」のかけらを みつけた！</p>` : ''}
-            <button class="btn btn-primary btn-wide" id="btn-next">つぎへ ▶</button>`;
+            ${vd ? `<p class="virtue-earned">${ADV_CHARA.virtue(virtue)} 「${vd.label}」のかけらを みつけた！</p>` : ''}
+            <button class="btn btn-primary btn-wide" id="btn-next">つぎへ</button>`;
         $('#btn-next').onclick = () => {
             if (AdvEngine.shouldOfferBonus()) { renderBonusOffer(); return; }
             advanceStep();
@@ -465,14 +463,14 @@ document.addEventListener('DOMContentLoaded', () => {
         stage().innerHTML = `
         <div class="step-scene">
             <div class="dialog glass-card dialog-bonus">
-                <div class="dialog-face">👦</div>
+                ${ADV_CHARA.face('lubicchi')}
                 <div class="dialog-body">
                     <p class="dialog-name">ルビッチ</p>
                     <p class="dialog-text">${esc(ADV_DATA.bonus.intro)}</p>
                 </div>
             </div>
             <div class="bonus-actions">
-                <button class="btn btn-primary btn-wide" id="btn-bonus-yes">やってみる！🌟</button>
+                <button class="btn btn-primary btn-wide" id="btn-bonus-yes">やってみる！</button>
                 <button class="btn btn-outline btn-wide" id="btn-bonus-no">つぎに すすむ</button>
             </div>
         </div>`;
@@ -483,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderBonusStep(bstep) {
         stage().innerHTML = `
         <div class="step-scene">
-            <p class="step-count">🌟 ボーナスチャレンジ</p>
+            <p class="step-count">${ADV_CHARA.mark('star')} ボーナスチャレンジ</p>
             <div class="question-card glass-card question-bonus">
                 <p class="question-text">${esc(bstep.q)}</p>
                 <div id="answer-area">${answerAreaHtml(bstep)}</div>
@@ -507,10 +505,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (value === null || String(value).trim() === '') return;
             const ok = AdvEngine.submitBonus(bstep, value);
             const f = ok
-                ? '👦 ルビッチ「' + (bstep.explain || 'せいかい！') + ' きみ、ほんとにすごいよ！」 🏮光＋1'
-                : '👦 ルビッチ「おしい！でもボーナスに挑戦したこと自体がすごいんだ。こたえは ' + (bstep.type === 'choice' ? '「' + bstep.options[bstep.answer] + '」' : bstep.answer + (bstep.unit || '')) + ' だよ」';
+                ? 'ルビッチ「' + (bstep.explain || 'せいかい！') + ' きみ、ほんとにすごいよ！」 町の光がひとつふえた！'
+                : 'ルビッチ「おしい！でもボーナスに挑戦したこと自体がすごいんだ。こたえは ' + (bstep.type === 'choice' ? '「' + bstep.options[bstep.answer] + '」' : bstep.answer + (bstep.unit || '')) + ' だよ」';
             showFeedback(f, ok ? 'good' : 'reveal');
-            $('#step-actions').innerHTML = `<button class="btn btn-primary btn-wide" id="btn-next">つぎへ ▶</button>`;
+            $('#step-actions').innerHTML = `<button class="btn btn-primary btn-wide" id="btn-next">つぎへ</button>`;
             $('#btn-next').onclick = () => advanceStep();
         };
     }
@@ -520,13 +518,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = AdvEngine.completeQuest();
         stage().innerHTML = `
         <div class="finish-scene glass-card">
-            <div class="finish-lantern">🏮</div>
+            <div class="finish-lantern">${ADV_CHARA.mark('lantern', 'adv-mark-lg')}</div>
             <h2>ぼうけん たっせい！</h2>
-            <p class="finish-quest">${result.quest.icon} ${esc(result.quest.title)}</p>
+            <p class="finish-quest">${esc(result.quest.title)}</p>
             <p class="finish-light">町に 光が <strong>＋${result.light}</strong> もどったよ！</p>
-            <p class="finish-phrase">🎃 プペル「${esc(result.endPhrase)}」</p>
-            ${result.newAreas.map(a => `<p class="finish-unlock">🗺️ あたらしいエリア「${a.icon} ${esc(a.label)}」が ひらいた！</p>`).join('')}
-            ${result.newBadges.map(b => `<p class="finish-badge">${b.icon} バッジ「${esc(b.label)}」を てにいれた！</p>`).join('')}
+            <p class="finish-phrase">プペル「${esc(result.endPhrase)}」</p>
+            ${result.newAreas.map(a => `<p class="finish-unlock">あたらしいエリア「${esc(a.label)}」が ひらいた！</p>`).join('')}
+            ${result.newBadges.map(b => `<p class="finish-badge">${ADV_CHARA.mark('star')} バッジ「${esc(b.label)}」を てにいれた！</p>`).join('')}
             <button class="btn btn-primary btn-wide" id="btn-back-town">町に もどる</button>
         </div>`;
         $('#btn-back-town').onclick = () => go('town');
@@ -540,28 +538,28 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="town-wrap">
             <header class="quest-header">
                 <button class="btn-mini" id="btn-back">← 町にもどる</button>
-                <span class="quest-title-mini">📔 ぼうけんアルバム</span>
+                <span class="quest-title-mini">ぼうけんアルバム</span>
             </header>
 
-            <h2 class="town-section-title">🎖️ あつめたバッジ</h2>
+            <h2 class="town-section-title">あつめたバッジ</h2>
             <div class="badge-grid">
                 ${ADV_DATA.badges.map(b => {
                     const got = st.badges.includes(b.id);
                     return `<div class="badge-card glass-card ${got ? '' : 'badge-locked'}">
-                        <div class="badge-icon">${got ? b.icon : '❓'}</div>
+                        <div class="badge-icon">${got ? b.icon : '？'}</div>
                         <p class="badge-label">${got ? esc(b.label) : '？？？'}</p>
                         <p class="badge-desc">${esc(b.desc)}</p>
                     </div>`;
                 }).join('')}
             </div>
 
-            <h2 class="town-section-title">🌠 おもいで</h2>
+            <h2 class="town-section-title">おもいで</h2>
             ${st.album.length === 0 ? '<p class="album-empty">クエストをクリアすると、ここに おもいでが たまっていくよ。</p>' : ''}
             <div class="memory-list">
                 ${st.album.slice().reverse().map(m => {
                     const q = AdvEngine.questById(m.questId);
                     return q ? `<div class="memory-card glass-card">
-                        <span class="memory-icon">${q.icon}</span>
+                        <span class="icon-chip icon-chip-sm">${q.icon}</span>
                         <div><p class="memory-title">${esc(q.title)}</p><p class="memory-date">${esc(m.date)}</p></div>
                     </div>` : '';
                 }).join('')}
@@ -577,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const b = 4 + Math.floor(Math.random() * 6);
         app.innerHTML = `
         <div class="ob-wrap"><div class="glass-card ob-card">
-            <h2>👪 おうちのかた 確認</h2>
+            <h2>おうちのかた 確認</h2>
             <p class="ob-lead">保護者の方向けの画面です。つぎの計算に答えてください。</p>
             <p class="gate-q">${a} × ${b} ＝ ？</p>
             <div class="form-group"><input type="number" id="gate-input" placeholder="こたえ"></div>
@@ -598,14 +596,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const d = AdvEngine.dashboard();
         const p = d.profile;
         const goalLabel = id => (ADV_DATA.goals.find(g => g.id === id) || {}).label || id;
-        const interestLabel = id => { const i = ADV_DATA.interests.find(x => x.id === id); return i ? i.icon + i.label : id; };
+        const interestLabel = id => { const i = ADV_DATA.interests.find(x => x.id === id); return i ? i.label : id; };
         const tierNames = { 1: '5〜6歳向け', 2: '小1〜2向け', 3: '小3〜4向け', 4: '小5〜6向け' };
 
         app.innerHTML = `
         <div class="town-wrap parent-wrap">
             <header class="quest-header">
                 <button class="btn-mini" id="btn-back">← 町にもどる</button>
-                <span class="quest-title-mini">📖 今日の冒険日記</span>
+                <span class="quest-title-mini">今日の冒険日記</span>
             </header>
 
             <div class="glass-card parent-card">
@@ -617,36 +615,36 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <div class="glass-card parent-card">
-                <h3>🤖 AIからのメッセージ</h3>
+                <h3>AIからのメッセージ</h3>
                 <p class="parent-message">${esc(d.message)}</p>
             </div>
 
             <div class="glass-card parent-card">
-                <h3>💬 今日おすすめの親子会話</h3>
+                <h3>今日おすすめの親子会話</h3>
                 <p>${esc(d.talk)}</p>
             </div>
 
             <div class="parent-grid">
                 <div class="glass-card parent-card">
-                    <h3>✨ 今日の冒険</h3>
+                    <h3>今日の冒険</h3>
                     ${d.day.quests.length
-                        ? `<ul class="parent-list">${d.day.quests.map(q => `<li>${q.icon} ${esc(q.title)}</li>`).join('')}</ul>`
+                        ? `<ul class="parent-list">${d.day.quests.map(q => `<li>${esc(q.title)}</li>`).join('')}</ul>`
                         : '<p class="parent-empty">今日はまだ冒険に出ていません。</p>'}
                 </div>
                 <div class="glass-card parent-card">
-                    <h3>🪙 今日のお金の学び</h3>
+                    <h3>今日のお金の学び</h3>
                     ${d.day.learnings.length
                         ? `<ul class="parent-list">${d.day.learnings.map(l => `<li>${esc(l)}</li>`).join('')}</ul>`
                         : '<p class="parent-empty">今日はお金の学びはありませんでした。</p>'}
                 </div>
                 <div class="glass-card parent-card">
-                    <h3>💛 今日の心の選択</h3>
+                    <h3>今日の心の選択</h3>
                     ${d.day.hearts.length
                         ? `<ul class="parent-list">${d.day.hearts.map(h => `<li>「${esc(h.q)}」→ <strong>${esc(h.a)}</strong></li>`).join('')}</ul>`
                         : '<p class="parent-empty">今日は心の選択の場面はありませんでした。</p>'}
                 </div>
                 <div class="glass-card parent-card">
-                    <h3>📈 最近伸びている力</h3>
+                    <h3>最近伸びている力</h3>
                     ${d.growing.length
                         ? d.growing.map(g => `
                             <div class="skill-row">
@@ -659,34 +657,34 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <div class="glass-card parent-card">
-                <h3>🔥💛✨🌟 集めた心のかけら</h3>
+                <h3>集めた心のかけら</h3>
                 <div class="virtue-row">
                     ${Object.entries(ADV_DATA.virtues).map(([k, v]) =>
-                        `<span class="virtue-pill">${v.icon} ${v.label} × ${d.virtues[k] || 0}</span>`).join('')}
+                        `<span class="virtue-pill">${ADV_CHARA.virtue(k)} ${v.label} × ${d.virtues[k] || 0}</span>`).join('')}
                 </div>
             </div>
 
             ${d.freeAnswers.length ? `
             <div class="glass-card parent-card">
-                <h3>✏️ 最近の「自分の言葉」</h3>
+                <h3>最近の「自分の言葉」</h3>
                 <ul class="parent-list">
                     ${d.freeAnswers.map(f => `<li><span class="parent-note">${esc(f.q)}</span><br>「${esc(f.a)}」</li>`).join('')}
                 </ul>
             </div>` : ''}
 
             <div class="glass-card parent-card">
-                <h3>📚 これまでの日記</h3>
+                <h3>これまでの日記</h3>
                 ${d.recentDays.length
                     ? d.recentDays.map(rd => `
                         <div class="diary-day">
                             <p class="diary-date">${esc(rd.date)}</p>
-                            <p>${rd.entry.quests.map(q => q.icon + ' ' + esc(q.title)).join('、') || '記録なし'}</p>
+                            <p>${rd.entry.quests.map(q => esc(q.title)).join('、') || '記録なし'}</p>
                         </div>`).join('')
                     : '<p class="parent-empty">まだ日記はありません。</p>'}
             </div>
 
             <div class="glass-card parent-card">
-                <h3>⚙️ 冒険のしおり</h3>
+                <h3>冒険のしおり</h3>
                 <p class="parent-meta">
                     ニックネーム：${esc(p.nickname)} ｜ ${p.age ? p.age + '歳' : ''} ${p.grade ? (p.grade === 'pre' ? '未就学' : '小学' + p.grade + '年生') : ''}<br>
                     好きなもの：${(p.interests || []).map(interestLabel).join('、') || '未設定'}<br>

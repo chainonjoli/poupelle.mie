@@ -62,9 +62,9 @@ const ADV_DATA = {
     ],
 
     characters: {
-        pupelle:  { name: 'プペル',   icon: '🎃', role: 'buddy' },
-        lubicchi: { name: 'ルビッチ', icon: '👦', role: 'buddy' },
-        narrator: { name: '', icon: '📖', role: 'narrator' }
+        pupelle:  { name: 'プペル',   art: 'pupelle', role: 'buddy' },
+        lubicchi: { name: 'ルビッチ', art: 'lubicchi', role: 'buddy' },
+        narrator: { name: '', art: 'narrator', role: 'narrator' }
     },
 
     /* ============================================================
