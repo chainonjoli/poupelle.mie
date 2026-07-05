@@ -7,47 +7,53 @@ const ADV_CHARA = (() => {
 
     /* ---- ミニキャラ本体（viewBox 0 0 96 96） ---- */
 
-    /* プペル：緑のとんがり帽子・つぎはぎの顔・ラッパ */
+    /* プペル：ねじれた緑のとんがり帽子・青いゴーグル・
+     * オレンジのとがり鼻・むねの緑の看板・つぎはぎのからだ */
     const pupelle = `
     <svg viewBox="0 0 96 96" aria-hidden="true">
-        <!-- くつ -->
-        <ellipse cx="38" cy="91" rx="9" ry="4.5" fill="#6e4a32"/>
-        <ellipse cx="58" cy="91" rx="9" ry="4.5" fill="#6e4a32"/>
-        <!-- みどりのマント -->
-        <path d="M30 58 q18 -8 36 0 l4 26 q-22 6 -44 0 z" fill="#5f9678"/>
-        <path d="M30 58 l-3 10 6 2 z M66 58 l3 10 -6 2 z" fill="#4e7d63"/>
-        <!-- つぎはぎ -->
-        <rect x="40" y="66" width="11" height="10" rx="2" fill="#d9a53f"/>
-        <path d="M42 66 v10 M46 76 v-10 M49 66 v10" stroke="#b5832c" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
-        <rect x="55" y="70" width="10" height="9" rx="2" fill="#4e8f82"/>
-        <path d="M55 72 h10 M55 76 h10" stroke="#3c7267" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
-        <!-- えりのフリンジ -->
-        <path d="M32 58 l5 6 5 -6 5 6 5 -6 5 6 5 -6 4 6 -2 -8 -30 0 z" fill="#d9a53f"/>
-        <!-- ラッパ（あたまのよこ） -->
-        <path d="M70 34 q10 -3 14 -9 q3 8 -4 13 q-6 3 -10 0 z" fill="#d9a53f"/>
-        <ellipse cx="85" cy="27" rx="4.5" ry="6" fill="#e6b54a" transform="rotate(24 85 27)"/>
-        <!-- かお（つぎはぎ） -->
-        <circle cx="48" cy="40" r="22" fill="#b56a4a"/>
-        <path d="M48 18 a22 22 0 0 0 -22 22 a22 22 0 0 0 8 17 q8 -20 14 -39z" fill="#4e8f82"/>
-        <path d="M44 20 q-8 18 -12 36" stroke="#3c7267" stroke-width="1.6" stroke-dasharray="3 3" stroke-linecap="round" fill="none"/>
-        <!-- みみのけ -->
-        <path d="M26 40 q-5 2 -6 7 q5 1 8 -2 z" fill="#6e4a32"/>
-        <path d="M70 40 q5 2 6 7 q-5 1 -8 -2 z" fill="#6e4a32"/>
-        <!-- め -->
-        <circle cx="38" cy="40" r="8.5" fill="#f7ead8"/>
-        <circle cx="38" cy="40" r="8.5" fill="none" stroke="#2f4f4a" stroke-width="2"/>
-        <circle cx="39" cy="41" r="3.6" fill="#332a24"/>
-        <circle cx="40.4" cy="39.6" r="1.3" fill="#fff"/>
-        <circle cx="60" cy="41" r="4.2" fill="#332a24"/>
-        <circle cx="61.4" cy="39.8" r="1.4" fill="#fff"/>
-        <!-- はな・くち -->
-        <circle cx="50" cy="48" r="5" fill="#e07a3f"/>
-        <path d="M42 56 q7 5 14 0" stroke="#5f3a26" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-        <!-- とんがりぼうし -->
-        <path d="M24 27 q20 -8 48 0 l-8 -1 q4 -14 12 -22 q-12 2 -18 8 q-2 -6 -7 -8 q-14 6 -27 23 z" fill="#7ba05a"/>
-        <path d="M64 26 q4 -14 12 -22 l4 3 q-7 8 -9 20 z" fill="#6a8c4c"/>
-        <path d="M18 29 q30 -10 60 0 l-3 5 q-27 -8 -54 0 z" fill="#8fae66"/>
-        <path d="M26 25 q22 -6 44 0 l-1 5 q-21 -5 -42 0 z" fill="#8a5a3a"/>
+        <!-- あし（かたほうはパイプ） -->
+        <rect x="36" y="80" width="5" height="9" rx="2" fill="#8b8f99"/>
+        <path d="M36 83 h5 M36 86 h5" stroke="#6e727c" stroke-width="1" opacity="0.8"/>
+        <ellipse cx="38" cy="91" rx="8" ry="4" fill="#4e7d8f"/>
+        <ellipse cx="58" cy="91" rx="8.5" ry="4.5" fill="#5a8fa3"/>
+        <!-- スカート（つぎはぎ） -->
+        <path d="M32 70 q16 -4 32 0 l4 16 q-20 5 -40 0 z" fill="#e6a54a"/>
+        <rect x="52" y="76" width="10" height="8" rx="2" fill="#d98f3e"/>
+        <path d="M54 76 v8 M58 84 v-8" stroke="#b5722c" stroke-width="1.1" stroke-linecap="round" opacity="0.8"/>
+        <rect x="37" y="75" width="9" height="8" rx="2" fill="#f2c14e"/>
+        <!-- うで -->
+        <path d="M30 58 q-7 3 -8 11 q5 3 9 0 z" fill="#7fb7e8"/>
+        <path d="M66 58 q7 3 8 11 q-5 3 -9 0 z" fill="#7fb7e8"/>
+        <circle cx="27" cy="72" r="4.5" fill="#fffdf7" stroke="#d8cbb5" stroke-width="1.2"/>
+        <circle cx="70" cy="72" r="4" fill="#8b8f99"/>
+        <!-- むねの みどりの看板 -->
+        <path d="M33 55 h30 q2 0 2 2 v14 q-17 4 -34 0 v-14 q0 -2 2 -2 z" fill="#5f9678"/>
+        <rect x="37" y="58" width="22" height="10" rx="2" fill="#6da886"/>
+        <path d="M42 60 v6 M47 60 v6 M52 60 v6" stroke="#fdf7ea" stroke-width="1.6" stroke-linecap="round" opacity="0.85"/>
+        <!-- かお（つぎはぎ 上下二色） -->
+        <circle cx="48" cy="38" r="21" fill="#c9a284"/>
+        <path d="M27 40 a21 21 0 0 0 42 0 z" fill="#93a8b0"/>
+        <path d="M28 42 h40 M36 40 l-1.5 4 M48 41 v4 M60 40 l1.5 4" stroke="#6e7f87" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="3 3"/>
+        <!-- ゴーグル -->
+        <path d="M27 32 h42" stroke="#8a5a3a" stroke-width="2.6"/>
+        <circle cx="38" cy="32" r="8" fill="#7fb7e8" stroke="#c9a86a" stroke-width="2.6"/>
+        <circle cx="58" cy="32" r="8" fill="#7fb7e8" stroke="#c9a86a" stroke-width="2.6"/>
+        <circle cx="39.5" cy="33.5" r="3.4" fill="#3f5d7a"/>
+        <circle cx="59.5" cy="33.5" r="3.4" fill="#3f5d7a"/>
+        <circle cx="36" cy="29.5" r="2" fill="#d9ecfb"/>
+        <circle cx="56" cy="29.5" r="2" fill="#d9ecfb"/>
+        <!-- とがった オレンジのはな -->
+        <path d="M46 38 l12 5 -11 4 q-3 -4 -1 -9 z" fill="#e07a3f"/>
+        <!-- ぬいめの わらった くち -->
+        <path d="M38 49 q10 7 20 0" stroke="#4e5d63" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M42 51.5 l-1 3.5 M48 53 v3.5 M54 51.5 l1 3.5" stroke="#4e5d63" stroke-width="1.6" stroke-linecap="round"/>
+        <!-- くろい かみのけ -->
+        <path d="M28 26 q-4 4 -3 9 l5 -2 z M68 26 q4 4 3 9 l-5 -2 z" fill="#4a4453"/>
+        <!-- ねじれた みどりのぼうし -->
+        <path d="M27 25 q21 -7 42 0 q-2 -7 -10 -8 q6 -4 4 -10 q-7 3 -12 1 q4 -4 2 -8 q-8 2 -10 8 q-6 -2 -9 2 q5 2 5 6 q-8 1 -12 9 z" fill="#7ba05a"/>
+        <path d="M43 8 q-2 5 1 8 M38 16 q8 -2 15 0 M33 22 q14 -4 28 1" stroke="#5f7d43" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M26 26 q22 -7 44 0 l-1 4 q-21 -6 -42 0 z" fill="#8a5a3a"/>
+        <path d="M30 29 l-2 6 M66 29 l2 6" stroke="#8a5a3a" stroke-width="1.8" stroke-linecap="round"/>
     </svg>`;
 
     /* ルビッチ：シルクハット・まきげ・あかい蝶ネクタイ */
@@ -64,24 +70,29 @@ const ADV_CHARA = (() => {
         <!-- ちょうネクタイ -->
         <path d="M48 60 l-10 -5 v10 z M48 60 l10 -5 v10 z" fill="#d9542e"/>
         <circle cx="48" cy="60" r="2.6" fill="#b5432e"/>
+        <!-- みみ -->
+        <circle cx="26" cy="42" r="4.5" fill="#f5c9a0"/>
+        <circle cx="70" cy="42" r="4.5" fill="#f5c9a0"/>
         <!-- かお -->
         <circle cx="48" cy="40" r="21" fill="#f5c9a0"/>
-        <!-- まきげ -->
-        <path d="M28 36 q-4 4 -2 9 q4 3 7 -1 M68 36 q4 4 2 9 q-4 3 -7 -1" fill="#8a5a3a"/>
-        <path d="M27 34 q2 -10 10 -13 l3 7 q-7 2 -8 8 z" fill="#8a5a3a"/>
-        <path d="M69 34 q-2 -10 -10 -13 l-3 7 q7 2 8 8 z" fill="#8a5a3a"/>
-        <!-- め・ほっぺ・くち -->
+        <!-- すないろの くせっけ（はねた毛） -->
+        <path d="M29 34 q-6 0 -8 6 l6 1 q-3 3 -2 7 l6 -3 q0 4 3 6 l3 -6 z" fill="#cf8f4a"/>
+        <path d="M67 34 q6 0 8 6 l-6 1 q3 3 2 7 l-6 -3 q0 4 -3 6 l-3 -6 z" fill="#cf8f4a"/>
+        <path d="M27 35 q3 -12 21 -12 q18 0 21 12 q-6 -4 -10 -2 q-3 -4 -11 -4 q-8 0 -11 4 q-4 -2 -10 2 z" fill="#cf8f4a"/>
+        <!-- め・そばかす・くち -->
         <circle cx="40" cy="41" r="4" fill="#332a24"/>
         <circle cx="56" cy="41" r="4" fill="#332a24"/>
         <circle cx="41.4" cy="39.6" r="1.4" fill="#fff"/>
         <circle cx="57.4" cy="39.6" r="1.4" fill="#fff"/>
-        <ellipse cx="33" cy="48" rx="4" ry="2.6" fill="#eb9a7a" opacity="0.7"/>
-        <ellipse cx="63" cy="48" rx="4" ry="2.6" fill="#eb9a7a" opacity="0.7"/>
+        <circle cx="33" cy="47.5" r="1.1" fill="#d9924a"/>
+        <circle cx="36.5" cy="49" r="1.1" fill="#d9924a"/>
+        <circle cx="63" cy="47.5" r="1.1" fill="#d9924a"/>
+        <circle cx="59.5" cy="49" r="1.1" fill="#d9924a"/>
         <path d="M43 51 q5 5 10 0" stroke="#a8663d" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-        <!-- シルクハット -->
-        <path d="M32 22 q0 -18 16 -18 q16 0 16 18 z" fill="#3f3a35"/>
-        <rect x="32" y="16" width="32" height="6" fill="#a8442e"/>
-        <ellipse cx="48" cy="22" rx="26" ry="5.5" fill="#3f3a35"/>
+        <!-- あかい帯の シルクハット（たかいトップハット） -->
+        <path d="M34 21 L32.5 5 q0 -3 3 -3 h25 q3 0 3 3 L62 21 z" fill="#3f3a35"/>
+        <path d="M33.6 17 h28.8 l-0.5 -5.5 h-27.8 z" fill="#c9402e"/>
+        <ellipse cx="48" cy="21" rx="23" ry="5" fill="#3f3a35"/>
     </svg>`;
 
     /* 町の人：ハンチング帽と赤いスカーフのおじさん */
