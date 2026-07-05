@@ -14,6 +14,33 @@ document.addEventListener('DOMContentLoaded', () => {
         ));
     }
 
+    /* ---- ふりがな（子ども向け画面のみ） ----
+     * 学年が辞書のレベルより下の漢字語に <ruby> を付ける */
+    let kanaRe = null, kanaMap = null;
+
+    function kanaGrade() {
+        const p = AdvEngine.getProfile();
+        if (!p) return 6;
+        if (p.grade === 'pre') return 0;
+        const g = parseInt(p.grade, 10);
+        if (g >= 1 && g <= 6) return g;
+        const age = parseInt(p.age, 10);
+        return age ? Math.min(6, Math.max(0, age - 6)) : 6;
+    }
+
+    function rk(s) {
+        const text = esc(s);
+        if (!kanaRe) {
+            const list = ADV_DATA.kana.slice().sort((a, b) => b[0].length - a[0].length);
+            kanaMap = {};
+            list.forEach(e => { kanaMap[e[0]] = e; });
+            kanaRe = new RegExp(list.map(e => e[0]).join('|'), 'g');
+        }
+        const grade = kanaGrade();
+        return text.replace(kanaRe, w =>
+            grade < kanaMap[w][2] ? `<ruby>${w}<rt>${kanaMap[w][1]}</rt></ruby>` : w);
+    }
+
     function charOf(sp, npcName) {
         if (sp === 'npc') return { name: npcName || '町の人', art: 'npc' };
         return ADV_DATA.characters[sp] || ADV_DATA.characters.narrator;
@@ -182,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="buddy-bubble glass-card">
                 ${ADV_CHARA.face('pupelle')}
-                <p>${esc(greeting)}</p>
+                <p>${rk(greeting)}</p>
             </div>
 
             <div class="light-meter glass-card">
@@ -203,8 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="today-quest-body">
                     <span class="icon-chip">${rec.icon}</span>
                     <div>
-                        <h3>${esc(rec.title)}</h3>
-                        <p class="today-area">${esc(areas.find(a => a.id === rec.area).label)}</p>
+                        <h3>${rk(rec.title)}</h3>
+                        <p class="today-area">${rk(areas.find(a => a.id === rec.area).label)}</p>
                     </div>
                 </div>
                 <button class="btn btn-primary btn-wide" id="btn-start-rec">この ぼうけんに でかける</button>
@@ -219,9 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `
                     <div class="area-card glass-card ${open ? '' : 'area-locked'}" data-area="${a.id}">
                         <div class="area-icon">${open ? a.icon : ADV_CHARA.mark('lock')}</div>
-                        <h3>${a.label}</h3>
+                        <h3>${rk(a.label)}</h3>
                         ${open
-                            ? `<p class="area-desc">${esc(a.desc)}</p><p class="area-progress">クエスト ${done}/${quests.length}</p>`
+                            ? `<p class="area-desc">${rk(a.desc)}</p><p class="area-progress">クエスト ${done}/${quests.length}</p>`
                             : `<p class="area-desc">光が <strong>${a.light}</strong> あつまると ひらくよ</p>`}
                     </div>`;
                 }).join('')}
@@ -267,15 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
         sheet.innerHTML = `
         <div class="sheet glass-card">
             <div class="sheet-head">
-                <h3><span class="icon-chip icon-chip-sm">${area.icon}</span> ${area.label}</h3>
+                <h3><span class="icon-chip icon-chip-sm">${area.icon}</span> ${rk(area.label)}</h3>
                 <button class="btn-mini" id="sheet-close">とじる</button>
             </div>
-            <p class="area-desc">${esc(area.desc)}</p>
+            <p class="area-desc">${rk(area.desc)}</p>
             <div class="sheet-quests">
                 ${quests.map(q => `
                     <button class="quest-row" data-q="${q.id}">
                         <span class="icon-chip icon-chip-sm">${q.icon}</span>
-                        <span class="quest-row-title">${esc(q.title)}</span>
+                        <span class="quest-row-title">${rk(q.title)}</span>
                         <span class="quest-row-state">${st.completed[q.id] ? ADV_CHARA.mark('star') + ' クリア' : 'あたらしい！'}</span>
                     </button>`).join('')}
             </div>
@@ -300,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="quest-wrap">
             <header class="quest-header">
                 <button class="btn-mini" id="quest-quit">← 町にもどる</button>
-                <span class="quest-title-mini">${esc(session.quest.title)}</span>
+                <span class="quest-title-mini">${rk(session.quest.title)}</span>
             </header>
             <div id="quest-stage"></div>
         </div>`;
@@ -327,12 +354,12 @@ document.addEventListener('DOMContentLoaded', () => {
             stage().innerHTML = `
             <div class="story-scene">
                 ${line.sp === 'narrator'
-                    ? `<p class="narrator-text">${esc(line.t)}</p>`
+                    ? `<p class="narrator-text">${rk(line.t)}</p>`
                     : `<div class="dialog glass-card">
                          ${ADV_CHARA.face(ch.art)}
                          <div class="dialog-body">
                            <p class="dialog-name">${esc(ch.name)}</p>
-                           <p class="dialog-text">${esc(line.t)}</p>
+                           <p class="dialog-text">${rk(line.t)}</p>
                          </div>
                        </div>`}
                 <button class="btn btn-primary btn-wide" id="story-next">つぎへ</button>
@@ -356,11 +383,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${ADV_CHARA.face(ch.art)}
                 <div class="dialog-body">
                     <p class="dialog-name">${esc(ch.name)}</p>
-                    <p class="dialog-text">${esc(step.story)}</p>
+                    <p class="dialog-text">${rk(step.story)}</p>
                 </div>
             </div>
             <div class="question-card glass-card">
-                <p class="question-text">${esc(step.q)}</p>
+                <p class="question-text">${rk(step.q)}</p>
                 <div id="answer-area">${answerAreaHtml(step)}</div>
                 <p class="feedback hidden" id="feedback"></p>
                 <div id="step-actions">
@@ -375,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function answerAreaHtml(step) {
         if (step.type === 'choice' || step.type === 'heart') {
             return `<div class="option-list">
-                ${step.options.map((o, i) => `<button class="option-btn" data-i="${i}">${esc(o)}</button>`).join('')}
+                ${step.options.map((o, i) => `<button class="option-btn" data-i="${i}">${rk(o)}</button>`).join('')}
             </div>`;
         }
         if (step.type === 'number') {
@@ -410,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showFeedback(text, kind) {
         const f = $('#feedback');
-        f.textContent = text;
+        f.innerHTML = rk(text);
         f.className = `feedback fb-${kind}`;
     }
 
@@ -466,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${ADV_CHARA.face('lubicchi')}
                 <div class="dialog-body">
                     <p class="dialog-name">ルビッチ</p>
-                    <p class="dialog-text">${esc(ADV_DATA.bonus.intro)}</p>
+                    <p class="dialog-text">${rk(ADV_DATA.bonus.intro)}</p>
                 </div>
             </div>
             <div class="bonus-actions">
@@ -483,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="step-scene">
             <p class="step-count">${ADV_CHARA.mark('star')} ボーナスチャレンジ</p>
             <div class="question-card glass-card question-bonus">
-                <p class="question-text">${esc(bstep.q)}</p>
+                <p class="question-text">${rk(bstep.q)}</p>
                 <div id="answer-area">${answerAreaHtml(bstep)}</div>
                 <p class="feedback hidden" id="feedback"></p>
                 <div id="step-actions">
@@ -520,11 +547,11 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="finish-scene glass-card">
             <div class="finish-lantern">${ADV_CHARA.mark('lantern', 'adv-mark-lg')}</div>
             <h2>ぼうけん たっせい！</h2>
-            <p class="finish-quest">${esc(result.quest.title)}</p>
+            <p class="finish-quest">${rk(result.quest.title)}</p>
             <p class="finish-light">町に 光が <strong>＋${result.light}</strong> もどったよ！</p>
-            <p class="finish-phrase">プペル「${esc(result.endPhrase)}」</p>
-            ${result.newAreas.map(a => `<p class="finish-unlock">あたらしいエリア「${esc(a.label)}」が ひらいた！</p>`).join('')}
-            ${result.newBadges.map(b => `<p class="finish-badge">${ADV_CHARA.mark('star')} バッジ「${esc(b.label)}」を てにいれた！</p>`).join('')}
+            <p class="finish-phrase">プペル「${rk(result.endPhrase)}」</p>
+            ${result.newAreas.map(a => `<p class="finish-unlock">あたらしいエリア「${rk(a.label)}」が ひらいた！</p>`).join('')}
+            ${result.newBadges.map(b => `<p class="finish-badge">${ADV_CHARA.mark('star')} バッジ「${rk(b.label)}」を てにいれた！</p>`).join('')}
             <button class="btn btn-primary btn-wide" id="btn-back-town">町に もどる</button>
         </div>`;
         $('#btn-back-town').onclick = () => go('town');
@@ -547,8 +574,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const got = st.badges.includes(b.id);
                     return `<div class="badge-card glass-card ${got ? '' : 'badge-locked'}">
                         <div class="badge-icon">${got ? b.icon : '？'}</div>
-                        <p class="badge-label">${got ? esc(b.label) : '？？？'}</p>
-                        <p class="badge-desc">${esc(b.desc)}</p>
+                        <p class="badge-label">${got ? rk(b.label) : '？？？'}</p>
+                        <p class="badge-desc">${rk(b.desc)}</p>
                     </div>`;
                 }).join('')}
             </div>
@@ -560,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const q = AdvEngine.questById(m.questId);
                     return q ? `<div class="memory-card glass-card">
                         <span class="icon-chip icon-chip-sm">${q.icon}</span>
-                        <div><p class="memory-title">${esc(q.title)}</p><p class="memory-date">${esc(m.date)}</p></div>
+                        <div><p class="memory-title">${rk(q.title)}</p><p class="memory-date">${esc(m.date)}</p></div>
                     </div>` : '';
                 }).join('')}
             </div>
