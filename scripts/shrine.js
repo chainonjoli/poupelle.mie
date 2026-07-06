@@ -90,7 +90,23 @@
         targets.forEach(function (t) { io.observe(t); });
     }
 
-    /* ---- 推しカラー選択の門 ---- */
+    /* ---- 推しカラー選択の門（十色の輪） ---- */
+    function previewColor(c) {
+        /* 選ぶ前のライブプレビュー: 保存はせず世界の色だけ変える */
+        body.setAttribute('data-color', c.id);
+        document.getElementById('ring-label').textContent = c.jp;
+    }
+
+    function endPreview() {
+        var saved = load(STORAGE_COLOR, null);
+        if (saved && findColor(saved)) {
+            body.setAttribute('data-color', saved);
+        } else {
+            body.removeAttribute('data-color');
+        }
+        document.getElementById('ring-label').textContent = '色をえらぶ';
+    }
+
     function renderGate() {
         var list = document.getElementById('color-list');
         list.innerHTML = '';
@@ -99,12 +115,15 @@
             btn.type = 'button';
             btn.className = 'color-swatch';
             btn.style.setProperty('--i', idx);
+            btn.style.setProperty('--ang', (idx * 36) + 'deg');
             btn.setAttribute('data-color-id', c.id);
             btn.setAttribute('aria-label', c.jp + '（' + c.en + '）を推しカラーに選ぶ');
-            btn.innerHTML =
-                '<span class="swatch-dot" style="--sw:' + c.hex + ';--sw-deep:' + c.deep + '"></span>' +
-                '<span>' + c.jp + '</span>';
+            btn.innerHTML = '<span class="swatch-dot" style="--sw:' + c.hex + ';--sw-deep:' + c.deep + '"></span>';
             btn.addEventListener('click', function () { chooseColor(c.id, true); });
+            btn.addEventListener('mouseenter', function () { previewColor(c); });
+            btn.addEventListener('focus', function () { previewColor(c); });
+            btn.addEventListener('mouseleave', endPreview);
+            btn.addEventListener('blur', endPreview);
             list.appendChild(btn);
         });
     }

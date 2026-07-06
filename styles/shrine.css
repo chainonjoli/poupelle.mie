@@ -183,6 +183,7 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     .reveal { opacity: 1; transform: none; transition: none; }
     .k-char, .gate-title .k-char { opacity: 1; animation: none; }
     .aurora span, .crest { animation: none; }
+    .ring-slots .color-swatch { opacity: 1; animation: none; }
 }
 
 /* ============================================================
@@ -195,13 +196,29 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px;
-    background: radial-gradient(ellipse at 50% 120%, #1a1430 0%, #07060c 75%);
+    padding: 24px 20px;
+    background:
+        radial-gradient(ellipse at 72% 40%, color-mix(in srgb, var(--oshi) 24%, transparent) 0%, transparent 58%),
+        radial-gradient(ellipse at 50% 120%, #16112a 0%, #07060c 75%);
     overflow-y: auto;
-    transition: opacity 0.9s ease;
+    transition: opacity 0.9s ease, background 0.7s ease;
 }
 .color-gate.closing { opacity: 0; pointer-events: none; }
-.gate-inner { max-width: 760px; text-align: center; margin: auto; }
+
+.gate-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    align-items: center;
+    gap: 36px;
+    max-width: 940px;
+    width: 100%;
+    margin: auto;
+}
+.gate-brand { text-align: left; }
+@media (max-width: 760px) {
+    .gate-grid { grid-template-columns: 1fr; gap: 20px; }
+    .gate-brand { text-align: center; }
+}
 
 /* 十色の神紋（十人十色を表す10色のリング） */
 .crest {
@@ -229,68 +246,99 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     filter: none;
 }
 
-.gate-kicker { color: #cdbf9a; letter-spacing: 0.14em; font-size: 0.82rem; }
+.gate-kicker { color: #cdbf9a; letter-spacing: 0.22em; font-size: 0.78rem; }
 .gate-title {
-    /* 2026年らしいオーバーサイズの見出し */
-    font-size: clamp(3.4rem, 15vw, 6.6rem);
+    /* 御朱印の印影のような2×2の字組み（word-breakで2文字ずつ折り返す） */
+    font-size: clamp(4rem, 16vw, 7.2rem);
+    width: 2.16em;
+    word-break: break-all;
     letter-spacing: 0.06em;
-    line-height: 1.1;
-    margin-top: 10px;
+    line-height: 1.04;
+    margin: 10px 0 6px;
 }
-.gate-sub { color: #b3a479; letter-spacing: 0.28em; font-size: 0.85rem; margin: 6px 0 30px; }
+@media (max-width: 760px) { .gate-title { margin-inline: auto; } }
+.gate-sub { color: #b3a479; letter-spacing: 0.28em; font-size: 0.82rem; margin: 8px 0 26px; }
 .gate-question {
     font-family: 'Shippori Mincho', serif;
-    font-size: clamp(1.25rem, 4.4vw, 1.8rem);
-    letter-spacing: 0.1em;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    letter-spacing: 0.12em;
+    line-height: 1.6;
     color: #fdf8ea;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
-.gate-lead { color: #d8d0ba; font-size: 0.9rem; margin-bottom: 32px; }
-.gate-lead strong { color: #ffd97a; }
+.gate-lead { color: #d8d0ba; font-size: 0.9rem; margin-bottom: 26px; }
+.gate-lead strong { color: color-mix(in srgb, var(--oshi) 75%, #fff); transition: color 0.5s ease; }
 
-.color-list {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 18px 10px;
-    max-width: 580px;
-    margin: 0 auto 32px;
+/* ---- 十色の輪（円環に並ぶスウォッチ = 神紋そのもの） ---- */
+.color-ring {
+    position: relative;
+    width: min(80vw, 360px);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
 }
-@media (max-width: 480px) { .color-list { gap: 14px 6px; } }
-.color-swatch {
+.ring-slots { position: absolute; inset: 0; }
+.ring-slots .color-swatch {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(44px, 12vw, 56px);
+    height: clamp(44px, 12vw, 56px);
+    padding: 0;
     background: none;
     border: none;
     cursor: pointer;
-    color: #e8e2d2;
-    font-family: 'Kiwi Maru', serif;
-    font-size: 0.72rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    /* 円周上に配置: 回して押し出し、逆回転で玉を正立に戻す */
+    transform:
+        translate(-50%, -50%)
+        rotate(var(--ang))
+        translateY(calc(min(34vw, 152px) * -1))
+        rotate(calc(var(--ang) * -1));
     opacity: 0;
-    animation: swatch-in 0.6s var(--spring) forwards;
-    animation-delay: calc(var(--i) * 60ms + 0.7s);
-    transition: transform 0.3s var(--spring);
+    animation: ring-in 0.55s ease forwards;
+    animation-delay: calc(var(--i) * 70ms + 0.6s);
 }
-@keyframes swatch-in {
-    from { opacity: 0; transform: translateY(18px) scale(0.6); }
-    to   { opacity: 1; transform: none; }
-}
-.color-swatch:hover, .color-swatch:focus-visible { transform: translateY(-6px) scale(1.1); }
-.color-swatch:active { transform: translateY(-2px) scale(0.94); }
+@keyframes ring-in { from { opacity: 0; } to { opacity: 1; } }
 .swatch-dot {
-    width: clamp(46px, 12vw, 60px);
-    height: clamp(46px, 12vw, 60px);
+    display: block;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.55);
     background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.8) 0%, var(--sw) 42%, var(--sw-deep) 100%);
     box-shadow: 0 0 20px 2px color-mix(in srgb, var(--sw) 60%, transparent);
-    transition: box-shadow 0.3s ease;
+    transition: transform 0.3s var(--spring), box-shadow 0.3s ease;
 }
-.color-swatch:hover .swatch-dot {
+.color-swatch:hover .swatch-dot, .color-swatch:focus-visible .swatch-dot {
+    transform: scale(1.25);
     box-shadow:
-        0 0 28px 6px color-mix(in srgb, var(--sw) 75%, transparent),
+        0 0 30px 7px color-mix(in srgb, var(--sw) 80%, transparent),
         0 0 0 5px color-mix(in srgb, var(--sw) 35%, transparent);
+}
+.color-swatch:active .swatch-dot { transform: scale(1.05); }
+
+/* 輪の中心: 鳥居のシルエットとプレビュー中の色名 */
+.ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    pointer-events: none;
+}
+.mini-torii { position: relative; width: 76px; height: 66px; }
+.mini-torii span { position: absolute; background: var(--oshi); transition: background 0.5s ease, box-shadow 0.5s ease; }
+.mt-kasagi { top: 0; left: -7%; width: 114%; height: 11px; border-radius: 7px 7px 2px 2px; box-shadow: 0 0 18px var(--glow); }
+.mt-nuki { top: 22px; left: 5%; width: 90%; height: 7px; border-radius: 2px; }
+.mt-p { top: 13px; bottom: 0; width: 9px; border-radius: 2px; }
+.mt-p.l { left: 15%; }
+.mt-p.r { right: 15%; }
+.ring-label {
+    font-size: 0.82rem;
+    color: #efe9d8;
+    letter-spacing: 0.24em;
+    text-indent: 0.24em; /* letter-spacingの右余白ぶんを相殺して中央に */
 }
 .gate-note { font-size: 0.72rem; color: #8d8570; }
 
