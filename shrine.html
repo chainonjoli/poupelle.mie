@@ -18,17 +18,30 @@
 
     <!-- ===== 推しカラー選択の門 ===== -->
     <div id="color-gate" class="color-gate">
-        <div class="gate-inner">
-            <div class="crest" aria-hidden="true"></div>
-            <p class="gate-kicker">— 十人十色、推しの数だけ色がある —</p>
-            <h1 id="gate-title" class="gate-title">十色神社</h1>
-            <p class="gate-sub">といろじんじゃ ｜ TOIRO SHRINE</p>
-            <p class="gate-question">あなたの推しは、何色ですか。</p>
-            <p class="gate-lead">
-                選んだ<strong>推しカラー</strong>に、この神社のすべてが染まります。
-            </p>
-            <div id="color-list" class="color-list" role="list"></div>
-            <p class="gate-note">※ 本サイトは完全オリジナルの架空の神社です。実在の人物・団体・作品とは一切関係ありません。</p>
+        <div class="gate-grid">
+            <div class="gate-brand">
+                <p class="gate-kicker">十人十色、推しの数だけ色がある</p>
+                <h1 id="gate-title" class="gate-title">十色神社</h1>
+                <p class="gate-sub">といろじんじゃ ｜ TOIRO SHRINE</p>
+                <p class="gate-question">あなたの推しは、<br>何色ですか。</p>
+                <p class="gate-lead">
+                    色にふれると、世界が染まります。<br>
+                    <strong>推しカラー</strong>を選んで、あなただけの参拝へ。
+                </p>
+                <p class="gate-note">※ 本サイトは完全オリジナルの架空の神社です。実在の人物・団体・作品とは一切関係ありません。</p>
+            </div>
+            <div class="color-ring" aria-label="十色の輪から推しカラーを選ぶ">
+                <div id="color-list" class="ring-slots" role="list"></div>
+                <div class="ring-center" aria-hidden="true">
+                    <div class="mini-torii">
+                        <span class="mt-kasagi"></span>
+                        <span class="mt-nuki"></span>
+                        <span class="mt-p l"></span>
+                        <span class="mt-p r"></span>
+                    </div>
+                    <span id="ring-label" class="ring-label">色をえらぶ</span>
+                </div>
+            </div>
         </div>
     </div>
 
