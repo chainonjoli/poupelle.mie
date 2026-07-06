@@ -257,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="town-footer">
                 <button class="btn btn-outline" id="btn-album">ぼうけんアルバム</button>
+                <a class="btn btn-outline" href="https://poupelle.com/" target="_blank" rel="noopener">『えんとつ町のプペル』公式サイト</a>
             </div>
         </div>`;
 
