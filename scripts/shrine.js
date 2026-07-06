@@ -57,14 +57,48 @@
         try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* プライベートモード等では保存しない */ }
     }
 
+    /* ---- キネティック・タイポグラフィ（一文字ずつ登場） ---- */
+    function splitKinetic(el) {
+        var text = el.textContent;
+        el.textContent = '';
+        el.setAttribute('aria-label', text);
+        for (var i = 0; i < text.length; i++) {
+            var span = document.createElement('span');
+            span.className = 'k-char';
+            span.setAttribute('aria-hidden', 'true');
+            span.style.setProperty('--i', i);
+            span.textContent = text[i];
+            el.appendChild(span);
+        }
+    }
+
+    /* ---- スクロール連動リビール ---- */
+    function setupReveal() {
+        var targets = document.querySelectorAll('.reveal');
+        if (!('IntersectionObserver' in window)) {
+            targets.forEach(function (t) { t.classList.add('in'); });
+            return;
+        }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in');
+                    io.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        targets.forEach(function (t) { io.observe(t); });
+    }
+
     /* ---- 推しカラー選択の門 ---- */
     function renderGate() {
         var list = document.getElementById('color-list');
         list.innerHTML = '';
-        COLORS.forEach(function (c) {
+        COLORS.forEach(function (c, idx) {
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'color-swatch';
+            btn.style.setProperty('--i', idx);
             btn.setAttribute('data-color-id', c.id);
             btn.setAttribute('aria-label', c.jp + '（' + c.en + '）を推しカラーに選ぶ');
             btn.innerHTML =
@@ -197,6 +231,8 @@
     }
 
     /* ---- 初期化 ---- */
+    splitKinetic(document.getElementById('gate-title'));
+    setupReveal();
     renderGate();
     renderWishChips();
     renderEmaRack();

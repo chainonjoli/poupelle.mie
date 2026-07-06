@@ -12,13 +12,15 @@
 </head>
 <body data-mode="night">
     <div class="sky" aria-hidden="true"></div>
+    <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="grain" aria-hidden="true"></div>
     <div id="particles" class="particles" aria-hidden="true"></div>
 
     <!-- ===== 推しカラー選択の門 ===== -->
     <div id="color-gate" class="color-gate">
         <div class="gate-inner">
             <p class="gate-kicker">— すべての推し活ファンに捧ぐ、幻想の聖地 —</p>
-            <h1 class="gate-title">推し色神社</h1>
+            <h1 id="gate-title" class="gate-title">推し色神社</h1>
             <p class="gate-sub">Oshiiro Shrine</p>
             <p class="gate-lead">
                 ようこそお参りくださいました。<br>
@@ -72,12 +74,12 @@
             <a href="#ema" class="btn-main">絵馬に願いを込める</a>
         </section>
 
-        <!-- ===== 境内のみどころ ===== -->
-        <section class="section">
+        <!-- ===== 境内のみどころ（Bentoグリッド） ===== -->
+        <section class="section reveal">
             <h2 class="section-title">境内のみどころ</h2>
             <p class="section-lead">鳥居から御朱印まで、境内のすべてがあなたの推しカラーに変わります。</p>
-            <div class="spot-grid">
-                <article class="spot-card">
+            <div class="spot-grid bento">
+                <article class="spot-card b-a">
                     <div class="spot-visual hanachozu" aria-hidden="true">
                         <span class="flower f1"></span><span class="flower f2"></span><span class="flower f3"></span>
                         <span class="flower f4"></span><span class="flower f5"></span>
@@ -86,7 +88,7 @@
                     <h3>推し色の花手水</h3>
                     <p>手水舎に浮かぶのは、推しカラーの花々。水面に映る色に心を映して、そっと手を清めます。</p>
                 </article>
-                <article class="spot-card">
+                <article class="spot-card b-b">
                     <div class="spot-visual furin-visual" aria-hidden="true">
                         <span class="furin"><span class="furin-dome"></span><span class="furin-strip"></span></span>
                         <span class="furin d2"><span class="furin-dome"></span><span class="furin-strip"></span></span>
@@ -95,14 +97,14 @@
                     <h3>風鈴の回廊</h3>
                     <p>参道に連なる風鈴の短冊は、すべて参拝者の推しカラー。風が吹くたび、澄んだ音が願いを空へ運びます。</p>
                 </article>
-                <article class="spot-card">
+                <article class="spot-card b-c">
                     <div class="spot-visual omamori-visual" aria-hidden="true">
                         <span class="omamori"><span class="omamori-knot"></span><span class="omamori-text">推し守</span></span>
                     </div>
                     <h3>推し守（おまもり）</h3>
                     <p>推しカラーの錦に「推し守」の金文字。当選祈願・神席祈願・健康祈願、想いに合わせてお受けください。</p>
                 </article>
-                <article class="spot-card">
+                <article class="spot-card b-d">
                     <div class="spot-visual goshuin-visual" aria-hidden="true">
                         <span class="goshuin"><span class="goshuin-stamp">推</span><span class="goshuin-date">推し色神社 参拝之証</span></span>
                     </div>
@@ -113,7 +115,7 @@
         </section>
 
         <!-- ===== 絵馬奉納 ===== -->
-        <section id="ema" class="section">
+        <section id="ema" class="section reveal">
             <h2 class="section-title">絵馬奉納</h2>
             <p class="section-lead">
                 この神社の絵馬は、一人ひとりのためだけの特別なもの。<br>
@@ -142,7 +144,7 @@
         </section>
 
         <!-- ===== 由緒 ===== -->
-        <section class="section">
+        <section class="section reveal">
             <h2 class="section-title">御由緒</h2>
             <div class="yuisho glass">
                 <p>
