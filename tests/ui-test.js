@@ -59,7 +59,13 @@ const path = require('path');
     if (!/探検団/.test(fin) || !fin.includes('の証')) errors.push('firstバッジが出ない');
     if (!fin.includes('中央市場')) errors.push('市場開放が出ない');
     if (await page.locator('.finish-scene ruby').count() < 1) errors.push('ふりがなが出ない');
-    await page.click('#btn-back-town');
+
+    // ミッション連戦: 進捗と「つぎのぼうけんへ」ボタン
+    if (!fin.includes('きょうのミッション')) errors.push('ミッション進捗が出ない');
+    if (await page.locator('#btn-next-quest').count() < 1) errors.push('つぎのぼうけんボタンが出ない');
+    await page.click('#btn-next-quest');
+    await page.waitForSelector('#story-next');
+    await page.click('#quest-quit'); // 中断して町へ
 
     // 保護者ダッシュボード（ふりがな無しを検証）
     await page.waitForSelector('.area-card');
