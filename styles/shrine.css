@@ -153,11 +153,23 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     animation-delay: calc(var(--i) * 90ms + 0.2s);
 }
 .gate-title .k-char {
-    /* 親のグラデーション文字は transform された子には効かないため、文字ごとに適用 */
-    background: linear-gradient(180deg, #fdf6dd 15%, #e8b95d 60%, #c98a2e 95%);
+    /* 十色を象徴する虹彩グラデーション。
+       親に付けたグラデーション文字は transform された子には効かないため、文字ごとに適用 */
+    background: linear-gradient(120deg, #ffd12e, #ff70a6, #a566ff, #4fd6ff, #3fd97c, #ffd12e);
+    background-size: 400% 400%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    animation:
+        char-pop 0.7s var(--spring) forwards,
+        iridescent 9s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 90ms + 0.2s), calc(var(--i) * -0.9s);
+    filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.18));
+}
+@keyframes iridescent {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 @keyframes char-pop {
     from { opacity: 0; transform: translateY(0.55em) rotate(5deg) scale(0.8); }
@@ -169,8 +181,8 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
 .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
-    .k-char { opacity: 1; animation: none; }
-    .aurora span { animation: none; }
+    .k-char, .gate-title .k-char { opacity: 1; animation: none; }
+    .aurora span, .crest { animation: none; }
 }
 
 /* ============================================================
@@ -190,21 +202,50 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
 }
 .color-gate.closing { opacity: 0; pointer-events: none; }
 .gate-inner { max-width: 760px; text-align: center; margin: auto; }
+
+/* 十色の神紋（十人十色を表す10色のリング） */
+.crest {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #ff4d47 0 36deg, #ff9430 36deg 72deg, #ffd12e 72deg 108deg,
+        #3fd97c 108deg 144deg, #4fd6ff 144deg 180deg, #4d7dff 180deg 216deg,
+        #a566ff 216deg 252deg, #ff70a6 252deg 288deg, #f0ebde 288deg 324deg,
+        #5c5c78 324deg 360deg);
+    -webkit-mask: radial-gradient(circle, transparent 0 52%, #000 54% 100%);
+    mask: radial-gradient(circle, transparent 0 52%, #000 54% 100%);
+    animation: crest-spin 30s linear infinite;
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.22));
+}
+@keyframes crest-spin { to { transform: rotate(360deg); } }
+.crest-mini {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 0 7px -2px 0;
+    vertical-align: baseline;
+    filter: none;
+}
+
 .gate-kicker { color: #cdbf9a; letter-spacing: 0.14em; font-size: 0.82rem; }
 .gate-title {
     /* 2026年らしいオーバーサイズの見出し */
-    font-size: clamp(3.2rem, 13vw, 6rem);
-    letter-spacing: 0.08em;
+    font-size: clamp(3.4rem, 15vw, 6.6rem);
+    letter-spacing: 0.06em;
     line-height: 1.1;
-    margin-top: 12px;
-    background: linear-gradient(180deg, #fdf6dd 15%, #e8b95d 60%, #c98a2e 95%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    filter: drop-shadow(0 0 30px rgba(232, 197, 106, 0.4));
+    margin-top: 10px;
 }
-.gate-sub { color: #b3a479; letter-spacing: 0.4em; font-size: 0.85rem; margin: 4px 0 26px; }
-.gate-lead { color: #f0e9d8; margin-bottom: 32px; }
+.gate-sub { color: #b3a479; letter-spacing: 0.28em; font-size: 0.85rem; margin: 6px 0 30px; }
+.gate-question {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(1.25rem, 4.4vw, 1.8rem);
+    letter-spacing: 0.1em;
+    color: #fdf8ea;
+    margin-bottom: 10px;
+}
+.gate-lead { color: #d8d0ba; font-size: 0.9rem; margin-bottom: 32px; }
 .gate-lead strong { color: #ffd97a; }
 
 .color-list {
