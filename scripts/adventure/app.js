@@ -257,7 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="town-footer">
                 <button class="btn btn-outline" id="btn-album">ぼうけんアルバム</button>
-                <a class="btn btn-outline" href="index.html">上映会ページへ</a>
             </div>
         </div>`;
 
