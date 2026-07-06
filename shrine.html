@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>推し色神社 - あなたの推しカラーで参拝する、幻想の聖地</title>
-    <meta name="description" content="推し活ファンのための架空の神社「推し色神社」。10色の推しカラーから選ぶと、鳥居も提灯も花手水も、神社のすべてがあなたの色に染まります。絵馬に願いを込めて奉納しましょう。">
+    <title>十色神社 TOIRO SHRINE - あなたの推しは、何色ですか。</title>
+    <meta name="description" content="十人十色の推し心を祀る架空の神社「十色神社（といろじんじゃ）」。10色の推しカラーから選ぶと、鳥居も提灯も花手水も、神社のすべてがあなたの色に染まります。絵馬に願いを込めて奉納しましょう。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
@@ -12,18 +12,20 @@
 </head>
 <body data-mode="night">
     <div class="sky" aria-hidden="true"></div>
+    <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="grain" aria-hidden="true"></div>
     <div id="particles" class="particles" aria-hidden="true"></div>
 
     <!-- ===== 推しカラー選択の門 ===== -->
     <div id="color-gate" class="color-gate">
         <div class="gate-inner">
-            <p class="gate-kicker">— すべての推し活ファンに捧ぐ、幻想の聖地 —</p>
-            <h1 class="gate-title">推し色神社</h1>
-            <p class="gate-sub">Oshiiro Shrine</p>
+            <div class="crest" aria-hidden="true"></div>
+            <p class="gate-kicker">— 十人十色、推しの数だけ色がある —</p>
+            <h1 id="gate-title" class="gate-title">十色神社</h1>
+            <p class="gate-sub">といろじんじゃ ｜ TOIRO SHRINE</p>
+            <p class="gate-question">あなたの推しは、何色ですか。</p>
             <p class="gate-lead">
-                ようこそお参りくださいました。<br>
-                まずは、あなたの<strong>推しカラー</strong>をお選びください。<br>
-                選んだ色に、この神社のすべてが染まります。
+                選んだ<strong>推しカラー</strong>に、この神社のすべてが染まります。
             </p>
             <div id="color-list" class="color-list" role="list"></div>
             <p class="gate-note">※ 本サイトは完全オリジナルの架空の神社です。実在の人物・団体・作品とは一切関係ありません。</p>
@@ -32,7 +34,7 @@
 
     <!-- ===== 上部バー ===== -->
     <header class="topbar">
-        <span class="topbar-title">⛩ 推し色神社</span>
+        <span class="topbar-title"><span class="crest crest-mini" aria-hidden="true"></span>十色神社</span>
         <div class="topbar-actions">
             <button id="btn-mode" class="pill-btn" type="button">☀ 昼の参拝へ</button>
             <button id="btn-recolor" class="pill-btn" type="button">推しカラーを選び直す</button>
@@ -57,7 +59,7 @@
                 <div class="torii">
                     <div class="kasagi"></div>
                     <div class="shimaki"></div>
-                    <div class="gaku">推し色神社</div>
+                    <div class="gaku">十色神社</div>
                     <div class="nuki"></div>
                     <div class="hashira left"></div>
                     <div class="hashira right"></div>
@@ -72,12 +74,12 @@
             <a href="#ema" class="btn-main">絵馬に願いを込める</a>
         </section>
 
-        <!-- ===== 境内のみどころ ===== -->
-        <section class="section">
+        <!-- ===== 境内のみどころ（Bentoグリッド） ===== -->
+        <section class="section reveal">
             <h2 class="section-title">境内のみどころ</h2>
             <p class="section-lead">鳥居から御朱印まで、境内のすべてがあなたの推しカラーに変わります。</p>
-            <div class="spot-grid">
-                <article class="spot-card">
+            <div class="spot-grid bento">
+                <article class="spot-card b-a">
                     <div class="spot-visual hanachozu" aria-hidden="true">
                         <span class="flower f1"></span><span class="flower f2"></span><span class="flower f3"></span>
                         <span class="flower f4"></span><span class="flower f5"></span>
@@ -86,7 +88,7 @@
                     <h3>推し色の花手水</h3>
                     <p>手水舎に浮かぶのは、推しカラーの花々。水面に映る色に心を映して、そっと手を清めます。</p>
                 </article>
-                <article class="spot-card">
+                <article class="spot-card b-b">
                     <div class="spot-visual furin-visual" aria-hidden="true">
                         <span class="furin"><span class="furin-dome"></span><span class="furin-strip"></span></span>
                         <span class="furin d2"><span class="furin-dome"></span><span class="furin-strip"></span></span>
@@ -95,16 +97,16 @@
                     <h3>風鈴の回廊</h3>
                     <p>参道に連なる風鈴の短冊は、すべて参拝者の推しカラー。風が吹くたび、澄んだ音が願いを空へ運びます。</p>
                 </article>
-                <article class="spot-card">
+                <article class="spot-card b-c">
                     <div class="spot-visual omamori-visual" aria-hidden="true">
                         <span class="omamori"><span class="omamori-knot"></span><span class="omamori-text">推し守</span></span>
                     </div>
                     <h3>推し守（おまもり）</h3>
                     <p>推しカラーの錦に「推し守」の金文字。当選祈願・神席祈願・健康祈願、想いに合わせてお受けください。</p>
                 </article>
-                <article class="spot-card">
+                <article class="spot-card b-d">
                     <div class="spot-visual goshuin-visual" aria-hidden="true">
-                        <span class="goshuin"><span class="goshuin-stamp">推</span><span class="goshuin-date">推し色神社 参拝之証</span></span>
+                        <span class="goshuin"><span class="goshuin-stamp">推</span><span class="goshuin-date">十色神社 参拝之証</span></span>
                     </div>
                     <h3>推し色御朱印</h3>
                     <p>参拝の証は、推しカラーの箔押し御朱印。月替わりの意匠に、光の演出があしらわれます。</p>
@@ -113,7 +115,7 @@
         </section>
 
         <!-- ===== 絵馬奉納 ===== -->
-        <section id="ema" class="section">
+        <section id="ema" class="section reveal">
             <h2 class="section-title">絵馬奉納</h2>
             <p class="section-lead">
                 この神社の絵馬は、一人ひとりのためだけの特別なもの。<br>
@@ -142,12 +144,13 @@
         </section>
 
         <!-- ===== 由緒 ===== -->
-        <section class="section">
+        <section class="section reveal">
             <h2 class="section-title">御由緒</h2>
             <div class="yuisho glass">
                 <p>
-                    推し色神社は、「推しを応援したい」「推しに会いたい」「ライブが当たりますように」——
+                    十色神社（といろじんじゃ）は、「推しを応援したい」「推しに会いたい」「ライブが当たりますように」——
                     そんな願いを抱く人たちが全国から訪れる、推し活ファンのための聖地です。
+                    社名は「十人十色」に由来し、十の推しカラーがご神域を彩ります。
                 </p>
                 <p>
                     ここには特定のアイドルもキャラクターも祀られていません。
@@ -164,8 +167,8 @@
     </main>
 
     <footer class="footer">
-        <p>「推し色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
-        <p class="footer-copy">&copy; 2026 推し色神社 - Oshiiro Shrine</p>
+        <p>「十色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
+        <p class="footer-copy">&copy; 2026 十色神社 - TOIRO SHRINE</p>
     </footer>
 
     <script src="scripts/shrine.js"></script>
