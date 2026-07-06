@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推し色神社 - あなたの推しカラーで参拝する、幻想の聖地</title>
+    <meta name="description" content="推し活ファンのための架空の神社「推し色神社」。10色の推しカラーから選ぶと、鳥居も提灯も花手水も、神社のすべてがあなたの色に染まります。絵馬に願いを込めて奉納しましょう。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/shrine.css">
+</head>
+<body data-mode="night">
+    <div class="sky" aria-hidden="true"></div>
+    <div id="particles" class="particles" aria-hidden="true"></div>
+
+    <!-- ===== 推しカラー選択の門 ===== -->
+    <div id="color-gate" class="color-gate">
+        <div class="gate-inner">
+            <p class="gate-kicker">— すべての推し活ファンに捧ぐ、幻想の聖地 —</p>
+            <h1 class="gate-title">推し色神社</h1>
+            <p class="gate-sub">Oshiiro Shrine</p>
+            <p class="gate-lead">
+                ようこそお参りくださいました。<br>
+                まずは、あなたの<strong>推しカラー</strong>をお選びください。<br>
+                選んだ色に、この神社のすべてが染まります。
+            </p>
+            <div id="color-list" class="color-list" role="list"></div>
+            <p class="gate-note">※ 本サイトは完全オリジナルの架空の神社です。実在の人物・団体・作品とは一切関係ありません。</p>
+        </div>
+    </div>
+
+    <!-- ===== 上部バー ===== -->
+    <header class="topbar">
+        <span class="topbar-title">⛩ 推し色神社</span>
+        <div class="topbar-actions">
+            <button id="btn-mode" class="pill-btn" type="button">☀ 昼の参拝へ</button>
+            <button id="btn-recolor" class="pill-btn" type="button">推しカラーを選び直す</button>
+        </div>
+    </header>
+
+    <main id="main" class="main hidden">
+
+        <!-- ===== 参道と大鳥居 ===== -->
+        <section class="hero-shrine">
+            <p class="hero-kicker">あなたのための参道が、いま開かれました</p>
+            <h2 class="hero-welcome">ようこそ、<span id="hero-color-name" class="oshi-name">推し色</span>の参道へ</h2>
+
+            <div class="shrine-scene" aria-label="推しカラーに染まった大鳥居と提灯の風景">
+                <div class="lantern-row">
+                    <div class="lantern"><span class="lantern-cord"></span><span class="lantern-body"></span></div>
+                    <div class="lantern small"><span class="lantern-cord"></span><span class="lantern-body"></span></div>
+                    <div class="lantern"><span class="lantern-cord"></span><span class="lantern-body"></span></div>
+                    <div class="lantern small"><span class="lantern-cord"></span><span class="lantern-body"></span></div>
+                    <div class="lantern"><span class="lantern-cord"></span><span class="lantern-body"></span></div>
+                </div>
+                <div class="torii">
+                    <div class="kasagi"></div>
+                    <div class="shimaki"></div>
+                    <div class="gaku">推し色神社</div>
+                    <div class="nuki"></div>
+                    <div class="hashira left"></div>
+                    <div class="hashira right"></div>
+                </div>
+                <div class="sando"></div>
+            </div>
+
+            <p class="hero-lead">
+                参道には幻想的な光が舞い、やさしい風に風鈴が揺れています。<br>
+                昼は木漏れ日に包まれ、夜は推しカラーの光が境内を優しく照らします。
+            </p>
+            <a href="#ema" class="btn-main">絵馬に願いを込める</a>
+        </section>
+
+        <!-- ===== 境内のみどころ ===== -->
+        <section class="section">
+            <h2 class="section-title">境内のみどころ</h2>
+            <p class="section-lead">鳥居から御朱印まで、境内のすべてがあなたの推しカラーに変わります。</p>
+            <div class="spot-grid">
+                <article class="spot-card">
+                    <div class="spot-visual hanachozu" aria-hidden="true">
+                        <span class="flower f1"></span><span class="flower f2"></span><span class="flower f3"></span>
+                        <span class="flower f4"></span><span class="flower f5"></span>
+                        <span class="water"></span><span class="bowl"></span>
+                    </div>
+                    <h3>推し色の花手水</h3>
+                    <p>手水舎に浮かぶのは、推しカラーの花々。水面に映る色に心を映して、そっと手を清めます。</p>
+                </article>
+                <article class="spot-card">
+                    <div class="spot-visual furin-visual" aria-hidden="true">
+                        <span class="furin"><span class="furin-dome"></span><span class="furin-strip"></span></span>
+                        <span class="furin d2"><span class="furin-dome"></span><span class="furin-strip"></span></span>
+                        <span class="furin d3"><span class="furin-dome"></span><span class="furin-strip"></span></span>
+                    </div>
+                    <h3>風鈴の回廊</h3>
+                    <p>参道に連なる風鈴の短冊は、すべて参拝者の推しカラー。風が吹くたび、澄んだ音が願いを空へ運びます。</p>
+                </article>
+                <article class="spot-card">
+                    <div class="spot-visual omamori-visual" aria-hidden="true">
+                        <span class="omamori"><span class="omamori-knot"></span><span class="omamori-text">推し守</span></span>
+                    </div>
+                    <h3>推し守（おまもり）</h3>
+                    <p>推しカラーの錦に「推し守」の金文字。当選祈願・神席祈願・健康祈願、想いに合わせてお受けください。</p>
+                </article>
+                <article class="spot-card">
+                    <div class="spot-visual goshuin-visual" aria-hidden="true">
+                        <span class="goshuin"><span class="goshuin-stamp">推</span><span class="goshuin-date">推し色神社 参拝之証</span></span>
+                    </div>
+                    <h3>推し色御朱印</h3>
+                    <p>参拝の証は、推しカラーの箔押し御朱印。月替わりの意匠に、光の演出があしらわれます。</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- ===== 絵馬奉納 ===== -->
+        <section id="ema" class="section">
+            <h2 class="section-title">絵馬奉納</h2>
+            <p class="section-lead">
+                この神社の絵馬は、一人ひとりのためだけの特別なもの。<br>
+                お名前と、推しへの願いを自由にお書きください。
+            </p>
+
+            <div class="ema-write glass">
+                <div class="form-group">
+                    <label for="ema-name">お名前・ニックネーム</label>
+                    <input type="text" id="ema-name" maxlength="20" placeholder="例：あず" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="ema-wish">推しへの願いごと</label>
+                    <textarea id="ema-wish" rows="3" maxlength="60" placeholder="例：ライブに当選しますように"></textarea>
+                </div>
+                <p class="chips-label">願いごとの例（タップで入力できます）</p>
+                <div id="wish-chips" class="wish-chips"></div>
+                <button id="btn-dedicate" class="btn-main" type="button">この絵馬を奉納する</button>
+                <p id="ema-error" class="ema-error hidden">お名前と願いごとを書いてから奉納してください。</p>
+            </div>
+
+            <div id="ema-done" class="ema-done hidden" role="status"></div>
+
+            <h3 class="emakake-title">絵馬掛け 〜みんなの願い〜</h3>
+            <div id="ema-rack" class="ema-rack"></div>
+        </section>
+
+        <!-- ===== 由緒 ===== -->
+        <section class="section">
+            <h2 class="section-title">御由緒</h2>
+            <div class="yuisho glass">
+                <p>
+                    推し色神社は、「推しを応援したい」「推しに会いたい」「ライブが当たりますように」——
+                    そんな願いを抱く人たちが全国から訪れる、推し活ファンのための聖地です。
+                </p>
+                <p>
+                    ここには特定のアイドルもキャラクターも祀られていません。
+                    お祀りしているのは、<strong>「推し」という存在を大切に想う気持ちそのもの</strong>。
+                    誰かを応援するあたたかい心が、この境内の光になっています。
+                </p>
+                <p>
+                    参拝者が推しカラーを選ぶと、鳥居、提灯、花手水、風鈴、絵馬、お守り、御朱印、
+                    そして光の演出まで、境内のすべてがその色に包まれ、
+                    その人だけの特別な参拝体験が始まります。
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>「推し色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
+        <p class="footer-copy">&copy; 2026 推し色神社 - Oshiiro Shrine</p>
+    </footer>
+
+    <script src="scripts/shrine.js"></script>
+</body>
+</html>
