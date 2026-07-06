@@ -51,6 +51,6 @@ sns/reports/2026-07.md      ← analyst がまとめる振り返り
 
 `YYYY-MM-DD_アカウント_プラットフォーム.md`
 
-- アカウント: `main`（メイン） / `shrine`（推し色神社） / `adventure`（探検団）
+- アカウント: `ise`（@ise.poupelle.likes） / `chainon`（@chainonjoli）
 - プラットフォーム: `ig`（Instagram） / `th`（Threads）
-- 例: `2026-07-10_shrine_ig.md`
+- 例: `2026-07-19_ise_ig.md`
