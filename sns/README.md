@@ -1,6 +1,6 @@
 # SNS運用チーム
 
-『えんとつ町のプペル』ファンプロジェクト（poupelle.mie）の Instagram / Threads 複数アカウント運用のためのチームとドキュメント一式です。
+『えんとつ町のプペル』ファンアカウント（[@ise.poupelle.likes](https://www.instagram.com/ise.poupelle.likes/)）と本業のエステサロンアカウント（[@chainonjoli](https://www.instagram.com/chainonjoli/)）、2つの Instagram / Threads アカウントを運用するためのチームとドキュメント一式です。
 
 ## チーム構成（AIサブエージェント）
 
@@ -22,8 +22,9 @@
 | [accounts.md](accounts.md) | 複数アカウントの設計と役割分担 |
 | [guidelines.md](guidelines.md) | トンマナ・投稿頻度・禁止事項・権利上の注意 |
 | [workflow.md](workflow.md) | 週次の運用フロー（企画→執筆→校閲→投稿→分析） |
-| [templates/instagram.md](templates/instagram.md) | Instagram投稿テンプレート集 |
-| [templates/threads.md](templates/threads.md) | Threads投稿テンプレート集 |
+| [templates/instagram.md](templates/instagram.md) | Instagram投稿テンプレート集（ファンアカウント用） |
+| [templates/threads.md](templates/threads.md) | Threads投稿テンプレート集（ファンアカウント用） |
+| [templates/salon.md](templates/salon.md) | サロンアカウント（@chainonjoli）用テンプレート集 |
 | `calendar/` | 月別の投稿カレンダー（sns-planner が作成） |
 | `drafts/` | 投稿原稿のドラフト置き場（sns-writer が作成） |
 | `reports/` | 月次レポート（sns-analyst が作成） |
