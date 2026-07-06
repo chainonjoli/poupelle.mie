@@ -226,15 +226,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ${rec ? `
             <div class="today-quest glass-card">
-                <p class="today-label">きょうの ぼうけん</p>
+                <p class="today-label">きょうの ミッション</p>
                 <div class="today-quest-body">
                     <span class="icon-chip">${rec.icon}</span>
                     <div>
                         <h3>${rk(rec.title)}</h3>
-                        <p class="today-area">${rk(areas.find(a => a.id === rec.area).label)}</p>
+                        <p class="today-area">${rk(areas.find(a => a.id === rec.area).label)} から スタート</p>
                     </div>
                 </div>
-                <button class="btn btn-primary btn-wide" id="btn-start-rec">この ぼうけんに でかける</button>
+                <p class="today-area" style="margin-top:8px;">ぼうけんを つづけて、ぜんぶで <strong>${MISSION_TARGET}もん</strong> に ちょうせんしよう！</p>
+                <button class="btn btn-primary btn-wide" id="btn-start-rec">きょうの ミッションを はじめる</button>
             </div>` : ''}
 
             <h2 class="town-section-title">えんとつ町のちず</h2>
@@ -262,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         $('#btn-parent').onclick = () => go('parentGate');
         $('#btn-album').onclick = () => go('album');
-        if (rec) $('#btn-start-rec').onclick = () => go('quest', rec.id);
+        if (rec) $('#btn-start-rec').onclick = () => { startMission(); go('quest', rec.id); };
         document.querySelectorAll('.area-card:not(.area-locked)').forEach(el => {
             el.onclick = () => renderAreaSheet(el.dataset.area);
         });
@@ -311,8 +312,25 @@ document.addEventListener('DOMContentLoaded', () => {
         sheet.querySelector('#sheet-close').onclick = () => sheet.remove();
         sheet.addEventListener('click', e => { if (e.target === sheet) sheet.remove(); });
         sheet.querySelectorAll('.quest-row').forEach(b => {
-            b.onclick = () => { sheet.remove(); go('quest', b.dataset.q); };
+            b.onclick = () => { sheet.remove(); mission = null; go('quest', b.dataset.q); };
         });
+    }
+
+    /* ================= きょうのミッション（クエスト連戦） ================= */
+
+    const MISSION_TARGET = 10;   // 1日のミッションの目標もんだい数
+    let mission = null;          // { doneSteps, quests, played: [questId] }
+
+    function startMission() {
+        mission = { doneSteps: 0, quests: 0, played: [] };
+    }
+
+    /* ミッションのつぎのクエスト（まだ遊んでいないおすすめから） */
+    function nextMissionQuest() {
+        if (!mission || mission.doneSteps >= MISSION_TARGET) return null;
+        const cand = AdvEngine.recommendQuests(ADV_DATA.quests.length)
+            .filter(q => !mission.played.includes(q.id));
+        return cand[0] || null;
     }
 
     /* ================= クエスト（物語＋学び） ================= */
@@ -322,6 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderQuest(questId) {
         const session = AdvEngine.startQuest(questId);
         if (!session) { go('town'); return; }
+        if (mission) mission.played.push(questId);
         questCtx = { phase: 'intro', lineIndex: 0, bonus: null };
         app.innerHTML = `
         <div class="quest-wrap">
@@ -331,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </header>
             <div id="quest-stage"></div>
         </div>`;
-        $('#quest-quit').onclick = () => go('town');
+        $('#quest-quit').onclick = () => { mission = null; go('town'); };
         renderQuestPhase();
     }
 
@@ -376,9 +395,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = AdvEngine.session;
         const total = s.quest.tiers[s.tier].steps.length;
 
+        const countLabel = mission
+            ? `もんだい ${Math.min(MISSION_TARGET, mission.doneSteps + s.stepIndex + 1)} / ${MISSION_TARGET}`
+            : `もんだい ${s.stepIndex + 1} / ${total}`;
         stage().innerHTML = `
         <div class="step-scene">
-            <p class="step-count">もんだい ${s.stepIndex + 1} / ${total}</p>
+            <p class="step-count">${countLabel}</p>
             <div class="dialog glass-card">
                 ${ADV_CHARA.face(ch.art)}
                 <div class="dialog-body">
@@ -540,9 +562,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    /* クエスト完了画面 */
+    /* クエスト完了画面（ミッション中は つぎのぼうけんへ 続けられる） */
     function finishQuest() {
+        const s = AdvEngine.session;
+        const questSteps = s.quest.tiers[s.tier].steps.length;
         const result = AdvEngine.completeQuest();
+
+        let next = null;
+        if (mission) {
+            mission.doneSteps += questSteps;
+            mission.quests++;
+            next = nextMissionQuest();
+        }
+        const missionDone = mission && !next;
+        const progress = mission ? Math.min(MISSION_TARGET, mission.doneSteps) : 0;
+
         stage().innerHTML = `
         <div class="finish-scene glass-card">
             <div class="finish-lantern">${ADV_CHARA.mark('lantern', 'adv-mark-lg')}</div>
@@ -552,9 +586,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="finish-phrase">プペル「${rk(result.endPhrase)}」</p>
             ${result.newAreas.map(a => `<p class="finish-unlock">あたらしいエリア「${rk(a.label)}」が ひらいた！</p>`).join('')}
             ${result.newBadges.map(b => `<p class="finish-badge">${ADV_CHARA.mark('star')} バッジ「${rk(b.label)}」を てにいれた！</p>`).join('')}
-            <button class="btn btn-primary btn-wide" id="btn-back-town">町に もどる</button>
+            ${mission ? `
+                <p class="mission-progress">きょうのミッション：もんだい <strong>${progress} / ${MISSION_TARGET}</strong></p>
+                <div class="light-bar"><div class="light-bar-fill" style="width:${Math.round(progress / MISSION_TARGET * 100)}%"></div></div>` : ''}
+            ${missionDone ? `<p class="finish-unlock">きょうの ミッション コンプリート！よく がんばったね！</p>` : ''}
+            ${next ? `<button class="btn btn-primary btn-wide" id="btn-next-quest">つぎの ぼうけんへ（${rk(next.title)}）</button>` : ''}
+            <button class="btn ${next ? 'btn-outline' : 'btn-primary'} btn-wide" id="btn-back-town">${next ? 'きょうは ここまで' : '町に もどる'}</button>
         </div>`;
-        $('#btn-back-town').onclick = () => go('town');
+        if (next) $('#btn-next-quest').onclick = () => go('quest', next.id);
+        $('#btn-back-town').onclick = () => { mission = null; go('town'); };
     }
 
     /* ================= アルバム ================= */
