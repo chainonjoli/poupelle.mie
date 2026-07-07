@@ -43,6 +43,7 @@ const path = require('path');
     const rackText = await page.textContent('#ema-rack');
     if (!rackText.includes('ライブに当選しますように')) errors.push('絵馬掛けに願いが出ない');
     if (!rackText.includes('あず より')) errors.push('絵馬掛けに名前が出ない');
+    if (await page.locator('#ema-done a.btn-x').count() < 1) errors.push('絵馬奉納後のシェアリンクが出ない');
 
     // リロード後も推しカラーと絵馬が残る（localStorage）
     await page.reload();
@@ -56,6 +57,35 @@ const path = require('path');
     await page.click('.color-swatch[data-color-id="pink"]');
     await page.waitForFunction(() => document.body.getAttribute('data-color') === 'pink');
     if (!(await page.textContent('#hero-color-name')).includes('ピンク')) errors.push('選び直し後の色名が出ない');
+
+    // 推し活みくじ
+    await page.click('.spot-card[data-action="omikuji"]');
+    await page.waitForSelector('#modal:not(.hidden)');
+    const mikujiText = await page.textContent('#modal-body');
+    if (!mikujiText.includes('推し活みくじ')) errors.push('みくじモーダルが開かない');
+    if (!/吉/.test(mikujiText)) errors.push('みくじの結果が出ない');
+    if (!(await page.getAttribute('#modal-body .btn-x', 'href')).includes('twitter.com/intent')) errors.push('みくじのシェアリンクが不正');
+    await page.click('#btn-redraw');
+    if (!/吉/.test(await page.textContent('#modal-body'))) errors.push('みくじの引き直しができない');
+    await page.click('#modal-close');
+    if (await page.locator('#modal.hidden').count() !== 1) errors.push('モーダルが閉じない');
+
+    // 推し色御朱印（画像生成）
+    await page.click('.spot-card[data-action="goshuin"]');
+    await page.waitForSelector('#goshuin-name');
+    await page.fill('#goshuin-name', 'あず');
+    await page.click('#btn-goshuin-make');
+    await page.waitForSelector('#goshuin-img');
+    const imgSrc = await page.getAttribute('#goshuin-img', 'src');
+    if (!imgSrc || !imgSrc.startsWith('data:image/png') || imgSrc.length < 5000) errors.push('御朱印画像が生成されない');
+    if (!(await page.getAttribute('#btn-goshuin-save', 'download'))) errors.push('御朱印の保存リンクがない');
+    await page.click('#modal-close');
+
+    // 花手水の波紋と風鈴の鳴動
+    await page.click('.spot-card[data-action="chozu"]');
+    if (await page.locator('.ripple-ring').count() < 1) errors.push('花手水の波紋が出ない');
+    await page.click('.spot-card[data-action="furin"]');
+    if (await page.locator('.furin-visual.ringing').count() !== 1) errors.push('風鈴が鳴動しない');
 
     // 保存できない環境（プライベートブラウズ等）でも絵馬が即時反映される
     const page2 = await browser.newPage({ viewport: { width: 420, height: 900 } });

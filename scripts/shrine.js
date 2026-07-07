@@ -249,13 +249,301 @@
         renderEmaRack();
         wishInput.value = '';
         done.textContent = name + 'さんの絵馬を奉納しました。あなたの願いが、推しに届きますように ✦';
+        var share = document.createElement('a');
+        share.className = 'btn-x btn-x-small';
+        share.href = xShareUrl('十色神社に絵馬を奉納しました ⛩「' + wish + '」あなたの推しは、何色ですか。');
+        share.target = '_blank';
+        share.rel = 'noopener';
+        share.textContent = '𝕏 で願いをポスト';
+        done.appendChild(share);
         done.classList.remove('hidden');
         done.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /* ============================================================
+       SNSシェアの仕掛け（みくじ・御朱印・シェア導線）
+       ============================================================ */
+    var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
+
+    function xShareUrl(text) {
+        return 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) +
+            '&url=' + encodeURIComponent(PAGE_URL) +
+            '&hashtags=' + encodeURIComponent('十色神社,推し活');
+    }
+
+    function currentColor() {
+        return findColor(body.getAttribute('data-color')) || COLORS[0];
+    }
+
+    /* ---- モーダル ---- */
+    var modal = document.getElementById('modal');
+    var modalBody = document.getElementById('modal-body');
+
+    function openModal(html) {
+        modalBody.innerHTML = html;
+        modal.classList.remove('hidden');
+    }
+    function closeModal() {
+        modal.classList.add('hidden');
+        modalBody.innerHTML = '';
+    }
+
+    /* ---- 花手水: ふれると波紋 ---- */
+    function rippleChozu(card) {
+        var water = card.querySelector('.water');
+        var ring = document.createElement('span');
+        ring.className = 'ripple-ring';
+        water.parentNode.appendChild(ring);
+        ring.style.left = water.offsetLeft + water.offsetWidth / 2 + 'px';
+        ring.style.top = water.offsetTop + water.offsetHeight / 2 + 'px';
+        ring.addEventListener('animationend', function () { ring.remove(); });
+    }
+
+    /* ---- 風鈴: ふれると鳴る ---- */
+    var audioCtx = null;
+    function chime() {
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            [2093, 2637].forEach(function (freq, i) {
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(i === 0 ? 0.12 : 0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.5);
+            });
+        } catch (e) { /* 音が出せない環境では視覚演出のみ */ }
+    }
+    function ringFurin(card) {
+        var visual = card.querySelector('.furin-visual');
+        visual.classList.remove('ringing');
+        void visual.offsetWidth; /* 連打でもアニメーションを再発火 */
+        visual.classList.add('ringing');
+        chime();
+    }
+
+    /* ---- 推し活みくじ ---- */
+    var OMIKUJI_RANKS = [
+        { r: '推し大吉', w: 4 }, { r: '大吉', w: 12 }, { r: '中吉', w: 26 },
+        { r: '小吉', w: 28 }, { r: '吉', w: 20 }, { r: '末吉', w: 10 }
+    ];
+    var OMIKUJI_MSGS = [
+        '今日の現場は、最高の思い出になる予感。',
+        '推しの新しい一面に出会えるかも。',
+        '諦めかけたチケットに、ご縁が巡ってきそう。',
+        '推しの笑顔が、あなたの一週間を守ってくれます。',
+        '遠征の空も味方するでしょう。忘れ物にはご注意を。',
+        '同担との素敵な出会いがありそう。',
+        '積んだ徳は、神席となって返ってくるでしょう。',
+        '今日は無理せず、おうちで推しを摂取する日。'
+    ];
+    function drawOmikuji() {
+        var total = 0, i;
+        for (i = 0; i < OMIKUJI_RANKS.length; i++) total += OMIKUJI_RANKS[i].w;
+        var roll = Math.random() * total;
+        var rank = OMIKUJI_RANKS[0].r;
+        for (i = 0; i < OMIKUJI_RANKS.length; i++) {
+            roll -= OMIKUJI_RANKS[i].w;
+            if (roll <= 0) { rank = OMIKUJI_RANKS[i].r; break; }
+        }
+        function stars() { return '★★★★★'.slice(0, 2 + Math.floor(Math.random() * 4)).padEnd(5, '☆'); }
+        return {
+            rank: rank,
+            msg: OMIKUJI_MSGS[Math.floor(Math.random() * OMIKUJI_MSGS.length)],
+            luck: [
+                { label: '当選運', v: stars() },
+                { label: '神席運', v: stars() },
+                { label: 'ファンサ運', v: stars() },
+                { label: '遠征運', v: stars() }
+            ]
+        };
+    }
+    function openOmikuji() {
+        var o = drawOmikuji();
+        var color = currentColor();
+        var rows = o.luck.map(function (l) {
+            return '<div class="mikuji-row"><span>' + l.label + '</span><span class="mikuji-stars">' + l.v + '</span></div>';
+        }).join('');
+        var shareText = '十色神社の推し活みくじは【' + o.rank + '】でした ⛩ あなたの推しは、何色ですか。';
+        openModal(
+            '<p class="modal-kicker">推し活みくじ</p>' +
+            '<p class="mikuji-rank">' + o.rank + '</p>' +
+            '<p class="mikuji-msg">' + o.msg + '</p>' +
+            '<div class="mikuji-luck">' + rows + '</div>' +
+            '<p class="mikuji-lucky">ラッキーカラー：あなたの推し色（' + color.jp + '）</p>' +
+            '<div class="modal-actions">' +
+            '<a class="btn-x" href="' + xShareUrl(shareText) + '" target="_blank" rel="noopener">𝕏 で結果をポスト</a>' +
+            '<button type="button" class="pill-btn" id="btn-redraw">もう一度引く</button>' +
+            '</div>'
+        );
+        document.getElementById('btn-redraw').addEventListener('click', openOmikuji);
+    }
+
+    /* ---- 推し色御朱印メーカー ---- */
+    function kanjiNum(n) {
+        var k = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+        if (n >= 10 && n < 100) {
+            var t = Math.floor(n / 10), o = n % 10;
+            return (t > 1 ? k[t] : '') + '十' + (o ? k[o] : '');
+        }
+        return String(n).split('').map(function (d) { return k[+d]; }).join('');
+    }
+    function drawVertical(ctx, text, x, y, lineH) {
+        for (var i = 0; i < text.length; i++) ctx.fillText(text[i], x, y + i * lineH);
+    }
+    function makeGoshuin(name) {
+        var color = currentColor();
+        var W = 720, H = 1000;
+        var cv = document.createElement('canvas');
+        cv.width = W; cv.height = H;
+        var ctx = cv.getContext('2d');
+
+        /* 和紙の下地 */
+        var bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#fdf9ee');
+        bg.addColorStop(1, '#f0e6cf');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(120, 100, 60, 0.05)';
+        for (var i = 0; i < 900; i++) {
+            ctx.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5);
+        }
+        /* 推し色の二重枠 */
+        ctx.strokeStyle = color.hex;
+        ctx.lineWidth = 5;
+        ctx.strokeRect(26, 26, W - 52, H - 52);
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(40, 40, W - 80, H - 80);
+
+        /* 十色の輪（うすく背景に） */
+        ctx.save();
+        ctx.globalAlpha = 0.16;
+        for (i = 0; i < 10; i++) {
+            ctx.beginPath();
+            ctx.strokeStyle = COLORS[i].hex;
+            ctx.lineWidth = 16;
+            ctx.arc(W / 2, H / 2 - 40, 215, (i * 36 - 90) * Math.PI / 180, ((i + 1) * 36 - 90) * Math.PI / 180);
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        var mincho = '"Shippori Mincho", "Hiragino Mincho ProN", serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        /* 御朱印（推し色の印）— 本物の御朱印のように、印を先に押して墨書きを上に */
+        ctx.save();
+        ctx.translate(W / 2, H / 2 - 40);
+        ctx.rotate(-0.05);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = color.hex;
+        var r = 108;
+        ctx.beginPath();
+        if (ctx.roundRect) { ctx.roundRect(-r, -r, r * 2, r * 2, 26); } else { ctx.rect(-r, -r, r * 2, r * 2); }
+        ctx.fill();
+        ctx.fillStyle = color.id === 'white' ? '#948a70' : '#fdf9ee';
+        ctx.font = '600 140px ' + mincho;
+        ctx.fillText('推', 0, 8);
+        ctx.restore();
+
+        ctx.fillStyle = '#3a2f22';
+
+        /* 奉拝 */
+        ctx.font = '600 34px ' + mincho;
+        drawVertical(ctx, '奉拝', 96, 110, 44);
+
+        /* 社名（中央・縦書き） */
+        ctx.font = '600 104px ' + mincho;
+        drawVertical(ctx, '十色神社', W / 2, 210, 132);
+
+        /* 日付（右・縦書き） */
+        var now = new Date();
+        var dateText = kanjiNum(now.getFullYear()) + '年' + kanjiNum(now.getMonth() + 1) + '月' + kanjiNum(now.getDate()) + '日';
+        ctx.fillStyle = '#3a2f22';
+        ctx.font = '600 36px ' + mincho;
+        drawVertical(ctx, dateText, W - 96, 320, 44);
+
+        /* 名前（左・縦書き） */
+        if (name) {
+            ctx.font = '600 40px ' + mincho;
+            drawVertical(ctx, name + ' 様', 96, 330, 50);
+        }
+
+        /* 下部 */
+        ctx.font = '500 26px ' + mincho;
+        ctx.fillStyle = color.id === 'white' ? '#948a70' : color.deep;
+        ctx.fillText('あなたの推しは、何色ですか。', W / 2, H - 130);
+        ctx.font = '400 20px sans-serif';
+        ctx.fillStyle = '#8d8062';
+        ctx.fillText('TOIRO SHRINE — ' + color.en.toUpperCase(), W / 2, H - 84);
+
+        return cv.toDataURL('image/png');
+    }
+    function openGoshuin() {
+        var prefill = document.getElementById('ema-name').value.trim();
+        openModal(
+            '<p class="modal-kicker">推し色御朱印</p>' +
+            '<p class="modal-lead">お名前と今日の日付が入った、あなたの推し色の御朱印画像をお作りします。</p>' +
+            '<div class="form-group"><label for="goshuin-name">お名前・ニックネーム（任意）</label>' +
+            '<input type="text" id="goshuin-name" maxlength="12" value="' + prefill.replace(/["<>&]/g, '') + '" placeholder="例：あず"></div>' +
+            '<button type="button" class="btn-main" id="btn-goshuin-make">御朱印をいただく</button>'
+        );
+        document.getElementById('btn-goshuin-make').addEventListener('click', function () {
+            var name = document.getElementById('goshuin-name').value.trim();
+            var render = function () {
+                var url = makeGoshuin(name);
+                var color = currentColor();
+                var shareText = '十色神社で ' + color.jp + ' の御朱印をいただきました ⛩ あなたの推しは、何色ですか。';
+                openModal(
+                    '<p class="modal-kicker">推し色御朱印</p>' +
+                    '<img id="goshuin-img" class="goshuin-img" src="' + url + '" alt="' + color.jp + 'の御朱印">' +
+                    '<p class="modal-hint">スマホでは画像を長押しすると保存できます。保存した画像を添えてポストしてください。</p>' +
+                    '<div class="modal-actions">' +
+                    '<a class="pill-btn" id="btn-goshuin-save" href="' + url + '" download="toiro-goshuin.png">画像を保存</a>' +
+                    '<a class="btn-x" href="' + xShareUrl(shareText) + '" target="_blank" rel="noopener">𝕏 でポストする</a>' +
+                    '</div>'
+                );
+            };
+            if (document.fonts && document.fonts.load) {
+                Promise.all([
+                    document.fonts.load('600 104px "Shippori Mincho"'),
+                    document.fonts.load('600 36px "Shippori Mincho"')
+                ]).then(render, render);
+            } else {
+                render();
+            }
+        });
+    }
+
+    /* ---- みどころカードのタップ ---- */
+    function setupSpots() {
+        document.querySelectorAll('.spot-tap').forEach(function (card) {
+            var action = card.getAttribute('data-action');
+            var run = function () {
+                if (action === 'chozu') rippleChozu(card);
+                else if (action === 'furin') ringFurin(card);
+                else if (action === 'omikuji') openOmikuji();
+                else if (action === 'goshuin') openGoshuin();
+            };
+            card.addEventListener('click', run);
+            card.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); run(); }
+            });
+        });
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeModal();
+        });
     }
 
     /* ---- 初期化 ---- */
     splitKinetic(document.getElementById('gate-title'));
     setupReveal();
+    setupSpots();
     renderGate();
     renderWishChips();
     renderEmaRack();

@@ -92,7 +92,7 @@
             <h2 class="section-title">境内のみどころ</h2>
             <p class="section-lead">鳥居から御朱印まで、境内のすべてがあなたの推しカラーに変わります。</p>
             <div class="spot-grid bento">
-                <article class="spot-card b-a">
+                <article class="spot-card b-a spot-tap" data-action="chozu" tabindex="0" role="button" aria-label="花手水にふれてお清めする">
                     <div class="spot-visual hanachozu" aria-hidden="true">
                         <span class="flower f1"></span><span class="flower f2"></span><span class="flower f3"></span>
                         <span class="flower f4"></span><span class="flower f5"></span>
@@ -100,8 +100,9 @@
                     </div>
                     <h3>推し色の花手水</h3>
                     <p>手水舎に浮かぶのは、推しカラーの花々。水面に映る色に心を映して、そっと手を清めます。</p>
+                    <span class="spot-cta">ふれてお清め</span>
                 </article>
-                <article class="spot-card b-b">
+                <article class="spot-card b-b spot-tap" data-action="furin" tabindex="0" role="button" aria-label="風鈴を鳴らす">
                     <div class="spot-visual furin-visual" aria-hidden="true">
                         <span class="furin"><span class="furin-dome"></span><span class="furin-strip"></span></span>
                         <span class="furin d2"><span class="furin-dome"></span><span class="furin-strip"></span></span>
@@ -109,20 +110,25 @@
                     </div>
                     <h3>風鈴の回廊</h3>
                     <p>参道に連なる風鈴の短冊は、すべて参拝者の推しカラー。風が吹くたび、澄んだ音が願いを空へ運びます。</p>
+                    <span class="spot-cta">ふれて鳴らす</span>
                 </article>
-                <article class="spot-card b-c">
+                <article class="spot-card b-c spot-tap" data-action="omikuji" tabindex="0" role="button" aria-label="推し活みくじを引く">
                     <div class="spot-visual omamori-visual" aria-hidden="true">
                         <span class="omamori"><span class="omamori-knot"></span><span class="omamori-text">推し守</span></span>
                     </div>
                     <h3>推し守（おまもり）</h3>
-                    <p>推しカラーの錦に「推し守」の金文字。当選祈願・神席祈願・健康祈願、想いに合わせてお受けください。</p>
+                    <p>推しカラーの錦に「推し守」の金文字。今日の推し活運を占う「推し活みくじ」もこちらで。</p>
+                    <span class="spot-cta">みくじを引く</span>
                 </article>
-                <article class="spot-card b-d">
+                <article class="spot-card b-d spot-tap" data-action="goshuin" tabindex="0" role="button" aria-label="推し色御朱印をいただく">
                     <div class="spot-visual goshuin-visual" aria-hidden="true">
                         <span class="goshuin"><span class="goshuin-stamp">推</span><span class="goshuin-date">十色神社 参拝之証</span></span>
                     </div>
-                    <h3>推し色御朱印</h3>
-                    <p>参拝の証は、推しカラーの箔押し御朱印。月替わりの意匠に、光の演出があしらわれます。</p>
+                    <div>
+                        <h3>推し色御朱印</h3>
+                        <p>参拝の証は、推しカラーの御朱印。お名前と今日の日付が入った御朱印画像をその場でお作りします。</p>
+                        <span class="spot-cta">御朱印をいただく</span>
+                    </div>
                 </article>
             </div>
         </section>
@@ -179,6 +185,15 @@
             </div>
         </section>
     </main>
+
+    <!-- ===== 授与モーダル（みくじ・御朱印） ===== -->
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+        <div id="modal-backdrop" class="modal-backdrop"></div>
+        <div class="modal-panel glass">
+            <button id="modal-close" class="modal-close" type="button" aria-label="閉じる">×</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
 
     <footer class="footer">
         <p>「十色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
