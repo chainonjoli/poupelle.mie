@@ -51,13 +51,26 @@
         '無理をしすぎず、推し活を楽しめますように。'
     ];
 
+    var EMPATHY_WISHES = [
+        '今日も推しが幸せでありますように。',
+        '推しの笑顔がずっと続きますように。',
+        '推しに直接ありがとうを伝えられますように。',
+        '推し活を頑張る自分のことも大切にできますように。',
+        '推しと過ごす時間が、これからも増えますように。',
+        '推しのステージがずっと輝いていますように。',
+        '遠くにいても、想いはちゃんと届きますように。',
+        '無理せず、長く推し活を続けられますように。'
+    ];
+
     var STORAGE_COLOR = 'toiro-color';
     var STORAGE_MODE = 'toiro-mode';
     var STORAGE_FONTSIZE = 'toiro-fontsize';
     var STORAGE_EMA = 'toiro-ema';
     var STORAGE_GOSHUIN_LOG = 'toiro-goshuin-log';
     var STORAGE_GOSHUIN_TODAY = 'toiro-goshuin-today';
+    var STORAGE_ANNIV = 'toiro-anniversaries';
     var MAX_EMA = 24;
+    var MAX_ANNIV = 5;
     var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
 
     var body = document.body;
@@ -96,6 +109,33 @@
         return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
     }
     function currentColor() { return findColor(body.getAttribute('data-color')) || COLORS[0]; }
+
+    /* ---- 記念日（自分の記念日・推しの記念日を最大5件登録） ---- */
+    function loadAnniversaries() { return load(STORAGE_ANNIV, []); }
+    function todaysAnniversary() {
+        var list = loadAnniversaries();
+        var now = new Date();
+        var m = now.getMonth() + 1, d = now.getDate();
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].month === m && list[i].day === d) return list[i];
+        }
+        return null;
+    }
+    function nextOccurrenceDays(month, day) {
+        var now = new Date();
+        var todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var target = new Date(now.getFullYear(), month - 1, day);
+        if (target < todayZero) target = new Date(now.getFullYear() + 1, month - 1, day);
+        return Math.round((target - todayZero) / 86400000);
+    }
+
+    /* ---- 推しカラーごとの参拝者数（目安のシミュレーション値。日替わりで変化する） ---- */
+    function estimatedVisitors(colorId) {
+        var str = colorId + '-' + dayOfYear();
+        var seed = 0;
+        for (var i = 0; i < str.length; i++) seed = (seed * 31 + str.charCodeAt(i)) >>> 0;
+        return 820 + (seed % 4200);
+    }
 
     /* ---- スクロール連動リビール ---- */
     function setupReveal() {
@@ -150,6 +190,9 @@
         renderMamoriCard();
         renderGoshuinArea();
         renderGoshuinBook();
+        renderAnnivRows();
+        renderAnnivList();
+        renderEmpathyFeed();
         setTimeout(syncScrollOffset, 0);
     }
 
@@ -247,6 +290,7 @@
         doneEl.classList.remove('hidden');
         document.getElementById('ema-wish').value = '';
         renderMamoriCard();
+        renderEmpathyFeed();
     }
 
     /* ---- 4. お守りページ ---- */
@@ -296,7 +340,7 @@
         var startY = y - ((lines.length - 1) * lineHeight) / 2;
         lines.forEach(function (l, idx) { ctx.fillText(l, x, startY + idx * lineHeight); });
     }
-    function makeGoshuin(name, wish, visitCount) {
+    function makeGoshuin(name, wish, visitCount, anivLabel) {
         var color = currentColor();
         var W = 720, H = 1000;
         var cv = document.createElement('canvas');
@@ -362,6 +406,12 @@
         ctx.fillStyle = color.hex;
         wrapCenterText(ctx, wish || '推しへの想いとともに', W / 2, H - 190, 34, 560);
 
+        if (anivLabel) {
+            ctx.font = '600 22px ' + mincho;
+            ctx.fillStyle = color.hex;
+            ctx.fillText('— ' + anivLabel + ' 記念 —', W / 2, H - 140);
+        }
+
         ctx.font = '500 24px ' + mincho;
         ctx.fillStyle = '#6d6350';
         ctx.fillText('参拝 ' + visitCount + '回目', W / 2, H - 108);
@@ -406,8 +456,9 @@
         var latestEma = emaList[0];
         var name = latestEma ? latestEma.name : '';
         var wish = latestEma ? latestEma.wish : '';
+        var aniv = todaysAnniversary();
         var log = recordVisit(today);
-        var img = makeGoshuin(name, wish, log.length);
+        var img = makeGoshuin(name, wish, log.length, aniv ? aniv.label : null);
         save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
         showGoshuinResult(img, false);
         renderGoshuinBook();
@@ -420,8 +471,11 @@
             showGoshuinResult(claimed.img, true);
             return;
         }
+        var aniv = todaysAnniversary();
         var area = document.getElementById('goshuin-area');
-        area.innerHTML = '<button id="btn-goshuin-make" class="btn-main btn-block" type="button">御朱印をいただく</button>';
+        area.innerHTML =
+            (aniv ? '<p class="goshuin-note aniv">🎉 今日は「' + aniv.label + '」の記念日です。特別な御朱印をどうぞ。</p>' : '') +
+            '<button id="btn-goshuin-make" class="btn-main btn-block" type="button">御朱印をいただく</button>';
         document.getElementById('btn-goshuin-make').addEventListener('click', claimGoshuin);
     }
 
@@ -480,6 +534,79 @@
         }
     }
 
+    /* ---- 7. 記念日登録ページ ---- */
+    function renderAnnivRows() {
+        var list = loadAnniversaries();
+        var wrap = document.getElementById('anniv-rows');
+        wrap.innerHTML = '';
+        for (var i = 0; i < MAX_ANNIV; i++) {
+            var a = list[i] || null;
+            var labelVal = a ? escAttr(a.label) : '';
+            var dateVal = a ? ('2000-' + pad2(a.month) + '-' + pad2(a.day)) : '';
+            var row = document.createElement('div');
+            row.className = 'form-group anniv-row';
+            row.innerHTML =
+                '<label for="anniv-label-' + i + '">記念日 ' + (i + 1) + '</label>' +
+                '<div class="anniv-row-inputs">' +
+                '<input type="text" id="anniv-label-' + i + '" maxlength="20" value="' + labelVal + '" placeholder="例：推しの生誕日">' +
+                '<input type="date" id="anniv-date-' + i + '" value="' + dateVal + '">' +
+                '</div>';
+            wrap.appendChild(row);
+        }
+    }
+
+    function renderAnnivList() {
+        var list = loadAnniversaries();
+        var wrap = document.getElementById('anniv-list');
+        if (!list.length) {
+            wrap.innerHTML = '<p class="anniv-empty">まだ記念日が登録されていません。</p>';
+            return;
+        }
+        var withDiff = list.map(function (a) { return { a: a, diff: nextOccurrenceDays(a.month, a.day) }; });
+        withDiff.sort(function (x, y) { return x.diff - y.diff; });
+        wrap.innerHTML = withDiff.map(function (item) {
+            var countText = item.diff === 0 ? '今日' : 'あと ' + item.diff + ' 日';
+            return '<div class="anniv-card' + (item.diff === 0 ? ' today' : '') + '">' +
+                '<p class="anniv-card-label">' + item.a.label + '</p>' +
+                '<p class="anniv-card-count">' + countText + '</p>' +
+                '</div>';
+        }).join('');
+    }
+
+    function saveAnniversaries() {
+        var result = [];
+        for (var i = 0; i < MAX_ANNIV; i++) {
+            var label = document.getElementById('anniv-label-' + i).value.trim();
+            var dateVal = document.getElementById('anniv-date-' + i).value;
+            if (label && dateVal) {
+                var parts = dateVal.split('-');
+                result.push({ label: escAttr(label), month: +parts[1], day: +parts[2] });
+            }
+        }
+        save(STORAGE_ANNIV, result);
+        renderAnnivList();
+        renderGoshuinArea();
+    }
+
+    /* ---- 8. 共感ページ ---- */
+    function renderEmpathyFeed() {
+        var color = currentColor();
+        document.getElementById('empathy-color-name').textContent = color.jp;
+        document.getElementById('empathy-count').textContent =
+            '全国で今日、' + estimatedVisitors(color.id).toLocaleString() + ' 人が' + color.jp + 'の参道を歩いています。（※目安の人数です）';
+
+        var mine = emaList.slice(0, 6).map(function (item) { return item.wish; });
+        var combined = mine.concat(EMPATHY_WISHES).slice(0, 10);
+        var feed = document.getElementById('empathy-feed');
+        feed.innerHTML = '';
+        combined.forEach(function (wish) {
+            var line = document.createElement('p');
+            line.className = 'empathy-line';
+            line.textContent = '「' + wish + '」';
+            feed.appendChild(line);
+        });
+    }
+
     /* ---- 初期化 ---- */
     renderColorGrid();
     renderWishChips();
@@ -513,4 +640,5 @@
     });
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
     document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
+    document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
 })();

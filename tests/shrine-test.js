@@ -1,6 +1,7 @@
 /* shrine.html（十色神社）のUI通しテスト（Playwright）
  * フェーズ1: トップページ（推しカラー選択）／参道ページ／願いごとページ（絵馬）
  * フェーズ2: お守りページ／御朱印ページ／御朱印帳ページ
+ * フェーズ3: 記念日登録ページ／共感ページ
  * 実行: node tests/shrine-test.js  （要: playwright, chromium） */
 const { chromium } = require('playwright');
 const path = require('path');
@@ -65,6 +66,24 @@ const path = require('path');
     if (!mamoriText.includes('ライブが当たりますように')) errors.push('お守りに願いのテーマが反映されない');
     if (!mamoriText.includes('パープル')) errors.push('お守りに推しカラーが反映されない');
 
+    // 7. 記念日登録ページ：今日の日付を登録すると「今日」表示になり、御朱印にも反映される
+    const now = new Date();
+    const todayIso = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    await page.fill('#anniv-label-0', '推しの生誕日');
+    await page.fill('#anniv-date-0', todayIso);
+    await page.click('#btn-anniv-save');
+    const annivListText = await page.textContent('#anniv-list');
+    if (!annivListText.includes('推しの生誕日')) errors.push('記念日リストにラベルが出ない');
+    if (!annivListText.includes('今日')) errors.push('今日の記念日が「今日」と表示されない');
+    const goshuinNoteText = await page.textContent('#goshuin-area');
+    if (!goshuinNoteText.includes('推しの生誕日')) errors.push('御朱印ページに記念日の案内が出ない');
+
+    // 8. 共感ページ：推しカラー名・参拝者数の目安・自分の願いごとが匿名で流れる
+    const empathyText = await page.textContent('#empathy-section');
+    if (!empathyText.includes('パープル')) errors.push('共感ページに推しカラー名が出ない');
+    if (!empathyText.includes('人が')) errors.push('共感ページに参拝者数の目安が出ない');
+    if (!empathyText.includes('ライブが当たりますように')) errors.push('共感ページに自分の願いごとが反映されない');
+
     // 5. 御朱印ページ：1日1枚生成し、名前と願いごとが反映される
     await page.click('#btn-goshuin-make');
     await page.waitForSelector('.goshuin-img');
@@ -127,5 +146,5 @@ const path = require('path');
         console.error('NG:\n' + errors.join('\n'));
         process.exit(1);
     }
-    console.log('OK: shrine.html（フェーズ1・2）通しテスト成功');
+    console.log('OK: shrine.html（フェーズ1・2・3）通しテスト成功');
 })();
