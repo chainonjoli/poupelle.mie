@@ -796,7 +796,13 @@ body[data-mode="day"] .ema-error { color: #c0392b; }
     text-align: center;
     font-size: 1.15rem;
     letter-spacing: 0.1em;
-    margin: 32px 0 16px;
+    margin: 32px 0 6px;
+}
+.rack-note {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
 }
 .ema-rack {
     display: grid;
