@@ -31,6 +31,18 @@ const path = require('path');
     const todayMsg = await page.textContent('#today-message');
     if (!todayMsg || todayMsg.trim().length < 5) errors.push('今日のひとことが出ない');
 
+    // 境内のご案内：6セクションへのリンクマップと「参道へもどる」ボタン
+    if (await page.locator('.keidai-link').count() !== 6) errors.push('境内のご案内が6件出ない');
+    await page.click('.keidai-link[href="#empathy-section"]');
+    await page.waitForTimeout(700);
+    const empathyBox = await page.locator('#empathy-section .section-title').boundingBox();
+    const topbarBox0 = await page.locator('.topbar').boundingBox();
+    if (empathyBox && topbarBox0 && empathyBox.y < topbarBox0.y + topbarBox0.height) errors.push('境内マップの移動先見出しが上部バーに隠れている');
+    if (await page.locator('.back-to-top.show').count() !== 1) errors.push('参道へもどるボタンが現れない');
+    await page.click('#btn-backtotop');
+    await page.waitForTimeout(800);
+    if (await page.evaluate(() => window.scrollY) > 10) errors.push('参道へもどるボタンで先頭に戻らない');
+
     // 参拝ボタンで絵馬セクションへスクロール
     await page.click('#btn-sanpai');
     await page.waitForTimeout(600);
