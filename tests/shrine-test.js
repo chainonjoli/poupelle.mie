@@ -1,5 +1,6 @@
 /* shrine.html（十色神社）のUI通しテスト（Playwright）
  * フェーズ1: トップページ（推しカラー選択）／参道ページ／願いごとページ（絵馬）
+ * フェーズ2: お守りページ／御朱印ページ／御朱印帳ページ
  * 実行: node tests/shrine-test.js  （要: playwright, chromium） */
 const { chromium } = require('playwright');
 const path = require('path');
@@ -58,6 +59,32 @@ const path = require('path');
     if (!rackText.includes('ライブが当たりますように')) errors.push('絵馬掛けに願いが出ない');
     if (!rackText.includes('あず より')) errors.push('絵馬掛けに名前が出ない');
 
+    // 4. お守りページ：願いのテーマが反映される
+    const mamoriText = await page.textContent('#mamori-card');
+    if (!mamoriText.includes('推し守')) errors.push('推し守カードが出ない');
+    if (!mamoriText.includes('ライブが当たりますように')) errors.push('お守りに願いのテーマが反映されない');
+    if (!mamoriText.includes('パープル')) errors.push('お守りに推しカラーが反映されない');
+
+    // 5. 御朱印ページ：1日1枚生成し、名前と願いごとが反映される
+    await page.click('#btn-goshuin-make');
+    await page.waitForSelector('.goshuin-img');
+    const goshuinSrc = await page.getAttribute('.goshuin-img', 'src');
+    if (!goshuinSrc || !goshuinSrc.startsWith('data:image/png') || goshuinSrc.length < 5000) errors.push('御朱印画像が生成されない');
+    if (!(await page.getAttribute('#btn-goshuin-save', 'download'))) errors.push('御朱印の保存リンクがない');
+
+    // 6. 御朱印帳：参拝日数とカレンダーに今日の日付が反映される
+    const bookLead = await page.textContent('#goshuinbook-lead');
+    if (!bookLead.includes('1 日')) errors.push('御朱印帳の参拝日数が反映されない');
+    if (await page.locator('.book-cell.got').count() !== 1) errors.push('御朱印帳のカレンダーに参拝日が反映されない');
+
+    // 御朱印は1日1回まで：再度開くと「いただき済み」表示になる
+    await page.reload();
+    await page.waitForSelector('#main:not(.hidden)');
+    await page.evaluate(() => document.getElementById('goshuin-section').scrollIntoView());
+    const goshuinAreaText = await page.textContent('#goshuin-area');
+    if (!goshuinAreaText.includes('いただき済み')) errors.push('御朱印の1日1回制限が効いていない');
+    if (await page.locator('#btn-goshuin-make').count() !== 0) errors.push('いただき済みなのに御朱印を再取得できてしまう');
+
     // リロード後も推しカラーと絵馬が残る（localStorage）
     await page.reload();
     await page.waitForSelector('#main:not(.hidden)');
@@ -100,5 +127,5 @@ const path = require('path');
         console.error('NG:\n' + errors.join('\n'));
         process.exit(1);
     }
-    console.log('OK: shrine.html（フェーズ1）通しテスト成功');
+    console.log('OK: shrine.html（フェーズ1・2）通しテスト成功');
 })();

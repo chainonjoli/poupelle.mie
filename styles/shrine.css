@@ -478,6 +478,94 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
 .ema-signature { margin-top: 10px; text-align: right; font-size: 0.74rem; color: color-mix(in srgb, var(--ema) 70%, #4a3a1c); font-weight: 600; }
 
 /* ============================================================
+   4. お守り
+   ============================================================ */
+.mamori-card {
+    position: relative;
+    max-width: 300px;
+    margin: 0 auto 24px;
+    padding: 34px 24px 22px;
+    text-align: center;
+    background: linear-gradient(170deg, var(--paper) 0%, var(--paper-deep) 100%);
+    border: 1px solid var(--oshi);
+    border-radius: 4px;
+    color: var(--ink);
+}
+.mamori-card::before {
+    content: "";
+    position: absolute;
+    top: -11px; left: 50%;
+    transform: translateX(-50%);
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    background: var(--paper);
+}
+.mamori-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.9rem;
+    letter-spacing: 0.14em;
+    color: var(--oshi-deep);
+    margin-bottom: 14px;
+}
+.mamori-blessing {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.92rem;
+    line-height: 1.8;
+    margin-bottom: 18px;
+}
+.mamori-meta {
+    font-size: 0.82rem;
+    line-height: 2.1;
+    text-align: left;
+    color: color-mix(in srgb, var(--ink) 72%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+    padding-top: 14px;
+}
+.mamori-meta strong { color: var(--oshi-deep); }
+
+/* ============================================================
+   5. 御朱印
+   ============================================================ */
+.goshuin-img {
+    display: block;
+    width: min(78vw, 300px);
+    margin: 0 auto 18px;
+    border-radius: 4px;
+    border: 1px solid var(--surface-border);
+}
+.goshuin-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.goshuin-note { text-align: center; font-size: 0.86rem; color: var(--text-muted); margin-bottom: 18px; }
+
+/* ============================================================
+   6. 御朱印帳
+   ============================================================ */
+.streak-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+.streak-badge {
+    padding: 8px 16px;
+    border: 1px solid var(--surface-border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+.streak-badge.achieved { border-color: var(--oshi); color: var(--text); }
+.book-month { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 14px; }
+.book-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.book-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    border: 1px solid var(--surface-border);
+    border-radius: 4px;
+}
+.book-cell.empty { border: none; }
+.book-cell.got { border-color: var(--oshi); color: var(--text); background: color-mix(in srgb, var(--oshi) 12%, transparent); }
+
+/* ============================================================
    フッター
    ============================================================ */
 .footer {

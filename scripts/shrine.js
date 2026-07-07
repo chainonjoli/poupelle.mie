@@ -42,11 +42,23 @@
         '今日という日を、そっと記録しておきましょう。'
     ];
 
+    var MAMORI_BLESSINGS = [
+        '推しへの想いが、まっすぐ届きますように。',
+        '推し活の毎日に、小さな幸運がありますように。',
+        '会いたい気持ちが、いつか叶いますように。',
+        '推しも自分も、健やかでありますように。',
+        '今日という日に、良いご縁がありますように。',
+        '無理をしすぎず、推し活を楽しめますように。'
+    ];
+
     var STORAGE_COLOR = 'toiro-color';
     var STORAGE_MODE = 'toiro-mode';
     var STORAGE_FONTSIZE = 'toiro-fontsize';
     var STORAGE_EMA = 'toiro-ema';
+    var STORAGE_GOSHUIN_LOG = 'toiro-goshuin-log';
+    var STORAGE_GOSHUIN_TODAY = 'toiro-goshuin-today';
     var MAX_EMA = 24;
+    var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
 
     var body = document.body;
     var gate = document.getElementById('gate');
@@ -78,6 +90,12 @@
         var diff = now - start;
         return Math.floor(diff / 86400000);
     }
+    function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+    function todayStr() {
+        var d = new Date();
+        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+    function currentColor() { return findColor(body.getAttribute('data-color')) || COLORS[0]; }
 
     /* ---- スクロール連動リビール ---- */
     function setupReveal() {
@@ -129,6 +147,9 @@
         gate.classList.add('hidden');
         main.classList.remove('hidden');
         document.getElementById('btn-recolor').classList.remove('hidden');
+        renderMamoriCard();
+        renderGoshuinArea();
+        renderGoshuinBook();
         setTimeout(syncScrollOffset, 0);
     }
 
@@ -225,6 +246,238 @@
         doneEl.textContent = name + 'さんの絵馬を奉納しました。';
         doneEl.classList.remove('hidden');
         document.getElementById('ema-wish').value = '';
+        renderMamoriCard();
+    }
+
+    /* ---- 4. お守りページ ---- */
+    function renderMamoriCard() {
+        var color = currentColor();
+        var now = new Date();
+        var dateText = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
+        var latestEma = emaList[0];
+        var theme = latestEma ? latestEma.wish : 'まだ願いごとが書かれていません';
+        var blessing = MAMORI_BLESSINGS[Math.floor(Math.random() * MAMORI_BLESSINGS.length)];
+        var card = document.getElementById('mamori-card');
+        card.innerHTML =
+            '<p class="mamori-title">推し守</p>' +
+            '<p class="mamori-blessing">' + blessing + '</p>' +
+            '<div class="mamori-meta">' +
+            '<p>日付：<strong>' + dateText + '</strong></p>' +
+            '<p>推しカラー：<strong>' + color.jp + '</strong></p>' +
+            '<p>願いのテーマ：<strong>' + theme + '</strong></p>' +
+            '</div>';
+    }
+
+    /* ---- 5. 御朱印ページ ---- */
+    function kanjiNum(n) {
+        var k = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+        if (n >= 10 && n < 100) {
+            var t = Math.floor(n / 10), o = n % 10;
+            return (t > 1 ? k[t] : '') + '十' + (o ? k[o] : '');
+        }
+        return String(n).split('').map(function (d) { return k[+d]; }).join('');
+    }
+    function drawVertical(ctx, text, x, y, lineH) {
+        for (var i = 0; i < text.length; i++) ctx.fillText(text[i], x, y + i * lineH);
+    }
+    function wrapCenterText(ctx, text, x, y, lineHeight, maxWidth) {
+        var lines = [];
+        var line = '';
+        for (var i = 0; i < text.length; i++) {
+            var test = line + text[i];
+            if (ctx.measureText(test).width > maxWidth && line) {
+                lines.push(line);
+                line = text[i];
+            } else {
+                line = test;
+            }
+        }
+        if (line) lines.push(line);
+        var startY = y - ((lines.length - 1) * lineHeight) / 2;
+        lines.forEach(function (l, idx) { ctx.fillText(l, x, startY + idx * lineHeight); });
+    }
+    function makeGoshuin(name, wish, visitCount) {
+        var color = currentColor();
+        var W = 720, H = 1000;
+        var cv = document.createElement('canvas');
+        cv.width = W; cv.height = H;
+        var ctx = cv.getContext('2d');
+
+        /* 和紙の下地 */
+        var bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#fdf9ee');
+        bg.addColorStop(1, '#f0e6cf');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(60, 50, 30, 0.04)';
+        for (var i = 0; i < 700; i++) {
+            ctx.fillRect(Math.random() * W, Math.random() * H, 1.4, 1.4);
+        }
+
+        /* 墨の二重枠 */
+        ctx.strokeStyle = '#3a2f22';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(30, 30, W - 60, H - 60);
+        ctx.strokeStyle = color.hex;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(42, 42, W - 84, H - 84);
+
+        var mincho = '"Shippori Mincho", "Hiragino Mincho ProN", serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        /* 推しカラーの角印（中央の縦書き社名と重ならない位置に） */
+        ctx.save();
+        ctx.translate(W / 2, H / 2 + 195);
+        ctx.rotate(-0.04);
+        ctx.fillStyle = color.hex;
+        var r = 85;
+        ctx.beginPath();
+        if (ctx.roundRect) { ctx.roundRect(-r, -r, r * 2, r * 2, 10); } else { ctx.rect(-r, -r, r * 2, r * 2); }
+        ctx.fill();
+        ctx.fillStyle = '#fdf9ee';
+        ctx.font = '600 110px ' + mincho;
+        ctx.fillText('推', 0, 5);
+        ctx.restore();
+
+        ctx.fillStyle = '#3a2f22';
+        ctx.font = '600 32px ' + mincho;
+        drawVertical(ctx, '奉拝', 92, 108, 42);
+
+        ctx.font = '600 96px ' + mincho;
+        drawVertical(ctx, '十色神社', W / 2, 200, 124);
+
+        var now = new Date();
+        var dateText = kanjiNum(now.getFullYear()) + '年' + kanjiNum(now.getMonth() + 1) + '月' + kanjiNum(now.getDate()) + '日';
+        ctx.font = '600 34px ' + mincho;
+        drawVertical(ctx, dateText, W - 92, 300, 42);
+
+        if (name) {
+            ctx.font = '600 38px ' + mincho;
+            drawVertical(ctx, name + ' 様', 92, 320, 48);
+        }
+
+        /* 願いごと */
+        ctx.font = '500 26px ' + mincho;
+        ctx.fillStyle = color.hex;
+        wrapCenterText(ctx, wish || '推しへの想いとともに', W / 2, H - 190, 34, 560);
+
+        ctx.font = '500 24px ' + mincho;
+        ctx.fillStyle = '#6d6350';
+        ctx.fillText('参拝 ' + visitCount + '回目', W / 2, H - 108);
+        ctx.font = '400 18px sans-serif';
+        ctx.fillText('TOIRO SHRINE — ' + color.jp.toUpperCase(), W / 2, H - 76);
+
+        return cv.toDataURL('image/png');
+    }
+
+    function recordVisit(dateStr) {
+        var log = load(STORAGE_GOSHUIN_LOG, []);
+        if (log.indexOf(dateStr) === -1) {
+            log.push(dateStr);
+            save(STORAGE_GOSHUIN_LOG, log);
+        }
+        return log;
+    }
+
+    function shareGoshuin() {
+        var text = '十色神社で今日の推し色御朱印をいただきました。';
+        if (navigator.share) {
+            navigator.share({ text: text, url: PAGE_URL }).catch(function () { /* ユーザーがキャンセルした場合など */ });
+        } else {
+            window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(PAGE_URL), '_blank', 'noopener');
+        }
+    }
+
+    function showGoshuinResult(img, alreadyClaimed) {
+        var area = document.getElementById('goshuin-area');
+        area.innerHTML =
+            (alreadyClaimed ? '<p class="goshuin-note">本日の御朱印はいただき済みです。また明日、参拝にいらしてください。</p>' : '') +
+            '<img class="goshuin-img" src="' + img + '" alt="今日の推し色御朱印">' +
+            '<div class="goshuin-actions">' +
+            '<a class="pill-btn" id="btn-goshuin-save" href="' + img + '" download="toiro-goshuin.png">画像として保存</a>' +
+            '<button type="button" class="pill-btn" id="btn-goshuin-share">SNSで共有</button>' +
+            '</div>';
+        document.getElementById('btn-goshuin-share').addEventListener('click', shareGoshuin);
+    }
+
+    function claimGoshuin() {
+        var today = todayStr();
+        var latestEma = emaList[0];
+        var name = latestEma ? latestEma.name : '';
+        var wish = latestEma ? latestEma.wish : '';
+        var log = recordVisit(today);
+        var img = makeGoshuin(name, wish, log.length);
+        save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
+        showGoshuinResult(img, false);
+        renderGoshuinBook();
+    }
+
+    function renderGoshuinArea() {
+        var today = todayStr();
+        var claimed = load(STORAGE_GOSHUIN_TODAY, null);
+        if (claimed && claimed.date === today && claimed.img) {
+            showGoshuinResult(claimed.img, true);
+            return;
+        }
+        var area = document.getElementById('goshuin-area');
+        area.innerHTML = '<button id="btn-goshuin-make" class="btn-main btn-block" type="button">御朱印をいただく</button>';
+        document.getElementById('btn-goshuin-make').addEventListener('click', claimGoshuin);
+    }
+
+    /* ---- 6. 御朱印帳ページ ---- */
+    function computeStreak(log) {
+        var set = {};
+        log.forEach(function (d) { set[d] = true; });
+        var streak = 0;
+        var cursor = new Date();
+        if (!set[todayStr()]) cursor.setDate(cursor.getDate() - 1);
+        while (true) {
+            var ds = cursor.getFullYear() + '-' + pad2(cursor.getMonth() + 1) + '-' + pad2(cursor.getDate());
+            if (set[ds]) { streak++; cursor.setDate(cursor.getDate() - 1); } else break;
+        }
+        return streak;
+    }
+
+    function renderGoshuinBook() {
+        var log = load(STORAGE_GOSHUIN_LOG, []);
+        var streak = computeStreak(log);
+        document.getElementById('goshuinbook-lead').textContent = 'これまでに ' + log.length + ' 日、参拝しています。';
+
+        var badges = [
+            { need: 7, label: '7日連続参拝' },
+            { need: 30, label: '30日連続参拝' }
+        ];
+        var badgesEl = document.getElementById('streak-badges');
+        badgesEl.innerHTML = '';
+        badges.forEach(function (b) {
+            var achieved = streak >= b.need;
+            var el = document.createElement('span');
+            el.className = 'streak-badge' + (achieved ? ' achieved' : '');
+            el.textContent = (achieved ? '✓ ' : '') + b.label;
+            badgesEl.appendChild(el);
+        });
+
+        var now = new Date();
+        var y = now.getFullYear(), m = now.getMonth();
+        document.getElementById('goshuinbook-month').textContent = y + '年' + (m + 1) + '月';
+        var firstWeekday = new Date(y, m, 1).getDay();
+        var daysInMonth = new Date(y, m + 1, 0).getDate();
+        var grid = document.getElementById('goshuinbook-grid');
+        grid.innerHTML = '';
+        for (var i = 0; i < firstWeekday; i++) {
+            var empty = document.createElement('span');
+            empty.className = 'book-cell empty';
+            grid.appendChild(empty);
+        }
+        for (var d = 1; d <= daysInMonth; d++) {
+            var ds = y + '-' + pad2(m + 1) + '-' + pad2(d);
+            var got = log.indexOf(ds) !== -1;
+            var cell = document.createElement('span');
+            cell.className = 'book-cell' + (got ? ' got' : '');
+            cell.textContent = d;
+            grid.appendChild(cell);
+        }
     }
 
     /* ---- 初期化 ---- */
@@ -259,4 +512,5 @@
         document.getElementById('ema-section').scrollIntoView({ behavior: 'smooth' });
     });
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
+    document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
 })();
