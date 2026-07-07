@@ -73,8 +73,15 @@ const path = require('path');
     if (!(await page.getAttribute('#modal-body .btn-x', 'href')).includes('twitter.com/intent')) errors.push('みくじのシェアリンクが不正');
     const mikujiImg = await page.getAttribute('#btn-mikuji-save', 'href');
     if (!mikujiImg || !mikujiImg.startsWith('data:image/png') || mikujiImg.length < 5000) errors.push('みくじ画像が生成されない');
-    await page.click('#btn-redraw');
-    await page.waitForSelector('.mikuji-rank', { timeout: 6000 });
+    // ランクと星の整合を複数回検証（小吉・末吉で星5が出ない / 推し大吉は全★5）
+    for (let d = 0; d < 5; d++) {
+        const rank = (await page.textContent('.mikuji-rank')).trim();
+        const starTexts = await page.locator('.mikuji-stars').allTextContents();
+        if ((rank === '小吉' || rank === '末吉') && starTexts.includes('★★★★★')) errors.push('低ランクなのに星5が出た: ' + rank);
+        if (rank === '推し大吉' && starTexts.some(s => s !== '★★★★★')) errors.push('推し大吉なのに星5未満がある');
+        await page.click('#btn-redraw');
+        await page.waitForSelector('.mikuji-rank', { timeout: 6000 });
+    }
     if (!/吉/.test(await page.textContent('#modal-body'))) errors.push('みくじの引き直しができない');
     await page.click('#modal-close');
     if (await page.locator('#modal.hidden').count() !== 1) errors.push('モーダルが閉じない');

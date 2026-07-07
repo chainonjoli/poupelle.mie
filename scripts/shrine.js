@@ -358,10 +358,18 @@
         chime();
     }
 
-    /* ---- 推し活みくじ ---- */
+    /* ---- 推し活みくじ ----
+       ランク順は神社本庁の基本順位（大吉>吉>中吉>小吉>末吉）に準拠。
+       s は星1〜5が出る確率。ランクが上なほど星も高くなるよう連動させ、
+       小吉・末吉では星5が出ない（「小吉なのに星5」の違和感を防ぐ）。
+       全体の星の期待値は約4.08（>= 3.9） */
     var OMIKUJI_RANKS = [
-        { r: '推し大吉', w: 4 }, { r: '大吉', w: 12 }, { r: '中吉', w: 26 },
-        { r: '小吉', w: 28 }, { r: '吉', w: 20 }, { r: '末吉', w: 10 }
+        { r: '推し大吉', w: 4,  tier: 'high', s: [0, 0, 0,    0,    1] },
+        { r: '大吉',     w: 12, tier: 'high', s: [0, 0, 0,    0.25, 0.75] },
+        { r: '吉',       w: 20, tier: 'mid',  s: [0, 0, 0.10, 0.45, 0.45] },
+        { r: '中吉',     w: 26, tier: 'mid',  s: [0, 0, 0.20, 0.55, 0.25] },
+        { r: '小吉',     w: 28, tier: 'low',  s: [0, 0, 0.25, 0.75, 0] },
+        { r: '末吉',     w: 10, tier: 'low',  s: [0, 0, 0.65, 0.35, 0] }
     ];
     var LUCKY_ITEMS = [
         'ペンライト', '銀テープ', '推しのうちわ', 'トレカ', '双眼鏡',
@@ -379,44 +387,56 @@
         'アクスタと一緒に空の写真を撮る',
         '友だちに推しの布教をしてみる'
     ];
-    var OMIKUJI_MSGS = [
-        '今日の現場は、最高の思い出になる予感。',
-        '推しの新しい一面に出会えるかも。',
-        '諦めかけたチケットに、ご縁が巡ってきそう。',
-        '推しの笑顔が、あなたの一週間を守ってくれます。',
-        '遠征の空も味方するでしょう。忘れ物にはご注意を。',
-        '同担との素敵な出会いがありそう。',
-        '積んだ徳は、神席となって返ってくるでしょう。',
-        '今日は無理せず、おうちで推しを摂取する日。'
-    ];
+    /* お告げもランク帯（tier）に連動させる */
+    var OMIKUJI_MSGS = {
+        high: [
+            '今日の現場は、最高の思い出になる予感。',
+            '諦めかけたチケットに、ご縁が巡ってきそう。',
+            '積んだ徳は、神席となって返ってくるでしょう。',
+            '推しと目が合う日。ファンサの準備を忘れずに。'
+        ],
+        mid: [
+            '推しの新しい一面に出会えるかも。',
+            '推しの笑顔が、あなたの一週間を守ってくれます。',
+            '同担との素敵な出会いがありそう。',
+            '遠征の空も味方するでしょう。忘れ物にはご注意を。'
+        ],
+        low: [
+            '今日は無理せず、おうちで推しを摂取する日。',
+            '焦らなくて大丈夫。推しはずっとそこにいます。',
+            '小さな幸せを集めると、大きなご縁につながります。',
+            '今は充電のとき。次の現場で輝けるように。'
+        ]
+    };
     function drawOmikuji() {
         var total = 0, i;
         for (i = 0; i < OMIKUJI_RANKS.length; i++) total += OMIKUJI_RANKS[i].w;
         var roll = Math.random() * total;
-        var rank = OMIKUJI_RANKS[0].r;
+        var entry = OMIKUJI_RANKS[0];
         for (i = 0; i < OMIKUJI_RANKS.length; i++) {
             roll -= OMIKUJI_RANKS[i].w;
-            if (roll <= 0) { rank = OMIKUJI_RANKS[i].r; break; }
+            if (roll <= 0) { entry = OMIKUJI_RANKS[i]; break; }
         }
-        /* 星は加重抽選（5:42% / 4:32% / 3:18% / 2:8% = 平均4.08 ≥ 3.9）。
-           ファンの背中を押すみくじなので、悪い結果は出しすぎない */
+        /* ランク固有の分布から星を引く（ランクと星の整合を保証） */
         function stars() {
-            var r = Math.random();
-            var n = r < 0.42 ? 5 : r < 0.74 ? 4 : r < 0.92 ? 3 : 2;
+            var r = Math.random(), cum = 0, n = 5;
+            for (var k = 0; k < 5; k++) {
+                cum += entry.s[k];
+                if (r < cum) { n = k + 1; break; }
+            }
             return '★★★★★'.slice(0, n).padEnd(5, '☆');
         }
-        var all5 = rank === '推し大吉';
-        function star5() { return all5 ? '★★★★★' : stars(); }
+        var msgs = OMIKUJI_MSGS[entry.tier];
         return {
-            rank: rank,
-            msg: OMIKUJI_MSGS[Math.floor(Math.random() * OMIKUJI_MSGS.length)],
+            rank: entry.r,
+            msg: msgs[Math.floor(Math.random() * msgs.length)],
             item: LUCKY_ITEMS[Math.floor(Math.random() * LUCKY_ITEMS.length)],
             action: LUCKY_ACTIONS[Math.floor(Math.random() * LUCKY_ACTIONS.length)],
             luck: [
-                { label: '当選運', v: star5() },
-                { label: '神席運', v: star5() },
-                { label: 'ファンサ運', v: star5() },
-                { label: '遠征運', v: star5() }
+                { label: '当選運', v: stars() },
+                { label: '神席運', v: stars() },
+                { label: 'ファンサ運', v: stars() },
+                { label: '遠征運', v: stars() }
             ]
         };
     }
