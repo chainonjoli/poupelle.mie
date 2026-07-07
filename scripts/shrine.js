@@ -182,6 +182,13 @@
         window.scrollTo(0, 0);
     }
 
+    /* ---- 固定の上部バーに見出しが隠れないよう、アンカー移動時の余白を実測して合わせる ---- */
+    function syncScrollOffset() {
+        var topbarEl = document.querySelector('.topbar');
+        if (!topbarEl) return;
+        document.documentElement.style.scrollPaddingTop = (topbarEl.getBoundingClientRect().height + 16) + 'px';
+    }
+
     /* ---- 昼夜切替 ---- */
     function applyMode(mode) {
         body.setAttribute('data-mode', mode);
@@ -928,12 +935,18 @@
     }
     checkAnniversaryBanner();
 
+    syncScrollOffset();
+    window.addEventListener('resize', syncScrollOffset);
+    window.addEventListener('load', syncScrollOffset);
+
     document.getElementById('btn-recolor').addEventListener('click', reopenGate);
     document.getElementById('btn-mode').addEventListener('click', function () {
         applyMode(body.getAttribute('data-mode') === 'night' ? 'day' : 'night');
+        setTimeout(syncScrollOffset, 0);
     });
     document.getElementById('btn-fontsize').addEventListener('click', function () {
         applyFontSize(document.documentElement.getAttribute('data-fontsize') === 'large' ? 'normal' : 'large');
+        setTimeout(syncScrollOffset, 320);
     });
     document.getElementById('btn-anniv').addEventListener('click', openAnniversaryEditor);
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
