@@ -1097,6 +1097,72 @@ body[data-mode="day"] .chozu-msg { color: var(--oshi-deep); text-shadow: none; }
 }
 .modal .form-group { text-align: left; }
 
+/* 記念日登録 */
+.anniv-row-inputs { display: flex; gap: 8px; flex-wrap: wrap; }
+.anniv-row-inputs input[type="text"] { flex: 1 1 160px; }
+.anniv-row-inputs input[type="date"] { flex: 1 1 150px; }
+
+/* 記念日バナー */
+.aniv-banner {
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, -140%);
+    z-index: 60;
+    max-width: min(92vw, 420px);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    text-align: center;
+    color: var(--text);
+    background: color-mix(in srgb, var(--bg2) 88%, var(--oshi));
+    border: 1px solid var(--oshi);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    transition: transform 0.5s var(--spring);
+}
+.aniv-banner.show { transform: translate(-50%, 0); }
+
+/* 御朱印帳（参拝カレンダー） */
+.goshuin-book {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-top: 14px;
+}
+.book-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+}
+.book-cell.empty { border: none; }
+.book-cell.got {
+    color: var(--text);
+    border-color: var(--oshi);
+    background: color-mix(in srgb, var(--oshi) 16%, transparent);
+}
+.book-stamp {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--oshi);
+    color: #fff;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.62rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+body[data-color="white"] .book-stamp { color: #55483a; }
+
 /* Xポストボタン */
 .btn-x {
     display: inline-block;
