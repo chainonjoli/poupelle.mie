@@ -566,6 +566,53 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
 .book-cell.got { border-color: var(--oshi); color: var(--text); background: color-mix(in srgb, var(--oshi) 12%, transparent); }
 
 /* ============================================================
+   7. 記念日登録
+   ============================================================ */
+.anniv-write {
+    max-width: 520px;
+    margin: 0 auto 26px;
+    padding: 30px 24px;
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    background: var(--surface);
+}
+.anniv-row { margin-bottom: 16px; }
+.anniv-row-inputs { display: flex; gap: 8px; flex-wrap: wrap; }
+.anniv-row-inputs input[type="text"] { flex: 1 1 160px; }
+.anniv-row-inputs input[type="date"] { flex: 1 1 150px; }
+.anniv-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+}
+.anniv-empty { color: var(--text-muted); font-size: 0.86rem; }
+.anniv-card {
+    padding: 18px 16px;
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    text-align: center;
+}
+.anniv-card.today { border-color: var(--oshi); background: color-mix(in srgb, var(--oshi) 10%, transparent); }
+.anniv-card-label { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 8px; }
+.anniv-card-count { font-family: 'Shippori Mincho', serif; font-size: 1.3rem; color: var(--oshi-deep); }
+.anniv-card.today .anniv-card-count { color: var(--text); }
+
+/* ============================================================
+   8. 共感
+   ============================================================ */
+.empathy-count { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 26px; }
+.empathy-feed { display: flex; flex-direction: column; gap: 14px; }
+.empathy-line {
+    padding: 16px 20px;
+    border-left: 2px solid var(--oshi);
+    background: var(--surface);
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.94rem;
+    line-height: 1.8;
+    color: var(--text);
+}
+
+/* ============================================================
    フッター
    ============================================================ */
 .footer {
