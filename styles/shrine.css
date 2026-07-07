@@ -16,6 +16,10 @@
     --gold-soft: #e4c877;
     --spring: cubic-bezier(0.32, 0.9, 0.35, 1);
 
+    /* 角丸は2種類に統一: カード面 / 紙もの（絵馬・お守り・御朱印） */
+    --radius-card: 6px;
+    --radius-paper: 4px;
+
     /* 未選択時は金色 */
     --oshi: var(--gold);
     --oshi-deep: #8a6a22;
@@ -35,6 +39,8 @@ body[data-color="white"]     { --oshi: #a89a72; --oshi-deep: #7a6f50; }
 
 /* ---- 墨（ink）／ 紙（paper）の基調切替 ---- */
 body[data-mode="ink"] {
+    /* color-scheme で日付入力などのネイティブUIも墨に合わせる */
+    color-scheme: dark;
     --bg: #17140f;
     --bg-deep: #0c0a08;
     --surface: color-mix(in srgb, #fff 6%, var(--bg));
@@ -44,6 +50,7 @@ body[data-mode="ink"] {
     --hairline: color-mix(in srgb, #fff 16%, transparent);
 }
 body[data-mode="paper"] {
+    color-scheme: light;
     --bg: var(--paper);
     --bg-deep: var(--paper-deep);
     --surface: color-mix(in srgb, #fff 65%, var(--paper-deep));
@@ -51,6 +58,12 @@ body[data-mode="paper"] {
     --text: var(--ink);
     --text-muted: color-mix(in srgb, var(--ink) 62%, transparent);
     --hairline: color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+/* キーボード操作時のフォーカスは推しカラーで統一 */
+:focus-visible {
+    outline: 2px solid var(--oshi);
+    outline-offset: 2px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -395,7 +408,7 @@ body[data-color="white"] .btn-main:hover { color: #33301f; }
     margin: 0 auto 26px;
     padding: 30px 24px;
     border: 1px solid var(--surface-border);
-    border-radius: 6px;
+    border-radius: var(--radius-card);
     background: var(--surface);
 }
 .form-group { margin-bottom: 18px; }
@@ -407,7 +420,7 @@ body[data-color="white"] .btn-main:hover { color: #33301f; }
     color: var(--text);
     background: color-mix(in srgb, var(--bg-deep) 55%, transparent);
     border: 1px solid var(--surface-border);
-    border-radius: 4px;
+    border-radius: var(--radius-paper);
     padding: 12px 14px;
     outline: none;
     transition: border-color 0.3s ease;
@@ -434,7 +447,8 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
 .wish-chip:hover { background: color-mix(in srgb, var(--oshi) 14%, transparent); border-color: var(--oshi); transform: translateY(-2px); }
 .wish-chip:active { transform: scale(0.94); }
 
-.ema-error { color: #c0392b; font-size: 0.82rem; margin-top: 12px; text-align: center; }
+.ema-error { color: #e09a94; font-size: 0.82rem; margin-top: 12px; text-align: center; }
+body[data-mode="paper"] .ema-error { color: #c0392b; }
 
 .ema-done {
     max-width: 520px;
@@ -442,7 +456,7 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
     padding: 18px 22px;
     text-align: center;
     font-size: 0.92rem;
-    border-radius: 6px;
+    border-radius: var(--radius-card);
     background: color-mix(in srgb, var(--oshi) 10%, transparent);
     border: 1px solid var(--surface-border);
 }
@@ -467,7 +481,7 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
     background: linear-gradient(170deg, var(--paper) 0%, var(--paper-deep) 100%);
     border: 1px solid var(--ema);
     border-top: 3px solid var(--ema);
-    border-radius: 2px;
+    border-radius: var(--radius-paper);
     padding: 20px 14px 14px;
     min-height: 110px;
     color: var(--ink);
@@ -488,7 +502,7 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
     text-align: center;
     background: linear-gradient(170deg, var(--paper) 0%, var(--paper-deep) 100%);
     border: 1px solid var(--oshi);
-    border-radius: 4px;
+    border-radius: var(--radius-paper);
     color: var(--ink);
 }
 .mamori-card::before {
@@ -531,11 +545,18 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
     display: block;
     width: min(78vw, 300px);
     margin: 0 auto 18px;
-    border-radius: 4px;
+    border-radius: var(--radius-paper);
     border: 1px solid var(--surface-border);
 }
 .goshuin-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .goshuin-note { text-align: center; font-size: 0.86rem; color: var(--text-muted); margin-bottom: 18px; }
+.goshuin-note.aniv {
+    color: var(--text);
+    border: 1px solid var(--oshi);
+    border-radius: var(--radius-card);
+    padding: 14px 18px;
+    background: color-mix(in srgb, var(--oshi) 8%, transparent);
+}
 
 /* ============================================================
    6. 御朱印帳
@@ -560,7 +581,7 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
     font-size: 0.78rem;
     color: var(--text-muted);
     border: 1px solid var(--surface-border);
-    border-radius: 4px;
+    border-radius: var(--radius-paper);
 }
 .book-cell.empty { border: none; }
 .book-cell.got { border-color: var(--oshi); color: var(--text); background: color-mix(in srgb, var(--oshi) 12%, transparent); }
@@ -593,7 +614,7 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
     color: var(--text);
     text-decoration: none;
     border: 1px solid var(--surface-border);
-    border-radius: 6px;
+    border-radius: var(--radius-card);
     transition: border-color 0.3s ease, background 0.3s ease, transform 0.25s var(--spring);
 }
 .keidai-link:hover { border-color: var(--oshi); background: color-mix(in srgb, var(--oshi) 8%, transparent); transform: translateY(-2px); }
@@ -633,7 +654,7 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
     margin: 0 auto 26px;
     padding: 30px 24px;
     border: 1px solid var(--surface-border);
-    border-radius: 6px;
+    border-radius: var(--radius-card);
     background: var(--surface);
 }
 .anniv-row { margin-bottom: 16px; }
@@ -649,7 +670,7 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
 .anniv-card {
     padding: 18px 16px;
     border: 1px solid var(--surface-border);
-    border-radius: 6px;
+    border-radius: var(--radius-card);
     text-align: center;
 }
 .anniv-card.today { border-color: var(--oshi); background: color-mix(in srgb, var(--oshi) 10%, transparent); }
