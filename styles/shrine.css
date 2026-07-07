@@ -62,7 +62,16 @@ body[data-mode="day"] {
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+    scroll-behavior: smooth;
+    font-size: 100%;
+    transition: font-size 0.3s ease;
+}
+/* 幅広い年代（10〜70代）に配慮した文字サイズ切替。rem基準の全要素が連動して拡大 */
+html[data-fontsize="large"] { font-size: 118%; }
+@media (prefers-reduced-motion: reduce) {
+    html { transition: none; }
+}
 
 body {
     font-family: 'Kiwi Maru', serif;
@@ -353,6 +362,7 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     top: 0;
     z-index: 20;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
@@ -362,17 +372,17 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     border-bottom: 1px solid var(--card-border);
     transition: background 0.8s ease;
 }
-.topbar-title { font-family: 'Shippori Mincho', serif; letter-spacing: 0.08em; font-size: 1.02rem; }
+.topbar-title { font-family: 'Shippori Mincho', serif; letter-spacing: 0.08em; font-size: 1.02rem; white-space: nowrap; }
 .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .pill-btn {
     font-family: 'Kiwi Maru', serif;
-    font-size: 0.74rem;
+    font-size: 0.8rem;
     color: var(--text);
     background: var(--card);
     border: 1px solid var(--card-border);
     border-radius: 999px;
-    padding: 8px 14px;
-    min-height: 36px;
+    padding: 10px 16px;
+    min-height: 44px;
     cursor: pointer;
     transition: box-shadow 0.3s ease, transform 0.2s var(--spring);
 }
@@ -606,7 +616,7 @@ body[data-color="white"] .btn-main { color: #756c54; text-shadow: none; }
 .spot-card h3 { font-size: 1.08rem; letter-spacing: 0.08em; margin-bottom: 8px; color: var(--oshi); }
 body[data-mode="day"] .spot-card h3 { color: var(--oshi-deep); }
 body[data-color="white"][data-mode="day"] .spot-card h3 { color: #948a70; }
-.spot-card p { font-size: 0.82rem; color: var(--text-muted); text-align: left; }
+.spot-card p { font-size: 0.9rem; color: var(--text-muted); text-align: left; }
 .b-d > div:last-child p { text-align: left; }
 
 .spot-visual { position: relative; height: 110px; margin-bottom: 14px; }
@@ -1113,7 +1123,7 @@ body[data-mode="day"] .chozu-msg { color: var(--oshi-deep); text-shadow: none; }
     animation: done-pop 0.7s var(--spring);
 }
 body[data-color="white"] .mikuji-rank { color: #948a70; }
-.mikuji-msg { font-size: 0.86rem; line-height: 1.7; margin-bottom: 12px; }
+.mikuji-msg { font-size: 0.95rem; line-height: 1.7; margin-bottom: 12px; }
 .mikuji-luck {
     max-width: 230px;
     margin: 0 auto 10px;

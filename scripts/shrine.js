@@ -30,6 +30,7 @@
 
     var STORAGE_COLOR = 'oshiiro-color';
     var STORAGE_MODE = 'oshiiro-mode';
+    var STORAGE_FONTSIZE = 'oshiiro-fontsize';
     var STORAGE_EMA = 'oshiiro-ema';
     var MAX_EMA = 24;
 
@@ -155,6 +156,22 @@
         document.getElementById('btn-mode').textContent =
             mode === 'night' ? '☀ 昼の参拝へ' : '🌙 夜の参拝へ';
         save(STORAGE_MODE, mode);
+    }
+
+    /* ---- 文字サイズ切替（幅広い年代への配慮） ---- */
+    function applyFontSize(size) {
+        var html = document.documentElement;
+        var btn = document.getElementById('btn-fontsize');
+        if (size === 'large') {
+            html.setAttribute('data-fontsize', 'large');
+            btn.textContent = '文字を標準に';
+            btn.setAttribute('aria-pressed', 'true');
+        } else {
+            html.removeAttribute('data-fontsize');
+            btn.textContent = '文字を大きく';
+            btn.setAttribute('aria-pressed', 'false');
+        }
+        save(STORAGE_FONTSIZE, size);
     }
 
     /* ---- 舞い散る光の粒 ---- */
@@ -742,6 +759,7 @@
     renderParticles();
 
     applyMode(load(STORAGE_MODE, 'night'));
+    applyFontSize(load(STORAGE_FONTSIZE, 'normal'));
 
     var savedColor = load(STORAGE_COLOR, null);
     if (savedColor && findColor(savedColor)) {
@@ -751,6 +769,9 @@
     document.getElementById('btn-recolor').addEventListener('click', reopenGate);
     document.getElementById('btn-mode').addEventListener('click', function () {
         applyMode(body.getAttribute('data-mode') === 'night' ? 'day' : 'night');
+    });
+    document.getElementById('btn-fontsize').addEventListener('click', function () {
+        applyFontSize(document.documentElement.getAttribute('data-fontsize') === 'large' ? 'normal' : 'large');
     });
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
 })();
