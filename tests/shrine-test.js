@@ -57,6 +57,19 @@ const path = require('path');
     await page.waitForFunction(() => document.body.getAttribute('data-color') === 'pink');
     if (!(await page.textContent('#hero-color-name')).includes('ピンク')) errors.push('選び直し後の色名が出ない');
 
+    // 保存できない環境（プライベートブラウズ等）でも絵馬が即時反映される
+    const page2 = await browser.newPage({ viewport: { width: 420, height: 900 } });
+    page2.on('pageerror', e => errors.push('pageerror(blocked): ' + e.message));
+    await page2.addInitScript(() => { Storage.prototype.setItem = function () { throw new Error('storage blocked'); }; });
+    await page2.goto('file://' + path.resolve(__dirname, '../shrine.html'));
+    await page2.click('.color-swatch[data-color-id="red"]');
+    await page2.waitForSelector('#main:not(.hidden)');
+    await page2.fill('#ema-name', 'みお');
+    await page2.fill('#ema-wish', '神席にご縁がありますように');
+    await page2.click('#btn-dedicate');
+    if (!(await page2.textContent('#ema-rack')).includes('神席にご縁がありますように')) errors.push('保存不可環境で絵馬が反映されない');
+    if (!(await page2.textContent('#ema-rack')).includes('みお より')) errors.push('保存不可環境で絵馬の名前が出ない');
+
     await browser.close();
 
     if (errors.length) {

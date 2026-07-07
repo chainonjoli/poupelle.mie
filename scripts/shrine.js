@@ -189,11 +189,15 @@
         });
     }
 
+    /* 絵馬はメモリ上のリストを正とし、localStorageは永続化にのみ使う。
+       （プライベートブラウズ等で保存できない環境でも、奉納した絵馬が
+       その場で絵馬掛けに表示されるように） */
+    var emaList = load(STORAGE_EMA, []);
+
     function renderEmaRack() {
         var rack = document.getElementById('ema-rack');
-        var emas = load(STORAGE_EMA, []);
         rack.innerHTML = '';
-        emas.forEach(function (ema) {
+        emaList.forEach(function (ema) {
             var color = findColor(ema.color) || COLORS[0];
             var plaque = document.createElement('div');
             plaque.className = 'ema-plaque';
@@ -233,20 +237,20 @@
         }
         error.classList.add('hidden');
 
-        var emas = load(STORAGE_EMA, []);
-        emas.unshift({
+        emaList.unshift({
             name: name,
             wish: wish,
             color: body.getAttribute('data-color') || 'red',
             at: Date.now()
         });
-        if (emas.length > MAX_EMA) emas = emas.slice(0, MAX_EMA);
-        save(STORAGE_EMA, emas);
+        if (emaList.length > MAX_EMA) emaList = emaList.slice(0, MAX_EMA);
+        save(STORAGE_EMA, emaList);
 
         renderEmaRack();
         wishInput.value = '';
         done.textContent = name + 'さんの絵馬を奉納しました。あなたの願いが、推しに届きますように ✦';
         done.classList.remove('hidden');
+        done.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     /* ---- 初期化 ---- */
