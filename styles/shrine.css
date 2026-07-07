@@ -40,24 +40,24 @@ body[data-mode="night"] {
     --text-muted: color-mix(in srgb, #f7f3ea 70%, transparent);
     --bg1: color-mix(in srgb, var(--oshi-deep) 30%, #08070f);
     --bg2: #060509;
-    --card: color-mix(in srgb, var(--oshi) 10%, rgba(255, 255, 255, 0.04));
-    --card-border: color-mix(in srgb, var(--oshi) 42%, transparent);
+    --card: color-mix(in srgb, var(--oshi) 7%, rgba(255, 255, 255, 0.03));
+    --card-border: color-mix(in srgb, var(--oshi) 32%, transparent);
     --glow: color-mix(in srgb, var(--oshi) 65%, transparent);
     --lantern-light: color-mix(in srgb, var(--oshi-soft) 82%, #fff);
     --aurora-blend: screen;
-    --aurora-op: 0.5;
+    --aurora-op: 0.38;
 }
 body[data-mode="day"] {
     --text: #43382c;
     --text-muted: color-mix(in srgb, #43382c 72%, transparent);
     --bg1: color-mix(in srgb, var(--oshi-soft) 38%, #fdfaf3);
     --bg2: color-mix(in srgb, var(--oshi) 14%, #fbf6ea);
-    --card: color-mix(in srgb, #ffffff 72%, var(--oshi-soft));
-    --card-border: color-mix(in srgb, var(--oshi-deep) 38%, transparent);
+    --card: color-mix(in srgb, #ffffff 80%, var(--oshi-soft));
+    --card-border: color-mix(in srgb, var(--oshi-deep) 30%, transparent);
     --glow: color-mix(in srgb, var(--oshi) 45%, transparent);
     --lantern-light: color-mix(in srgb, var(--oshi) 65%, #fff);
     --aurora-blend: normal;
-    --aurora-op: 0.3;
+    --aurora-op: 0.2;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -372,21 +372,22 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     border-bottom: 1px solid var(--card-border);
     transition: background 0.8s ease;
 }
-.topbar-title { font-family: 'Shippori Mincho', serif; letter-spacing: 0.08em; font-size: 1.02rem; white-space: nowrap; }
+.topbar-title { font-family: 'Shippori Mincho', serif; letter-spacing: 0.14em; font-size: 1.02rem; white-space: nowrap; }
 .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .pill-btn {
     font-family: 'Kiwi Maru', serif;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
     color: var(--text);
-    background: var(--card);
+    background: transparent;
     border: 1px solid var(--card-border);
     border-radius: 999px;
     padding: 10px 16px;
     min-height: 44px;
     cursor: pointer;
-    transition: box-shadow 0.3s ease, transform 0.2s var(--spring);
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s var(--spring);
 }
-.pill-btn:hover { box-shadow: 0 0 14px var(--glow); transform: translateY(-1px); }
+.pill-btn:hover { background: color-mix(in srgb, var(--oshi) 12%, transparent); border-color: var(--oshi); transform: translateY(-1px); }
 .pill-btn:active { transform: scale(0.94); }
 
 /* ============================================================
@@ -396,20 +397,31 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     max-width: 960px;
     margin: 0 auto;
     padding: 0 calc(18px + env(safe-area-inset-right)) 40px calc(18px + env(safe-area-inset-left));
+    counter-reset: ed-folio;
 }
 
 .hero-shrine { text-align: center; padding: 48px 0 30px; }
-.hero-kicker { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 0.1em; }
+.hero-kicker { color: var(--text-muted); font-size: 0.82rem; letter-spacing: 0.32em; }
+.hero-kicker::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 1px;
+    margin: 0 auto 14px;
+    background: var(--oshi);
+}
 .hero-welcome {
-    /* オーバーサイズ見出し */
-    font-size: clamp(1.7rem, 6.2vw, 3rem);
-    margin: 10px 0 6px;
-    letter-spacing: 0.05em;
-    line-height: 1.3;
+    /* 雑誌の表紙見出しのような大ぶりなセリフ体 */
+    font-size: clamp(1.9rem, 7vw, 3.4rem);
+    margin: 14px 0 6px;
+    letter-spacing: 0.02em;
+    line-height: 1.28;
+    text-wrap: balance;
 }
 .oshi-name {
     color: var(--oshi);
     text-shadow: 0 0 26px var(--glow);
+    white-space: nowrap;
 }
 body[data-mode="day"] .oshi-name { color: var(--oshi-deep); text-shadow: none; }
 body[data-color="white"][data-mode="day"] .oshi-name { color: #948a70; }
@@ -520,61 +532,73 @@ body[data-mode="day"] .sando {
 
 .hero-lead { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 24px; }
 
-/* ドーパミンカラーの動くグラデーションボタン */
+/* エディトリアルな輪郭線ボタン（誌面の「読む」リンクのような佇まい） */
 .btn-main {
-    display: inline-block;
-    font-family: 'Kiwi Maru', serif;
-    font-size: 0.95rem;
-    color: #fff;
-    background: linear-gradient(120deg, var(--oshi-soft), var(--oshi), var(--oshi-deep), var(--oshi));
-    background-size: 280% 280%;
-    animation: gradient-slide 7s ease infinite;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.92rem;
+    letter-spacing: 0.14em;
+    color: var(--text);
+    background: transparent;
+    border: 1.5px solid var(--oshi);
     border-radius: 999px;
-    padding: 14px 36px;
+    padding: 14px 32px;
     text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 4px 22px var(--glow);
-    transition: transform 0.25s var(--spring), box-shadow 0.25s ease;
+    transition: background 0.3s ease, color 0.3s ease, transform 0.25s var(--spring), box-shadow 0.3s ease;
 }
-@keyframes gradient-slide {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+.btn-main::after { content: "→"; transition: transform 0.25s ease; }
+.btn-main:hover {
+    background: var(--oshi);
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--glow);
 }
-.btn-main:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 30px var(--glow); }
-.btn-main:active { transform: scale(0.96); }
-body[data-color="white"] .btn-main { color: #756c54; text-shadow: none; }
+.btn-main:hover::after { transform: translateX(4px); }
+.btn-main:active { transform: scale(0.97); }
+body[data-color="white"] .btn-main:hover { color: #55483a; text-shadow: none; }
 
 /* ============================================================
    セクション共通
    ============================================================ */
-.section { padding: 48px 0 10px; }
+.section { padding: 48px 0 10px; counter-increment: ed-folio; }
 .section-title {
-    text-align: center;
-    font-size: clamp(1.6rem, 5.2vw, 2.3rem);
-    letter-spacing: 0.14em;
-    margin-bottom: 6px;
+    position: relative;
+    text-align: left;
+    font-size: clamp(1.8rem, 5.6vw, 2.6rem);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+.section-title::before {
+    /* 誌面のノンブル（ページ番号）のような編集記号 */
+    content: counter(ed-folio, decimal-leading-zero) " \2014  TOIRO SHRINE";
+    display: block;
+    font-family: 'Kiwi Maru', serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.28em;
+    color: var(--text-muted);
+    margin-bottom: 14px;
 }
 .section-title::after {
-    /* 手描き風の波線（オーガニックな揺らぎ） */
+    /* 細い罫線（雑誌の見出し下の1本線） */
     content: "";
     display: block;
-    width: 110px;
-    height: 12px;
-    margin: 8px auto 0;
-    background-color: var(--oshi);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12'%3E%3Cpath d='M2 8 Q 12 2 22 7 T 42 7 T 62 7 T 82 7 T 102 7 T 118 6' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12'%3E%3Cpath d='M2 8 Q 12 2 22 7 T 42 7 T 62 7 T 82 7 T 102 7 T 118 6' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
-    filter: drop-shadow(0 0 8px var(--glow));
+    width: 64px;
+    height: 2px;
+    margin: 16px 0 0;
+    background: var(--oshi);
 }
-.section-lead { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 28px; }
+.section-lead { text-align: left; color: var(--text-muted); font-size: 0.98rem; max-width: 42em; margin-bottom: 32px; }
 
 .glass {
     background: var(--card);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
+    border-radius: 6px;
     backdrop-filter: blur(8px);
     transition: background 0.8s ease, border-color 0.8s ease;
 }
@@ -586,6 +610,7 @@ body[data-color="white"] .btn-main { color: #756c54; text-shadow: none; }
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 14px;
+    counter-reset: ed-spot;
 }
 .b-a { grid-column: span 3; }
 .b-b { grid-column: span 3; }
@@ -600,22 +625,45 @@ body[data-color="white"] .btn-main { color: #756c54; text-shadow: none; }
 }
 
 .spot-card {
+    position: relative;
+    counter-increment: ed-spot;
     background: var(--card);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 22px 20px;
-    text-align: center;
+    border-radius: 6px;
+    padding: 24px 22px 22px;
+    text-align: left;
     backdrop-filter: blur(8px);
     transition: transform 0.35s var(--spring), box-shadow 0.35s ease, border-color 0.35s ease, background 0.8s ease;
 }
+.spot-card::before {
+    /* 誌面のインデックス番号 */
+    content: counter(ed-spot, decimal-leading-zero);
+    display: block;
+    font-family: 'Kiwi Maru', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
 .spot-card:hover {
-    transform: translateY(-6px) rotate(-0.4deg);
-    box-shadow: 0 10px 30px var(--glow);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
     border-color: var(--oshi);
 }
-.spot-card h3 { font-size: 1.08rem; letter-spacing: 0.08em; margin-bottom: 8px; color: var(--oshi); }
-body[data-mode="day"] .spot-card h3 { color: var(--oshi-deep); }
-body[data-color="white"][data-mode="day"] .spot-card h3 { color: #948a70; }
+.spot-card h3 {
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+.spot-card h3::after {
+    content: "";
+    display: block;
+    width: 26px;
+    height: 2px;
+    margin-top: 9px;
+    background: var(--oshi);
+}
 .spot-card p { font-size: 0.9rem; color: var(--text-muted); text-align: left; }
 .b-d > div:last-child p { text-align: left; }
 
@@ -776,18 +824,18 @@ body[data-mode="day"] .form-group input, body[data-mode="day"] .form-group texta
 .wish-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .wish-chip {
     font-family: 'Kiwi Maru', serif;
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     color: var(--text);
-    background: color-mix(in srgb, var(--oshi) 14%, transparent);
+    background: transparent;
     border: 1px solid var(--card-border);
     border-radius: 999px;
-    padding: 6px 12px;
+    padding: 8px 14px;
     cursor: pointer;
-    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s var(--spring);
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s var(--spring);
 }
 .wish-chip:hover {
-    background: color-mix(in srgb, var(--oshi) 30%, transparent);
-    box-shadow: 0 0 10px var(--glow);
+    background: color-mix(in srgb, var(--oshi) 14%, transparent);
+    border-color: var(--oshi);
     transform: translateY(-2px);
 }
 .wish-chip:active { transform: scale(0.93); }
@@ -827,7 +875,7 @@ body[data-mode="day"] .ema-error { color: #c0392b; }
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 18px 14px;
     padding: 22px 16px 26px;
-    border-radius: 20px;
+    border-radius: 6px;
     background: var(--card);
     border: 1px solid var(--card-border);
 }
@@ -892,14 +940,17 @@ body[data-mode="day"] .ema-error { color: #c0392b; }
 .spot-tap { cursor: pointer; }
 .spot-cta {
     display: inline-block;
-    margin-top: 12px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 0.74rem;
-    color: var(--text);
-    background: color-mix(in srgb, var(--oshi) 18%, transparent);
-    border: 1px solid var(--card-border);
+    margin-top: 14px;
+    padding: 0 0 2px;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--oshi);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--oshi);
 }
+body[data-mode="day"] .spot-cta { color: var(--oshi-deep); border-color: var(--oshi-deep); }
+body[data-color="white"][data-mode="day"] .spot-cta { color: #948a70; border-color: #948a70; }
 
 /* 花手水の波紋 */
 .ripple-ring {
@@ -1172,20 +1223,27 @@ body[data-color="white"] .mikuji-lucky strong { color: #948a70; }
 /* ============================================================
    御由緒・フッター
    ============================================================ */
-.yuisho { max-width: 640px; margin: 0 auto; padding: 28px 26px; font-size: 0.9rem; }
-.yuisho p + p { margin-top: 14px; }
+.yuisho { max-width: 640px; margin: 0 auto; padding: 8px 0 20px; font-size: 0.95rem; text-align: left; }
+.yuisho p:first-of-type {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(1.15rem, 3vw, 1.4rem);
+    line-height: 1.9;
+    letter-spacing: 0.02em;
+}
+.yuisho p + p { margin-top: 18px; line-height: 1.9; }
 .yuisho strong { color: var(--oshi); }
 body[data-mode="day"] .yuisho strong { color: var(--oshi-deep); }
 body[data-color="white"][data-mode="day"] .yuisho strong { color: #948a70; }
 
 .footer {
     text-align: center;
-    padding: 30px 18px calc(36px + env(safe-area-inset-bottom));
-    font-size: 0.74rem;
+    padding: 40px 18px calc(44px + env(safe-area-inset-bottom));
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
     color: var(--text-muted);
     border-top: 1px solid var(--card-border);
 }
-.footer-copy { margin-top: 10px; letter-spacing: 0.06em; }
+.footer-copy { margin-top: 12px; letter-spacing: 0.14em; }
 
 /* ============================================================
    スマホ最適化
