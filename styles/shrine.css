@@ -566,6 +566,66 @@ body[data-mode="paper"] .form-group input, body[data-mode="paper"] .form-group t
 .book-cell.got { border-color: var(--oshi); color: var(--text); background: color-mix(in srgb, var(--oshi) 12%, transparent); }
 
 /* ============================================================
+   境内のご案内（セクションへのリンクマップ）
+   ============================================================ */
+.keidai-map { max-width: 420px; margin: 40px auto 0; }
+.keidai-map-title {
+    font-size: 0.76rem;
+    letter-spacing: 0.28em;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+.keidai-map-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.keidai-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 6px 12px;
+    min-height: 64px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    transition: border-color 0.3s ease, background 0.3s ease, transform 0.25s var(--spring);
+}
+.keidai-link:hover { border-color: var(--oshi); background: color-mix(in srgb, var(--oshi) 8%, transparent); transform: translateY(-2px); }
+.keidai-link:active { transform: scale(0.97); }
+.keidai-no { font-family: 'Noto Serif JP', serif; font-size: 0.66rem; letter-spacing: 0.2em; color: var(--text-muted); }
+
+/* ---- 参道へもどる（スクロール後に現れる） ---- */
+.back-to-top {
+    position: fixed;
+    right: calc(16px + env(safe-area-inset-right));
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    z-index: 30;
+    padding: 12px 18px;
+    min-height: 48px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--surface-border);
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s var(--spring), border-color 0.3s ease;
+}
+.back-to-top.show { opacity: 1; pointer-events: auto; transform: none; }
+.back-to-top:hover { border-color: var(--oshi); }
+
+/* ============================================================
    7. 記念日登録
    ============================================================ */
 .anniv-write {

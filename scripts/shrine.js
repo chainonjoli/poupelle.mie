@@ -641,4 +641,13 @@
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
     document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
+
+    /* ---- 参道へもどる（1画面分スクロールしたら現れる） ---- */
+    var backBtn = document.getElementById('btn-backtotop');
+    backBtn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    window.addEventListener('scroll', function () {
+        backBtn.classList.toggle('show', window.scrollY > window.innerHeight && !main.classList.contains('hidden'));
+    }, { passive: true });
 })();
