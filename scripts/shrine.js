@@ -28,6 +28,15 @@
         '最高の思い出ができますように'
     ];
 
+    var MAMORI_BLESSINGS = [
+        '推しへの想いが、まっすぐ届きますように。',
+        '推し活の毎日に、小さな幸運がありますように。',
+        '会いたい気持ちが、いつか叶いますように。',
+        '推しも自分も、健やかでありますように。',
+        '今日という日に、良いご縁がありますように。',
+        '無理をしすぎず、推し活を楽しめますように。'
+    ];
+
     var STORAGE_COLOR = 'oshiiro-color';
     var STORAGE_MODE = 'oshiiro-mode';
     var STORAGE_FONTSIZE = 'oshiiro-fontsize';
@@ -673,6 +682,19 @@
         }, 5200);
     }
 
+    /* ---- 推し守 ---- */
+    function openMamori() {
+        var blessing = MAMORI_BLESSINGS[Math.floor(Math.random() * MAMORI_BLESSINGS.length)];
+        openModal(
+            '<p class="modal-kicker">推し守</p>' +
+            '<div class="mamori-charm" aria-hidden="true">' +
+            '<span class="omamori"><span class="omamori-knot"></span><span class="omamori-text">推し守</span></span>' +
+            '</div>' +
+            '<p class="modal-lead" style="text-align:center;">' + blessing + '</p>' +
+            '<p class="modal-hint" style="text-align:center;">推し守は、何度でもこちらで授かれます。</p>'
+        );
+    }
+
     /* ---- 推し色御朱印メーカー ---- */
     function kanjiNum(n) {
         var k = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -872,6 +894,7 @@
             var run = function () {
                 if (action === 'chozu') rippleChozu(card);
                 else if (action === 'furin') ringFurin(card);
+                else if (action === 'mamori') openMamori();
                 else if (action === 'omikuji') openOmikuji();
                 else if (action === 'goshuin') openGoshuin();
             };

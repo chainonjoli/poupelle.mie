@@ -635,13 +635,10 @@ body[data-color="white"] .btn-main:hover { color: #55483a; text-shadow: none; }
 .b-a { grid-column: span 3; }
 .b-b { grid-column: span 3; }
 .b-c { grid-column: span 2; }
-.b-d { grid-column: span 4; display: flex; align-items: center; gap: 18px; text-align: left; }
-.b-d .spot-visual { flex: 0 0 120px; height: 120px; margin-bottom: 0; }
-.b-d h3 { text-align: left; }
+.b-e { grid-column: span 2; }
+.b-d { grid-column: span 2; }
 @media (max-width: 720px) {
-    .b-a, .b-b, .b-c, .b-d { grid-column: span 6; }
-    .b-d { flex-direction: column; text-align: center; }
-    .b-d h3 { text-align: center; }
+    .b-a, .b-b, .b-c, .b-e, .b-d { grid-column: span 6; }
 }
 
 .spot-card {
@@ -685,7 +682,6 @@ body[data-color="white"] .btn-main:hover { color: #55483a; text-shadow: none; }
     background: var(--oshi);
 }
 .spot-card p { font-size: 0.9rem; color: var(--text-muted); text-align: left; }
-.b-d > div:last-child p { text-align: left; }
 
 .spot-visual { position: relative; height: 110px; margin-bottom: 14px; }
 
@@ -765,16 +761,16 @@ body[data-color="white"] .btn-main:hover { color: #55483a; text-shadow: none; }
     background: rgba(80, 60, 30, 0.28);
 }
 
-/* お守り */
+/* お守り（雑誌の挿絵のような、上品な錦のお守り） */
 .omamori-visual { display: flex; justify-content: center; align-items: center; }
 .omamori {
     position: relative;
     width: 62px; height: 86px;
     border-radius: 30px 30px 10px 10px / 26px 26px 10px 10px;
     background:
-        repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, #fff 22%, transparent) 7px 9px),
-        linear-gradient(160deg, var(--oshi) 0%, var(--oshi-deep) 100%);
-    box-shadow: 0 4px 16px var(--glow);
+        repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, #fff 16%, transparent) 7px 9px),
+        linear-gradient(160deg, color-mix(in srgb, var(--oshi) 82%, #fff) 0%, var(--oshi-deep) 100%);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -784,7 +780,7 @@ body[data-color="white"] .btn-main:hover { color: #55483a; text-shadow: none; }
     top: -12px; left: 50%; transform: translateX(-50%);
     width: 18px; height: 18px;
     border-radius: 50%;
-    border: 3.5px solid #e2c268;
+    border: 3.5px solid #d9b968;
     background: transparent;
 }
 .omamori-text {
@@ -795,9 +791,46 @@ body[data-color="white"] .btn-main:hover { color: #55483a; text-shadow: none; }
     font-family: 'Shippori Mincho', serif;
     color: #f7ecc8;
     font-size: 0.98rem;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 body[data-color="white"] .omamori-text { color: #756c54; text-shadow: none; }
+
+/* お守りモーダル内の大きめ表示 */
+.mamori-charm { display: flex; justify-content: center; margin: 34px 0 30px; }
+.mamori-charm .omamori { transform: scale(1.55); }
+
+/* みくじ箱（境内カードのプレビュー用イラスト） */
+.mikuji-visual { display: flex; justify-content: center; align-items: flex-end; }
+.mikuji-box { position: relative; width: 60px; height: 58px; }
+.mikuji-box-body {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 40px;
+    border-radius: 5px 5px 9px 9px;
+    background: linear-gradient(160deg, #a9764a 0%, #6b4826 100%);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+.mikuji-box-lid {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 68%; height: 10px;
+    border-radius: 50%;
+    background:
+        radial-gradient(ellipse at 38% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 60%),
+        linear-gradient(180deg, #4a3016 0%, #2c1c0d 100%);
+}
+.mikuji-stick {
+    position: absolute;
+    bottom: 22px;
+    width: 4px; height: 32px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--oshi) 55%, #fff) 0%, var(--oshi) 100%);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+}
+.mikuji-stick.s1 { left: 20px; transform: rotate(-9deg); }
+.mikuji-stick.s2 { left: 29px; height: 36px; transform: rotate(2deg); }
+.mikuji-stick.s3 { left: 38px; transform: rotate(10deg); }
 
 /* 御朱印 */
 .goshuin-visual { display: flex; justify-content: center; align-items: center; }
