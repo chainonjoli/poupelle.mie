@@ -32,7 +32,11 @@
     var STORAGE_MODE = 'oshiiro-mode';
     var STORAGE_FONTSIZE = 'oshiiro-fontsize';
     var STORAGE_EMA = 'oshiiro-ema';
+    var STORAGE_ANNIV = 'oshiiro-anniversaries';
+    var STORAGE_GOSHUIN_LOG = 'oshiiro-goshuin-log';
+    var STORAGE_GOSHUIN_TODAY = 'oshiiro-goshuin-today';
     var MAX_EMA = 24;
+    var MAX_ANNIV = 5;
 
     var body = document.body;
     var gate = document.getElementById('color-gate');
@@ -56,6 +60,25 @@
 
     function save(key, value) {
         try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* プライベートモード等では保存しない */ }
+    }
+
+    function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+    function todayStr() {
+        var d = new Date();
+        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+    function escAttr(s) { return String(s).replace(/["<>&]/g, ''); }
+
+    /* ---- 記念日（自分の記念日・推しの記念日を最大5件登録） ---- */
+    function loadAnniversaries() { return load(STORAGE_ANNIV, []); }
+    function todaysAnniversary() {
+        var list = loadAnniversaries();
+        var now = new Date();
+        var m = now.getMonth() + 1, d = now.getDate();
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].month === m && list[i].day === d) return list[i];
+        }
+        return null;
     }
 
     /* ---- キネティック・タイポグラフィ（一文字ずつ登場） ---- */
@@ -591,6 +614,65 @@
         setTimeout(showOmikujiResult, 1500);
     }
 
+    /* ---- 記念日登録モーダル ---- */
+    function openAnniversaryEditor() {
+        var list = loadAnniversaries();
+        var rows = [];
+        for (var i = 0; i < MAX_ANNIV; i++) {
+            var a = list[i] || null;
+            var labelVal = a ? escAttr(a.label) : '';
+            var dateVal = a ? ('2000-' + pad2(a.month) + '-' + pad2(a.day)) : '';
+            rows.push(
+                '<div class="form-group anniv-row">' +
+                '<label for="anniv-label-' + i + '">記念日 ' + (i + 1) + '</label>' +
+                '<div class="anniv-row-inputs">' +
+                '<input type="text" id="anniv-label-' + i + '" maxlength="20" value="' + labelVal + '" placeholder="例：推しの生誕日">' +
+                '<input type="date" id="anniv-date-' + i + '" value="' + dateVal + '">' +
+                '</div></div>'
+            );
+        }
+        openModal(
+            '<p class="modal-kicker">記念日登録</p>' +
+            '<p class="modal-lead">自分の記念日や推しの記念日を最大5件まで登録できます。登録した日に参拝すると、特別な御朱印と演出が現れます（年は使わず、毎年同じ月日で判定します）。</p>' +
+            rows.join('') +
+            '<button type="button" class="btn-main" id="btn-anniv-save">保存する</button>'
+        );
+        document.getElementById('btn-anniv-save').addEventListener('click', function () {
+            var result = [];
+            for (var i = 0; i < MAX_ANNIV; i++) {
+                var label = document.getElementById('anniv-label-' + i).value.trim();
+                var dateVal = document.getElementById('anniv-date-' + i).value;
+                if (label && dateVal) {
+                    var parts = dateVal.split('-');
+                    result.push({ label: label, month: +parts[1], day: +parts[2] });
+                }
+            }
+            save(STORAGE_ANNIV, result);
+            closeModal();
+            checkAnniversaryBanner();
+        });
+    }
+
+    /* ---- 記念日バナー ---- */
+    function checkAnniversaryBanner() {
+        var aniv = todaysAnniversary();
+        if (!aniv) return;
+        var seenKey = 'oshiiro-aniv-seen-' + todayStr();
+        if (load(seenKey, false)) return;
+        save(seenKey, true);
+        var el = document.createElement('div');
+        el.className = 'aniv-banner';
+        el.textContent = '🎉 今日は「' + aniv.label + '」の記念日です。特別な御朱印がいただけます。';
+        var topbarEl = document.querySelector('.topbar');
+        el.style.top = (topbarEl ? topbarEl.getBoundingClientRect().bottom + 10 : 70) + 'px';
+        document.body.appendChild(el);
+        setTimeout(function () { el.classList.add('show'); }, 30);
+        setTimeout(function () {
+            el.classList.remove('show');
+            setTimeout(function () { el.remove(); }, 700);
+        }, 5200);
+    }
+
     /* ---- 推し色御朱印メーカー ---- */
     function kanjiNum(n) {
         var k = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -603,7 +685,7 @@
     function drawVertical(ctx, text, x, y, lineH) {
         for (var i = 0; i < text.length; i++) ctx.fillText(text[i], x, y + i * lineH);
     }
-    function makeGoshuin(name) {
+    function makeGoshuin(name, anivLabel) {
         var color = currentColor();
         var W = 720, H = 1000;
         var cv = document.createElement('canvas');
@@ -682,6 +764,11 @@
         }
 
         /* 下部 */
+        if (anivLabel) {
+            ctx.font = '600 26px ' + mincho;
+            ctx.fillStyle = color.hex;
+            ctx.fillText('— ' + anivLabel + ' 記念 —', W / 2, H - 172);
+        }
         ctx.font = '500 26px ' + mincho;
         ctx.fillStyle = color.id === 'white' ? '#948a70' : color.deep;
         ctx.fillText('あなたの推しは、何色ですか。', W / 2, H - 130);
@@ -691,30 +778,81 @@
 
         return cv.toDataURL('image/png');
     }
-    function openGoshuin() {
-        var prefill = document.getElementById('ema-name').value.trim();
+
+    /* ---- 御朱印帳（参拝日をカレンダーで振り返る） ---- */
+    function recordGoshuin(dateStr, img) {
+        save(STORAGE_GOSHUIN_TODAY, { date: dateStr, img: img });
+        var log = load(STORAGE_GOSHUIN_LOG, []);
+        if (log.indexOf(dateStr) === -1) {
+            log.push(dateStr);
+            if (log.length > 120) log = log.slice(log.length - 120);
+            save(STORAGE_GOSHUIN_LOG, log);
+        }
+    }
+    function openGoshuinBook() {
+        var log = load(STORAGE_GOSHUIN_LOG, []);
+        var now = new Date();
+        var y = now.getFullYear(), m = now.getMonth();
+        var firstWeekday = new Date(y, m, 1).getDay();
+        var daysInMonth = new Date(y, m + 1, 0).getDate();
+        var cells = '';
+        for (var i = 0; i < firstWeekday; i++) cells += '<span class="book-cell empty"></span>';
+        for (var d = 1; d <= daysInMonth; d++) {
+            var ds = y + '-' + pad2(m + 1) + '-' + pad2(d);
+            var got = log.indexOf(ds) !== -1;
+            cells += '<span class="book-cell' + (got ? ' got' : '') + '">' + d + (got ? '<span class="book-stamp">推</span>' : '') + '</span>';
+        }
+        openModal(
+            '<p class="modal-kicker">御朱印帳</p>' +
+            '<p class="modal-lead">これまでに ' + log.length + ' 日、参拝しています。</p>' +
+            '<p class="modal-hint">' + y + '年' + (m + 1) + '月</p>' +
+            '<div class="goshuin-book">' + cells + '</div>'
+        );
+    }
+
+    function showGoshuinResult(url, alreadyClaimed) {
+        var color = currentColor();
+        var shareText = '十色神社で ' + color.jp + ' の御朱印をいただきました ⛩ あなたの推しは、何色ですか。';
         openModal(
             '<p class="modal-kicker">推し色御朱印</p>' +
-            '<p class="modal-lead">お名前と今日の日付が入った、あなたの推し色の御朱印画像をお作りします。</p>' +
-            '<div class="form-group"><label for="goshuin-name">お名前・ニックネーム（任意）</label>' +
-            '<input type="text" id="goshuin-name" maxlength="12" value="' + prefill.replace(/["<>&]/g, '') + '" placeholder="例：あず"></div>' +
-            '<button type="button" class="btn-main" id="btn-goshuin-make">御朱印をいただく</button>'
+            (alreadyClaimed ? '<p class="modal-lead">本日の御朱印はいただき済みです。また明日、参拝にいらしてください。</p>' : '') +
+            '<img id="goshuin-img" class="goshuin-img" src="' + url + '" alt="' + color.jp + 'の御朱印">' +
+            '<p class="modal-hint">スマホでは画像を長押しすると保存できます。保存した画像を添えてポストしてください。</p>' +
+            '<div class="modal-actions">' +
+            '<a class="pill-btn" id="btn-goshuin-save" href="' + url + '" download="toiro-goshuin.png">画像を保存</a>' +
+            '<a class="btn-x" href="' + xShareUrl(shareText) + '" target="_blank" rel="noopener">𝕏 でポストする</a>' +
+            '</div>' +
+            '<button type="button" class="pill-btn btn-x-small" id="btn-goshuin-book">御朱印帳を見る</button>'
         );
+        document.getElementById('btn-goshuin-book').addEventListener('click', openGoshuinBook);
+    }
+
+    function openGoshuin() {
+        var today = todayStr();
+        var claimed = load(STORAGE_GOSHUIN_TODAY, null);
+        if (claimed && claimed.date === today && claimed.img) {
+            showGoshuinResult(claimed.img, true);
+            return;
+        }
+        var prefill = document.getElementById('ema-name').value.trim();
+        var aniv = todaysAnniversary();
+        openModal(
+            '<p class="modal-kicker">推し色御朱印</p>' +
+            '<p class="modal-lead">' +
+            (aniv ? '🎉 今日は「' + aniv.label + '」の記念日です。特別な御朱印をどうぞ。' : 'お名前と今日の日付が入った、あなたの推し色の御朱印画像をお作りします。') +
+            ' 御朱印は1日に1枚までです。</p>' +
+            '<div class="form-group"><label for="goshuin-name">お名前・ニックネーム（任意）</label>' +
+            '<input type="text" id="goshuin-name" maxlength="12" value="' + escAttr(prefill) + '" placeholder="例：あず"></div>' +
+            '<button type="button" class="btn-main" id="btn-goshuin-make">御朱印をいただく</button>' +
+            '<button type="button" class="pill-btn btn-x-small" id="btn-goshuin-book">御朱印帳を見る</button>'
+        );
+        document.getElementById('btn-goshuin-book').addEventListener('click', openGoshuinBook);
         document.getElementById('btn-goshuin-make').addEventListener('click', function () {
             var name = document.getElementById('goshuin-name').value.trim();
             var render = function () {
-                var url = makeGoshuin(name);
-                var color = currentColor();
-                var shareText = '十色神社で ' + color.jp + ' の御朱印をいただきました ⛩ あなたの推しは、何色ですか。';
-                openModal(
-                    '<p class="modal-kicker">推し色御朱印</p>' +
-                    '<img id="goshuin-img" class="goshuin-img" src="' + url + '" alt="' + color.jp + 'の御朱印">' +
-                    '<p class="modal-hint">スマホでは画像を長押しすると保存できます。保存した画像を添えてポストしてください。</p>' +
-                    '<div class="modal-actions">' +
-                    '<a class="pill-btn" id="btn-goshuin-save" href="' + url + '" download="toiro-goshuin.png">画像を保存</a>' +
-                    '<a class="btn-x" href="' + xShareUrl(shareText) + '" target="_blank" rel="noopener">𝕏 でポストする</a>' +
-                    '</div>'
-                );
+                var url = makeGoshuin(name, aniv ? aniv.label : null);
+                recordGoshuin(today, url);
+                showGoshuinResult(url, false);
             };
             if (document.fonts && document.fonts.load) {
                 Promise.all([
@@ -765,6 +903,7 @@
     if (savedColor && findColor(savedColor)) {
         chooseColor(savedColor, false);
     }
+    checkAnniversaryBanner();
 
     document.getElementById('btn-recolor').addEventListener('click', reopenGate);
     document.getElementById('btn-mode').addEventListener('click', function () {
@@ -773,5 +912,6 @@
     document.getElementById('btn-fontsize').addEventListener('click', function () {
         applyFontSize(document.documentElement.getAttribute('data-fontsize') === 'large' ? 'normal' : 'large');
     });
+    document.getElementById('btn-anniv').addEventListener('click', openAnniversaryEditor);
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
 })();
