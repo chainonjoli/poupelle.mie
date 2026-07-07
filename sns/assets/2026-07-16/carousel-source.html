@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Zen Maru Gothic', sans-serif; }
+  .slide {
+    width: 1080px; height: 1350px;
+    background: #FAF6F0;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 90px 84px;
+    color: #5C5248;
+  }
+  /* やわらかい背景の円 */
+  .slide::before {
+    content: ""; position: absolute; border-radius: 50%;
+    width: 720px; height: 720px; right: -260px; top: -260px;
+    background: #F1E7D8;
+  }
+  .slide::after {
+    content: ""; position: absolute; border-radius: 50%;
+    width: 480px; height: 480px; left: -200px; bottom: -200px;
+    background: #F3ECE1;
+  }
+  .inner { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; }
+  .kicker {
+    font-size: 34px; letter-spacing: 0.28em; font-weight: 500;
+    color: #A89478; margin-bottom: 36px;
+  }
+  .pagenum {
+    position: absolute; z-index: 2; bottom: 64px; right: 84px;
+    font-size: 30px; letter-spacing: 0.1em; color: #B9AC99; font-weight: 500;
+  }
+  .brand {
+    position: absolute; z-index: 2; bottom: 64px; left: 84px;
+    font-size: 30px; letter-spacing: 0.14em; color: #B9AC99; font-weight: 500;
+  }
+  h1 { font-size: 96px; font-weight: 700; line-height: 1.42; color: #4E463C; }
+  h2 { font-size: 72px; font-weight: 700; line-height: 1.4; color: #4E463C; margin-bottom: 48px; }
+  .lead { font-size: 44px; line-height: 1.9; font-weight: 400; }
+  .step-label {
+    display: inline-block; align-self: flex-start; background: #A89478; color: #FDFBF7;
+    font-size: 36px; font-weight: 700; letter-spacing: 0.16em;
+    padding: 14px 44px; border-radius: 999px; margin-bottom: 44px;
+  }
+  .step-label.ng { background: #C99A8E; }
+  .center { justify-content: center; }
+  .cover-sub {
+    font-size: 46px; font-weight: 500; color: #A89478;
+    margin-top: 56px; line-height: 1.7;
+  }
+  .divider { width: 120px; height: 6px; background: #D8C9B2; border-radius: 3px; margin: 48px 0; }
+  .note-card {
+    background: #FDFBF7; border-radius: 36px; padding: 56px 60px;
+    box-shadow: 0 6px 24px rgba(120,100,70,.08);
+    font-size: 42px; line-height: 1.9; margin-top: auto; margin-bottom: 40px;
+  }
+  .emph { color: #A0784F; font-weight: 700; }
+  .save-badge {
+    display: flex; align-items: center; gap: 24px; margin-top: 48px; margin-bottom: 90px;
+    font-size: 40px; font-weight: 700; color: #4E463C;
+  }
+  .save-icon {
+    width: 88px; height: 88px; border-radius: 24px; background: #A89478;
+    display: flex; align-items: center; justify-content: center;
+    color: #FDFBF7; font-size: 46px;
+  }
+  ul.points { list-style: none; font-size: 44px; line-height: 1.75; }
+  ul.points li { padding-left: 64px; position: relative; margin-bottom: 40px; }
+  ul.points li::before {
+    content: ""; position: absolute; left: 8px; top: 26px;
+    width: 22px; height: 22px; border-radius: 50%; background: #C9B48F;
+  }
+</style>
+</head>
+<body>
+
+<!-- 1: 表紙 -->
+<section class="slide">
+  <div class="inner center">
+    <div class="kicker">夏のスキンケア豆知識</div>
+    <h1>夏なのに、<br>お肌がカサつく<br>のはなぜ？</h1>
+    <div class="cover-sub">冷房の季節に知っておきたい、<br>今日からできる乾燥ケア</div>
+  </div>
+  <div class="brand">chainon joli</div>
+  <div class="pagenum">1 / 6</div>
+</section>
+
+<!-- 2: 原因 -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">まずは原因から</div>
+    <h2>冷房の風が、<br>うるおいを奪っていく</h2>
+    <p class="lead">冷房のきいたお部屋は、じつは<span class="emph">湿度がぐっと低め</span>。<br><br>乾いた空気と風にさらされるうちに、お肌の水分も少しずつ奪われやすくなります。<br><br>「夏＝うるおっている」とは限らないんです。</p>
+  </div>
+  <div class="brand">chainon joli</div>
+  <div class="pagenum">2 / 6</div>
+</section>
+
+<!-- 3: ケア1 -->
+<section class="slide">
+  <div class="inner">
+    <div class="step-label">ケア 1</div>
+    <h2>朝の保湿に<br>「ふた」をひと手間</h2>
+    <p class="lead">化粧水だけで終わらせず、<span class="emph">乳液やクリームでふた</span>をしてあげましょう。<br><br>べたつきが気になる方は、Tゾーンを薄めに、頬はしっかり、の塗り分けがおすすめです。</p>
+  </div>
+  <div class="brand">chainon joli</div>
+  <div class="pagenum">3 / 6</div>
+</section>
+
+<!-- 4: ケア2 -->
+<section class="slide">
+  <div class="inner">
+    <div class="step-label">ケア 2</div>
+    <h2>冷房の風から、<br>そっと距離をとる</h2>
+    <ul class="points" style="margin-top:16px;">
+      <li>風が直接当たる席は、できるだけ避ける</li>
+      <li>卓上の加湿グッズやマスクで乾燥をやわらげる</li>
+      <li>温かい飲み物で、体の内側もいたわる</li>
+    </ul>
+    <p class="lead" style="margin-top:24px;">小さな工夫の積み重ねが、夕方のお肌を変えていきます。</p>
+  </div>
+  <div class="brand">chainon joli</div>
+  <div class="pagenum">4 / 6</div>
+</section>
+
+<!-- 5: NG -->
+<section class="slide">
+  <div class="inner">
+    <div class="step-label ng">やりがちNG</div>
+    <h2>「夏はさっぱり」で<br>保湿を省く</h2>
+    <p class="lead">べたつく季節はスキンケアを軽くしたくなりますが、保湿を省くと<span class="emph">かえって乾燥が進んでしまうことも</span>。<br><br>ごわつき・化粧ノリの悪さを感じたら、乾燥のサインかもしれません。</p>
+  </div>
+  <div class="brand">chainon joli</div>
+  <div class="pagenum">5 / 6</div>
+</section>
+
+<!-- 6: まとめ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">まとめ</div>
+    <h2>夏の乾燥は<br>「冷房＋紫外線」の<br>ダブルパンチ</h2>
+    <div class="note-card">
+      ・朝の保湿は「ふた」までセットで<br>
+      ・冷房の風とは、そっと距離をとる<br>
+      ・「さっぱり」しすぎに気をつけて
+    </div>
+    <div class="save-badge"><div class="save-icon">🔖</div>保存して、この夏のお守りに</div>
+  </div>
+  <div class="brand">chainon joli</div>
+  <div class="pagenum">6 / 6</div>
+</section>
+
+</body>
+</html>
