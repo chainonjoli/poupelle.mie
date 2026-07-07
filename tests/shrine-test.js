@@ -58,14 +58,20 @@ const path = require('path');
     await page.waitForFunction(() => document.body.getAttribute('data-color') === 'pink');
     if (!(await page.textContent('#hero-color-name')).includes('ピンク')) errors.push('選び直し後の色名が出ない');
 
-    // 推し活みくじ
+    // 推し活みくじ（筒を振る儀式 → 和紙の結果）
     await page.click('.spot-card[data-action="omikuji"]');
     await page.waitForSelector('#modal:not(.hidden)');
+    if (await page.locator('.mikuji-tube').count() !== 1) errors.push('みくじ筒の演出が出ない');
+    await page.waitForSelector('.mikuji-rank', { timeout: 6000 });
     const mikujiText = await page.textContent('#modal-body');
     if (!mikujiText.includes('推し活みくじ')) errors.push('みくじモーダルが開かない');
     if (!/吉/.test(mikujiText)) errors.push('みくじの結果が出ない');
+    if (await page.locator('.mikuji-paper').count() !== 1) errors.push('おみくじ紙が出ない');
     if (!(await page.getAttribute('#modal-body .btn-x', 'href')).includes('twitter.com/intent')) errors.push('みくじのシェアリンクが不正');
+    const mikujiImg = await page.getAttribute('#btn-mikuji-save', 'href');
+    if (!mikujiImg || !mikujiImg.startsWith('data:image/png') || mikujiImg.length < 5000) errors.push('みくじ画像が生成されない');
     await page.click('#btn-redraw');
+    await page.waitForSelector('.mikuji-rank', { timeout: 6000 });
     if (!/吉/.test(await page.textContent('#modal-body'))) errors.push('みくじの引き直しができない');
     await page.click('#modal-close');
     if (await page.locator('#modal.hidden').count() !== 1) errors.push('モーダルが閉じない');

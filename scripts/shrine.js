@@ -349,37 +349,153 @@
             roll -= OMIKUJI_RANKS[i].w;
             if (roll <= 0) { rank = OMIKUJI_RANKS[i].r; break; }
         }
-        function stars() { return '★★★★★'.slice(0, 2 + Math.floor(Math.random() * 4)).padEnd(5, '☆'); }
+        /* 星は加重抽選（5:42% / 4:32% / 3:18% / 2:8% = 平均4.08 ≥ 3.9）。
+           ファンの背中を押すみくじなので、悪い結果は出しすぎない */
+        function stars() {
+            var r = Math.random();
+            var n = r < 0.42 ? 5 : r < 0.74 ? 4 : r < 0.92 ? 3 : 2;
+            return '★★★★★'.slice(0, n).padEnd(5, '☆');
+        }
+        var all5 = rank === '推し大吉';
+        function star5() { return all5 ? '★★★★★' : stars(); }
         return {
             rank: rank,
             msg: OMIKUJI_MSGS[Math.floor(Math.random() * OMIKUJI_MSGS.length)],
             luck: [
-                { label: '当選運', v: stars() },
-                { label: '神席運', v: stars() },
-                { label: 'ファンサ運', v: stars() },
-                { label: '遠征運', v: stars() }
+                { label: '当選運', v: star5() },
+                { label: '神席運', v: star5() },
+                { label: 'ファンサ運', v: star5() },
+                { label: '遠征運', v: star5() }
             ]
         };
     }
-    function openOmikuji() {
+
+    /* みくじ紙の画像（保存してSNSに添付できる） */
+    function makeOmikujiImage(o) {
+        var color = currentColor();
+        var W = 480, H = 960;
+        var cv = document.createElement('canvas');
+        cv.width = W; cv.height = H;
+        var ctx = cv.getContext('2d');
+        var bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#fdf9ee');
+        bg.addColorStop(1, '#f0e6cf');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(120, 100, 60, 0.05)';
+        for (var i = 0; i < 500; i++) ctx.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5);
+        ctx.strokeStyle = color.hex;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(18, 18, W - 36, H - 36);
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(30, 30, W - 60, H - 60);
+
+        var mincho = '"Shippori Mincho", "Hiragino Mincho ProN", serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#6d6350';
+        ctx.font = '600 24px ' + mincho;
+        ctx.fillText('十色神社 推し活みくじ', W / 2, 78);
+
+        ctx.fillStyle = color.id === 'white' ? '#948a70' : color.deep;
+        ctx.font = '600 ' + (o.rank.length > 2 ? 84 : 108) + 'px ' + mincho;
+        ctx.fillText(o.rank, W / 2, 190);
+
+        ctx.fillStyle = '#4a3b28';
+        ctx.font = '500 26px ' + mincho;
+        var line = '', lines = [], ch;
+        for (i = 0; i < o.msg.length; i++) {
+            ch = o.msg[i];
+            line += ch;
+            if (line.length >= 14 || i === o.msg.length - 1) { lines.push(line); line = ''; }
+        }
+        lines.forEach(function (l, idx) { ctx.fillText(l, W / 2, 290 + idx * 40); });
+
+        var y = 430;
+        ctx.font = '600 30px ' + mincho;
+        o.luck.forEach(function (l) {
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#4a3b28';
+            ctx.fillText(l.label, 84, y);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = color.id === 'white' ? '#948a70' : color.deep;
+            ctx.fillText(l.v, W - 84, y);
+            ctx.strokeStyle = '#d8c9a8';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(72, y + 28);
+            ctx.lineTo(W - 72, y + 28);
+            ctx.stroke();
+            y += 68;
+        });
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#6d6350';
+        ctx.font = '500 24px ' + mincho;
+        ctx.fillText('ラッキーカラー：' + color.jp, W / 2, y + 30);
+
+        var now = new Date();
+        ctx.font = '400 20px sans-serif';
+        ctx.fillStyle = '#8d8062';
+        ctx.fillText(now.getFullYear() + '.' + (now.getMonth() + 1) + '.' + now.getDate() + '  TOIRO SHRINE', W / 2, H - 70);
+        return cv.toDataURL('image/png');
+    }
+
+    function burstSparkles() {
+        var panel = modal.querySelector('.modal-panel');
+        var color = currentColor();
+        for (var i = 0; i < 20; i++) {
+            var s = document.createElement('span');
+            s.className = 'kira';
+            s.style.background = i % 3 === 0 ? '#ffe9a8' : color.hex;
+            s.style.setProperty('--kx', (Math.random() * 260 - 130) + 'px');
+            s.style.setProperty('--ky', (Math.random() * -240 - 40) + 'px');
+            s.style.animationDelay = (Math.random() * 0.25) + 's';
+            panel.appendChild(s);
+            s.addEventListener('animationend', function (e) { e.target.remove(); });
+        }
+    }
+
+    function showOmikujiResult() {
+        if (modal.classList.contains('hidden')) return; /* 演出中に閉じられたら何もしない */
         var o = drawOmikuji();
         var color = currentColor();
         var rows = o.luck.map(function (l) {
             return '<div class="mikuji-row"><span>' + l.label + '</span><span class="mikuji-stars">' + l.v + '</span></div>';
         }).join('');
         var shareText = '十色神社の推し活みくじは【' + o.rank + '】でした ⛩ あなたの推しは、何色ですか。';
+        var img = makeOmikujiImage(o);
         openModal(
             '<p class="modal-kicker">推し活みくじ</p>' +
+            '<div class="mikuji-paper">' +
             '<p class="mikuji-rank">' + o.rank + '</p>' +
             '<p class="mikuji-msg">' + o.msg + '</p>' +
             '<div class="mikuji-luck">' + rows + '</div>' +
             '<p class="mikuji-lucky">ラッキーカラー：あなたの推し色（' + color.jp + '）</p>' +
+            '</div>' +
             '<div class="modal-actions">' +
+            '<a class="pill-btn" id="btn-mikuji-save" href="' + img + '" download="toiro-omikuji.png">画像を保存</a>' +
             '<a class="btn-x" href="' + xShareUrl(shareText) + '" target="_blank" rel="noopener">𝕏 で結果をポスト</a>' +
             '<button type="button" class="pill-btn" id="btn-redraw">もう一度引く</button>' +
             '</div>'
         );
+        if (o.rank === '推し大吉' || o.rank === '大吉') burstSparkles();
         document.getElementById('btn-redraw').addEventListener('click', openOmikuji);
+    }
+
+    function openOmikuji() {
+        /* 儀式演出: みくじ筒を振ってから結果が出る */
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) { modal.classList.remove('hidden'); showOmikujiResult(); return; }
+        openModal(
+            '<p class="modal-kicker">推し活みくじ</p>' +
+            '<div class="mikuji-tube" aria-hidden="true">' +
+            '<span class="tube-stick"></span>' +
+            '<span class="tube-body">御神籤</span>' +
+            '</div>' +
+            '<p class="mikuji-wait">心の中で、推しを想いながら…</p>'
+        );
+        setTimeout(showOmikujiResult, 1500);
     }
 
     /* ---- 推し色御朱印メーカー ---- */
