@@ -67,6 +67,9 @@ const path = require('path');
     if (!mikujiText.includes('推し活みくじ')) errors.push('みくじモーダルが開かない');
     if (!/吉/.test(mikujiText)) errors.push('みくじの結果が出ない');
     if (await page.locator('.mikuji-paper').count() !== 1) errors.push('おみくじ紙が出ない');
+    if (!mikujiText.includes('ラッキーアイテム')) errors.push('ラッキーアイテムが出ない');
+    if (!mikujiText.includes('開運アクション')) errors.push('開運アクションが出ない');
+    if (mikujiText.includes('ラッキーカラー')) errors.push('廃止したラッキーカラーがまだ出る');
     if (!(await page.getAttribute('#modal-body .btn-x', 'href')).includes('twitter.com/intent')) errors.push('みくじのシェアリンクが不正');
     const mikujiImg = await page.getAttribute('#btn-mikuji-save', 'href');
     if (!mikujiImg || !mikujiImg.startsWith('data:image/png') || mikujiImg.length < 5000) errors.push('みくじ画像が生成されない');
@@ -87,9 +90,11 @@ const path = require('path');
     if (!(await page.getAttribute('#btn-goshuin-save', 'download'))) errors.push('御朱印の保存リンクがない');
     await page.click('#modal-close');
 
-    // 花手水の波紋と風鈴の鳴動
+    // 花手水の波紋・花びら・ご利益のことば、風鈴の鳴動
     await page.click('.spot-card[data-action="chozu"]');
     if (await page.locator('.ripple-ring').count() < 1) errors.push('花手水の波紋が出ない');
+    if (await page.locator('.petal-float').count() < 4) errors.push('花手水の花びらが舞わない');
+    if (await page.locator('.chozu-msg').count() !== 1) errors.push('花手水のご利益メッセージが出ない');
     await page.click('.spot-card[data-action="furin"]');
     if (await page.locator('.furin-visual.ringing').count() !== 1) errors.push('風鈴が鳴動しない');
 

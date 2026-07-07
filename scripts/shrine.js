@@ -288,15 +288,48 @@
         modalBody.innerHTML = '';
     }
 
-    /* ---- 花手水: ふれると波紋 ---- */
+    /* ---- 花手水: ふれると波紋・花びら・ご利益のことば ---- */
+    var CHOZU_BLESSINGS = [
+        '心が清められました ✧',
+        '良いご縁が近づいています',
+        '推しからの風を感じました',
+        '今日の現場運が上がりました',
+        '願いが水面に届きました',
+        'やさしい気持ちが満ちていきます'
+    ];
     function rippleChozu(card) {
+        var visual = card.querySelector('.spot-visual');
         var water = card.querySelector('.water');
+        var cx = water.offsetLeft + water.offsetWidth / 2;
+        var cy = water.offsetTop + water.offsetHeight / 2;
+
         var ring = document.createElement('span');
         ring.className = 'ripple-ring';
-        water.parentNode.appendChild(ring);
-        ring.style.left = water.offsetLeft + water.offsetWidth / 2 + 'px';
-        ring.style.top = water.offsetTop + water.offsetHeight / 2 + 'px';
+        ring.style.left = cx + 'px';
+        ring.style.top = cy + 'px';
+        visual.appendChild(ring);
         ring.addEventListener('animationend', function () { ring.remove(); });
+
+        /* 推し色の花びらが舞い上がる */
+        for (var i = 0; i < 8; i++) {
+            var petal = document.createElement('span');
+            petal.className = 'petal-float';
+            petal.style.left = cx + (Math.random() * 70 - 35) + 'px';
+            petal.style.top = cy - 6 + 'px';
+            petal.style.setProperty('--px', (Math.random() * 60 - 30) + 'px');
+            petal.style.animationDelay = (Math.random() * 0.3) + 's';
+            visual.appendChild(petal);
+            petal.addEventListener('animationend', function (e) { e.target.remove(); });
+        }
+
+        /* ご利益のことば */
+        var old = visual.querySelector('.chozu-msg');
+        if (old) old.remove();
+        var msg = document.createElement('span');
+        msg.className = 'chozu-msg';
+        msg.textContent = CHOZU_BLESSINGS[Math.floor(Math.random() * CHOZU_BLESSINGS.length)];
+        visual.appendChild(msg);
+        msg.addEventListener('animationend', function () { msg.remove(); });
     }
 
     /* ---- 風鈴: ふれると鳴る ---- */
@@ -330,6 +363,22 @@
         { r: '推し大吉', w: 4 }, { r: '大吉', w: 12 }, { r: '中吉', w: 26 },
         { r: '小吉', w: 28 }, { r: '吉', w: 20 }, { r: '末吉', w: 10 }
     ];
+    var LUCKY_ITEMS = [
+        'ペンライト', '銀テープ', '推しのうちわ', 'トレカ', '双眼鏡',
+        'モバイルバッテリー', 'マフラータオル', 'チェキ', '缶バッジ',
+        '推し色のネイル', 'アクリルスタンド', '会場限定ドリンク'
+    ];
+    var LUCKY_ACTIONS = [
+        '開演前に深呼吸を3回する',
+        '推しの初期曲を聴いてから出発する',
+        '遠征のお供に甘いものを持っていく',
+        'SNSで推しの好きなところを一つ語る',
+        '物販列では水分補給を忘れずに',
+        '会場には右足から入ってみる',
+        '今夜は推しの写真を見てから眠る',
+        'アクスタと一緒に空の写真を撮る',
+        '友だちに推しの布教をしてみる'
+    ];
     var OMIKUJI_MSGS = [
         '今日の現場は、最高の思い出になる予感。',
         '推しの新しい一面に出会えるかも。',
@@ -361,6 +410,8 @@
         return {
             rank: rank,
             msg: OMIKUJI_MSGS[Math.floor(Math.random() * OMIKUJI_MSGS.length)],
+            item: LUCKY_ITEMS[Math.floor(Math.random() * LUCKY_ITEMS.length)],
+            action: LUCKY_ACTIONS[Math.floor(Math.random() * LUCKY_ACTIONS.length)],
             luck: [
                 { label: '当選運', v: star5() },
                 { label: '神席運', v: star5() },
@@ -432,7 +483,11 @@
         ctx.textAlign = 'center';
         ctx.fillStyle = '#6d6350';
         ctx.font = '500 24px ' + mincho;
-        ctx.fillText('ラッキーカラー：' + color.jp, W / 2, y + 30);
+        ctx.fillText('ラッキーアイテム：' + o.item, W / 2, y + 26);
+        ctx.font = '500 22px ' + mincho;
+        ctx.fillText('開運アクション', W / 2, y + 66);
+        ctx.fillStyle = '#4a3b28';
+        ctx.fillText(o.action, W / 2, y + 100);
 
         var now = new Date();
         ctx.font = '400 20px sans-serif';
@@ -463,7 +518,7 @@
         var rows = o.luck.map(function (l) {
             return '<div class="mikuji-row"><span>' + l.label + '</span><span class="mikuji-stars">' + l.v + '</span></div>';
         }).join('');
-        var shareText = '十色神社の推し活みくじは【' + o.rank + '】でした ⛩ あなたの推しは、何色ですか。';
+        var shareText = '十色神社の推し活みくじは【' + o.rank + '】、ラッキーアイテムは「' + o.item + '」でした ⛩ あなたの推しは、何色ですか。';
         var img = makeOmikujiImage(o);
         openModal(
             '<p class="modal-kicker">推し活みくじ</p>' +
@@ -471,7 +526,8 @@
             '<p class="mikuji-rank">' + o.rank + '</p>' +
             '<p class="mikuji-msg">' + o.msg + '</p>' +
             '<div class="mikuji-luck">' + rows + '</div>' +
-            '<p class="mikuji-lucky">ラッキーカラー：あなたの推し色（' + color.jp + '）</p>' +
+            '<p class="mikuji-lucky">ラッキーアイテム：<strong>' + o.item + '</strong></p>' +
+            '<p class="mikuji-lucky">開運アクション：' + o.action + '</p>' +
             '</div>' +
             '<div class="modal-actions">' +
             '<a class="pill-btn" id="btn-mikuji-save" href="' + img + '" download="toiro-omikuji.png">画像を保存</a>' +

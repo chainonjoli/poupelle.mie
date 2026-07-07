@@ -907,6 +907,46 @@ body[data-mode="day"] .ema-error { color: #c0392b; }
     to   { width: 130px; height: 44px; opacity: 0; }
 }
 
+/* 花手水: 舞い上がる花びら */
+.petal-float {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    border-radius: 62% 38% 60% 40% / 55% 60% 40% 45%;
+    background: radial-gradient(circle at 35% 30%, var(--oshi-soft) 0%, var(--oshi) 90%);
+    box-shadow: 0 0 8px var(--glow);
+    pointer-events: none;
+    opacity: 0;
+    animation: petal-up 1.7s ease-out forwards;
+}
+@keyframes petal-up {
+    0% { opacity: 0; transform: translate(0, 0) rotate(0); }
+    15% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--px), -78px) rotate(260deg); }
+}
+
+/* 花手水: ご利益のことば */
+.chozu-msg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--oshi);
+    text-shadow: 0 0 12px var(--glow);
+    pointer-events: none;
+    opacity: 0;
+    animation: msg-float 2s ease forwards;
+}
+body[data-mode="day"] .chozu-msg { color: var(--oshi-deep); text-shadow: none; }
+@keyframes msg-float {
+    0% { opacity: 0; transform: translateY(8px); }
+    20%, 75% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-8px); }
+}
+
 /* 風鈴の鳴動 */
 .furin-visual.ringing .furin { animation: furin-ring 1.3s ease; }
 .furin-visual.ringing .furin.d2 { animation-delay: 0.08s; }
@@ -1088,7 +1128,9 @@ body[data-color="white"] .mikuji-rank { color: #948a70; }
 }
 .mikuji-stars { color: var(--oshi-deep); letter-spacing: 0.1em; }
 body[data-color="white"] .mikuji-stars { color: #948a70; }
-.mikuji-lucky { font-size: 0.72rem; color: #6d6350; }
+.mikuji-lucky { font-size: 0.74rem; color: #6d6350; }
+.mikuji-lucky strong { color: var(--oshi-deep); font-weight: 600; }
+body[data-color="white"] .mikuji-lucky strong { color: #948a70; }
 
 /* 紙吹雪（大吉のとき） */
 .kira {
