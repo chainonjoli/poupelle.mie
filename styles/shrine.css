@@ -165,23 +165,9 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     animation-delay: calc(var(--i) * 90ms + 0.2s);
 }
 .gate-title .k-char {
-    /* 十色を象徴する虹彩グラデーション。
-       親に付けたグラデーション文字は transform された子には効かないため、文字ごとに適用 */
-    background: linear-gradient(120deg, #ffd12e, #ff70a6, #a566ff, #4fd6ff, #3fd97c, #ffd12e);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation:
-        char-pop 0.7s var(--spring) forwards,
-        iridescent 9s ease-in-out infinite;
-    animation-delay: calc(var(--i) * 90ms + 0.2s), calc(var(--i) * -0.9s);
-    filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.18));
-}
-@keyframes iridescent {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    /* 雑誌の表紙タイトルのような、一色の上品なセリフ体 */
+    color: #f7f1e0;
+    text-shadow: 0 0 40px rgba(247, 241, 224, 0.16);
 }
 @keyframes char-pop {
     from { opacity: 0; transform: translateY(0.55em) rotate(5deg) scale(0.8); }
@@ -210,8 +196,8 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     justify-content: center;
     padding: 24px 20px;
     background:
-        radial-gradient(ellipse at 72% 40%, color-mix(in srgb, var(--oshi) 24%, transparent) 0%, transparent 58%),
-        radial-gradient(ellipse at 50% 120%, #16112a 0%, #07060c 75%);
+        radial-gradient(ellipse at 72% 34%, color-mix(in srgb, var(--oshi) 12%, transparent) 0%, transparent 56%),
+        radial-gradient(ellipse at 50% 120%, #14111d 0%, #07060a 75%);
     overflow-y: auto;
     transition: opacity 0.9s ease, background 0.7s ease;
 }
@@ -258,7 +244,24 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     filter: none;
 }
 
-.gate-kicker { color: #cdbf9a; letter-spacing: 0.22em; font-size: 0.78rem; }
+.gate-kicker {
+    position: relative;
+    display: inline-block;
+    color: #a89a78;
+    letter-spacing: 0.34em;
+    font-size: 0.76rem;
+    padding-left: 46px;
+}
+.gate-kicker::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 36px;
+    height: 1px;
+    background: #a89a78;
+}
+@media (max-width: 760px) { .gate-kicker { padding-left: 0; } .gate-kicker::before { display: none; } }
 .gate-title {
     /* 御朱印の印影のような2×2の字組み（word-breakで2文字ずつ折り返す） */
     font-size: clamp(4rem, 16vw, 7.2rem);
@@ -266,19 +269,36 @@ body[data-mode="day"] .particle { opacity: 0; animation-name: rise-day; }
     word-break: break-all;
     letter-spacing: 0.06em;
     line-height: 1.04;
-    margin: 10px 0 6px;
+    margin: 18px 0 10px;
 }
 @media (max-width: 760px) { .gate-title { margin-inline: auto; } }
-.gate-sub { color: #b3a479; letter-spacing: 0.28em; font-size: 0.82rem; margin: 8px 0 26px; }
+.gate-sub {
+    position: relative;
+    color: #8d8570;
+    letter-spacing: 0.28em;
+    font-size: 0.78rem;
+    margin: 0 0 30px;
+    padding-bottom: 20px;
+}
+.gate-sub::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 64px;
+    height: 1px;
+    background: color-mix(in srgb, var(--oshi) 55%, #8d8570);
+}
+@media (max-width: 760px) { .gate-sub::after { left: 50%; transform: translateX(-50%); } }
 .gate-question {
     font-family: 'Shippori Mincho', serif;
-    font-size: clamp(1.4rem, 5vw, 2rem);
-    letter-spacing: 0.12em;
-    line-height: 1.6;
+    font-size: clamp(1.5rem, 5vw, 2.1rem);
+    letter-spacing: 0.1em;
+    line-height: 1.7;
     color: #fdf8ea;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
-.gate-lead { color: #d8d0ba; font-size: 0.9rem; margin-bottom: 26px; }
+.gate-lead { color: #c9c0a6; font-size: 0.92rem; line-height: 1.8; margin-bottom: 30px; }
 .gate-lead strong { color: color-mix(in srgb, var(--oshi) 75%, #fff); transition: color 0.5s ease; }
 
 /* ---- 十色の輪（円環に並ぶスウォッチ = 神紋そのもの） ---- */
