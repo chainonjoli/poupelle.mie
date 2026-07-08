@@ -673,6 +673,36 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
     border: 1px solid var(--surface-border);
 }
 .goshuin-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+/* 授与の儀式（朱印が押される瞬間） */
+.goshuin-stage {
+    position: relative;
+    width: fit-content;
+    margin: 0 auto;
+    animation: stage-press 1.6s ease;
+}
+@keyframes stage-press {
+    0%, 55% { transform: none; }
+    62% { transform: scale(0.99); }
+    72%, 100% { transform: none; }
+}
+.goshuin-stage .goshuin-img { margin-bottom: 0; }
+.stamp-press {
+    /* 完成画像から朱印の領域だけを切り出して重ね、押される動きを付ける */
+    position: absolute;
+    left: 38.89%;
+    top: 58%;
+    width: 22.23%;
+    height: 16%;
+    background-size: 450% 625%;
+    background-position: 50% 69.05%;
+    opacity: 0;
+    transform: scale(1.7) rotate(-5deg);
+    animation: stamp-in 0.5s cubic-bezier(0.5, 0, 0.6, 1) 0.9s forwards;
+}
+@keyframes stamp-in {
+    to { opacity: 1; transform: none; }
+}
 .goshuin-note { text-align: center; font-size: 0.86rem; color: var(--text-muted); margin-bottom: 18px; }
 .goshuin-note.aniv {
     color: var(--text);
@@ -845,6 +875,8 @@ button.book-cell.has-record:active { transform: scale(0.95); }
 .anniv-card-label { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 8px; }
 .anniv-card-count { font-family: 'Shippori Mincho', serif; font-size: 1.3rem; color: var(--oshi-deep); }
 .anniv-card.today .anniv-card-count { color: var(--text); }
+.anniv-calendar { margin-top: 24px; text-align: center; }
+.anniv-calendar .rack-note { margin-top: 10px; }
 
 /* ============================================================
    8. 共感

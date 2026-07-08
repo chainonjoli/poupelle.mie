@@ -504,19 +504,35 @@
         return null;
     }
 
+    /* 明朝体の読み込みを待ってから描く（初回訪問時に代替フォントで
+       描かれてしまうのを防ぐ） */
+    function withFonts(cb) {
+        if (document.fonts && document.fonts.load) {
+            Promise.all([
+                document.fonts.load('600 90px "Shippori Mincho"'),
+                document.fonts.load('400 19px "Noto Serif JP"')
+            ]).then(cb, cb);
+        } else {
+            cb();
+        }
+    }
+
     /* rec = { name, wish, visit, aniv, color(色ID), date('YYYY-MM-DD'),
                oshi(推しの名前), group, live, streak }
-       過去の御朱印も、この記録から同じ絵柄を再生成できる */
-    function makeGoshuin(rec) {
+       過去の御朱印も、この記録から同じ絵柄を再生成できる。
+       opts.noSeal: 朱印を押す前の姿（授与の儀式演出用） */
+    function makeGoshuin(rec, opts) {
         var name = rec.name;
         var wish = rec.wish;
         var visitCount = rec.visit;
         var anivLabel = rec.aniv;
         var color = findColor(rec.color) || currentColor();
         var W = 720, H = 1000;
+        var SCALE = 2; /* シェア・印刷に耐える高解像度で出力 */
         var cv = document.createElement('canvas');
-        cv.width = W; cv.height = H;
+        cv.width = W * SCALE; cv.height = H * SCALE;
         var ctx = cv.getContext('2d');
+        ctx.scale(SCALE, SCALE);
 
         /* 和紙の下地 */
         var bg = ctx.createLinearGradient(0, 0, 0, H);
@@ -566,29 +582,31 @@
         /* 角印（推しの名前が入っていれば名前のハンコに。
            本物の印章と同じく朱色で、右の列から上→下へ文字を刻む） */
         var VERMILION = '#c43124';
-        ctx.save();
-        ctx.translate(W / 2, H / 2 + 160);
-        ctx.rotate(-0.04);
-        ctx.fillStyle = VERMILION;
-        var r = 75;
-        ctx.beginPath();
-        if (ctx.roundRect) { ctx.roundRect(-r, -r, r * 2, r * 2, 10); } else { ctx.rect(-r, -r, r * 2, r * 2); }
-        ctx.fill();
-        ctx.fillStyle = '#fdf9ee';
-        var sealText = rec.oshi || '推';
-        var sealChars = Array.from(sealText);
-        var cols = Math.ceil(Math.sqrt(sealChars.length));
-        var rows = Math.ceil(sealChars.length / cols);
-        var cell = (r * 2 - 26) / Math.max(cols, rows);
-        ctx.font = '600 ' + Math.floor(cell * 0.86) + 'px ' + mincho;
-        sealChars.forEach(function (ch, idx) {
-            var colIdx = Math.floor(idx / rows);       /* 右の列から */
-            var rowIdx = idx % rows;                   /* 上から下へ */
-            var x = ((cols - 1) / 2 - colIdx) * cell;
-            var y = (rowIdx - (rows - 1) / 2) * cell;
-            ctx.fillText(ch, x, y + cell * 0.04);
-        });
-        ctx.restore();
+        if (!(opts && opts.noSeal)) {
+            ctx.save();
+            ctx.translate(W / 2, H / 2 + 160);
+            ctx.rotate(-0.04);
+            ctx.fillStyle = VERMILION;
+            var r = 75;
+            ctx.beginPath();
+            if (ctx.roundRect) { ctx.roundRect(-r, -r, r * 2, r * 2, 10); } else { ctx.rect(-r, -r, r * 2, r * 2); }
+            ctx.fill();
+            ctx.fillStyle = '#fdf9ee';
+            var sealText = rec.oshi || '推';
+            var sealChars = Array.from(sealText);
+            var cols = Math.ceil(Math.sqrt(sealChars.length));
+            var rows = Math.ceil(sealChars.length / cols);
+            var cell = (r * 2 - 26) / Math.max(cols, rows);
+            ctx.font = '600 ' + Math.floor(cell * 0.86) + 'px ' + mincho;
+            sealChars.forEach(function (ch, idx) {
+                var colIdx = Math.floor(idx / rows);       /* 右の列から */
+                var rowIdx = idx % rows;                   /* 上から下へ */
+                var x = ((cols - 1) / 2 - colIdx) * cell;
+                var y = (rowIdx - (rows - 1) / 2) * cell;
+                ctx.fillText(ch, x, y + cell * 0.04);
+            });
+            ctx.restore();
+        }
 
         ctx.fillStyle = '#3a2f22';
         ctx.font = '600 32px ' + mincho;
@@ -718,13 +736,15 @@
         rec.color = currentColor().id;
         records[today] = rec;
         save(STORAGE_GOSHUIN_RECORDS, records);
-        var img = makeGoshuin(rec);
-        save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
-        var note = profile.oshi
-            ? '入力内容を反映しました。角印が「' + profile.oshi + '」のハンコになっています。'
-            : '入力内容を反映しました。角印を推しの名前のハンコにするには、上の「推しのお名前」欄に入力してからもう一度押してください。';
-        showGoshuinResult(img, true, note);
-        document.querySelector('#goshuin-area .goshuin-img').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        withFonts(function () {
+            var img = makeGoshuin(rec);
+            save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
+            var note = profile.oshi
+                ? '入力内容を反映しました。角印が「' + profile.oshi + '」のハンコになっています。'
+                : '入力内容を反映しました。角印を推しの名前のハンコにするには、上の「推しのお名前」欄に入力してからもう一度押してください。';
+            showGoshuinResult(img, true, note);
+            document.querySelector('#goshuin-area .goshuin-img').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
     }
 
     function loadGoshuinRecords() { return load(STORAGE_GOSHUIN_RECORDS, {}); }
@@ -767,10 +787,39 @@
         var records = loadGoshuinRecords();
         records[today] = rec;
         save(STORAGE_GOSHUIN_RECORDS, records);
-        var img = makeGoshuin(rec);
-        save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
-        showGoshuinResult(img, false);
-        renderGoshuinBook();
+        withFonts(function () {
+            var img = makeGoshuin(rec);
+            save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
+            var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduce) {
+                showGoshuinResult(img, false);
+            } else {
+                playStampCeremony(makeGoshuin(rec, { noSeal: true }), img);
+            }
+            renderGoshuinBook();
+        });
+    }
+
+    /* 授与の儀式: 墨書きの姿が現れ、一拍おいて朱印が「トン」と押される */
+    function playStampCeremony(baseImg, finalImg) {
+        var area = document.getElementById('goshuin-area');
+        area.innerHTML =
+            '<div class="goshuin-stage">' +
+            '<img class="goshuin-img" src="' + baseImg + '" alt="御朱印をしたためています">' +
+            '<span class="stamp-press" style="background-image:url(' + finalImg + ')"></span>' +
+            '</div>' +
+            '<p class="goshuin-note">御朱印をしたためています…</p>';
+        var stage = area.querySelector('.goshuin-stage');
+        stage.addEventListener('animationend', function onEnd(e) {
+            if (e.target.classList.contains('stamp-press')) {
+                stage.removeEventListener('animationend', onEnd);
+                setTimeout(function () { showGoshuinResult(finalImg, false); }, 500);
+            }
+        });
+        /* 演出が何らかの理由で完了しなくても、必ず結果は表示する */
+        setTimeout(function () {
+            if (document.querySelector('#goshuin-area .goshuin-stage')) showGoshuinResult(finalImg, false);
+        }, 3200);
     }
 
     function renderGoshuinArea() {
@@ -783,7 +832,9 @@
         }
         if (records[today]) {
             /* 別端末から記録を読み込んだ直後など、画像キャッシュがない場合は記録から再生成 */
-            showGoshuinResult(makeGoshuin(records[today]), true);
+            withFonts(function () {
+                showGoshuinResult(makeGoshuin(records[today]), true);
+            });
             return;
         }
         var aniv = todaysAnniversary();
@@ -876,6 +927,9 @@
         var records = loadGoshuinRecords();
         var rec = records[ds];
         if (!rec) return;
+        withFonts(function () { showBookViewerImage(ds, rec); });
+    }
+    function showBookViewerImage(ds, rec) {
         var img = makeGoshuin(rec);
         var parts = ds.split('-');
         var viewer = document.getElementById('book-viewer');
@@ -1069,6 +1123,7 @@
     function renderAnnivList() {
         var list = loadAnniversaries();
         var wrap = document.getElementById('anniv-list');
+        document.getElementById('anniv-calendar').classList.toggle('hidden', !list.length);
         if (!list.length) {
             wrap.innerHTML = '<p class="anniv-empty">まだ記念日が登録されていません。</p>';
             return;
@@ -1082,6 +1137,53 @@
                 '<p class="anniv-card-count">' + countText + '</p>' +
                 '</div>';
         }).join('');
+    }
+
+    /* ---- 記念日をスマホのカレンダーへ（.ics）----
+       Webから通知が打てない代わりに、OSのカレンダー通知に任せる */
+    function buildAnnivIcs() {
+        var list = loadAnniversaries();
+        var now = new Date();
+        var lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//TOIRO SHRINE//toiro-shrine//JA',
+            'CALSCALE:GREGORIAN'
+        ];
+        list.forEach(function (a, i) {
+            var next = new Date(now.getFullYear(), a.month - 1, a.day);
+            var todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (next < todayZero) next = new Date(now.getFullYear() + 1, a.month - 1, a.day);
+            var ymd = next.getFullYear() + pad2(next.getMonth() + 1) + pad2(next.getDate());
+            lines.push(
+                'BEGIN:VEVENT',
+                'UID:toiro-anniv-' + i + '-' + a.month + '-' + a.day + '@toiro-shrine',
+                'SUMMARY:' + a.label + '（十色神社）',
+                'DTSTART;VALUE=DATE:' + ymd,
+                'RRULE:FREQ=YEARLY',
+                'DESCRIPTION:十色神社に登録した記念日です。今日は特別な御朱印が授かれます。',
+                'BEGIN:VALARM',
+                'ACTION:DISPLAY',
+                'DESCRIPTION:' + a.label + '（十色神社）',
+                'TRIGGER:PT9H',
+                'END:VALARM',
+                'END:VEVENT'
+            );
+        });
+        lines.push('END:VCALENDAR');
+        return lines.join('\r\n');
+    }
+
+    function downloadAnnivIcs() {
+        var blob = new Blob([buildAnnivIcs()], { type: 'text/calendar' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'toiro-kinenbi.ics';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
 
     function saveAnniversaries() {
@@ -1153,6 +1255,7 @@
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
     document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
+    document.getElementById('btn-anniv-ics').addEventListener('click', downloadAnnivIcs);
     document.getElementById('btn-book-prev').addEventListener('click', function () { shiftBookMonth(-1); });
     document.getElementById('btn-book-next').addEventListener('click', function () { shiftBookMonth(1); });
     document.getElementById('btn-export').addEventListener('click', exportRecords);
