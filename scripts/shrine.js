@@ -194,6 +194,7 @@
         renderAnnivRows();
         renderAnnivList();
         renderEmpathyFeed();
+        renderMemory();
         setTimeout(syncScrollOffset, 0);
     }
 
@@ -254,12 +255,19 @@
         });
     }
 
+    function toggleFulfilled(index) {
+        if (!emaList[index]) return;
+        emaList[index].fulfilled = !emaList[index].fulfilled;
+        saveEma();
+        renderEmaRack();
+    }
+
     function renderEmaRack() {
         var rack = document.getElementById('ema-rack');
         rack.innerHTML = '';
-        emaList.forEach(function (item) {
+        emaList.forEach(function (item, index) {
             var plaque = document.createElement('div');
-            plaque.className = 'ema-plaque';
+            plaque.className = 'ema-plaque' + (item.fulfilled ? ' fulfilled' : '');
             plaque.style.setProperty('--ema', findColor(item.color) ? findColor(item.color).hex : 'var(--gold)');
             var wishEl = document.createElement('p');
             wishEl.className = 'ema-wish-text';
@@ -269,8 +277,65 @@
             sigEl.textContent = (item.name || '名無し') + ' より';
             plaque.appendChild(wishEl);
             plaque.appendChild(sigEl);
+            if (item.fulfilled) {
+                var seal = document.createElement('span');
+                seal.className = 'ema-kanau-seal';
+                seal.textContent = '叶';
+                seal.setAttribute('aria-label', '叶いました');
+                plaque.appendChild(seal);
+            }
+            var toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'ema-kanau-btn';
+            toggleBtn.textContent = item.fulfilled ? '取り消す' : '叶いました';
+            toggleBtn.addEventListener('click', function () { toggleFulfilled(index); });
+            plaque.appendChild(toggleBtn);
             rack.appendChild(plaque);
         });
+    }
+
+    /* ---- あの日の願いとの再会（30日以上前の絵馬をそっと差し出す） ---- */
+    function renderMemory() {
+        var card = document.getElementById('memory-card');
+        var now = new Date();
+        var todayZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var best = null;
+        var bestScore = -1;
+        emaList.forEach(function (item) {
+            if (!item.date) return;
+            var d = new Date(item.date);
+            if (isNaN(d)) return;
+            var days = Math.round((todayZero - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+            if (days < 30) return;
+            /* 一年前・半年前・三月前・一月前の「節目」を優先し、なければ最も古いもの */
+            var score = days;
+            if (Math.abs(days - 365) <= 5) score += 100000;
+            else if (Math.abs(days - 180) <= 5) score += 50000;
+            else if (Math.abs(days - 90) <= 5) score += 20000;
+            else if (Math.abs(days - 30) <= 3) score += 10000;
+            if (score > bestScore) { bestScore = score; best = { item: item, days: days }; }
+        });
+        if (!best) { card.classList.add('hidden'); return; }
+        var label;
+        if (Math.abs(best.days - 365) <= 5) label = '一年前の今日';
+        else if (Math.abs(best.days - 180) <= 5) label = '半年前の今日';
+        else if (Math.abs(best.days - 90) <= 5) label = '三月前の今日';
+        else if (Math.abs(best.days - 30) <= 3) label = 'ひと月前の今日';
+        else label = best.days + '日前';
+        card.innerHTML = '';
+        var kicker = document.createElement('p');
+        kicker.className = 'memory-kicker';
+        kicker.textContent = label + '、あなたはこう願っていました。';
+        var wishEl = document.createElement('p');
+        wishEl.className = 'memory-wish';
+        wishEl.textContent = '「' + best.item.wish + '」';
+        var note = document.createElement('p');
+        note.className = 'memory-note';
+        note.textContent = 'その願いは、いま どうなりましたか。叶っていたら、絵馬掛けで「叶いました」の印を。';
+        card.appendChild(kicker);
+        card.appendChild(wishEl);
+        card.appendChild(note);
+        card.classList.remove('hidden');
     }
 
     function dedicateEma() {

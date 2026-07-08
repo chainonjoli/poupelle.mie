@@ -72,6 +72,16 @@ const path = require('path');
     if (!rackText.includes('ライブが当たりますように')) errors.push('絵馬掛けに願いが出ない');
     if (!rackText.includes('あず より')) errors.push('絵馬掛けに名前が出ない');
 
+    // 叶いました：印を付けると金の「叶」が現れ、リロード後も残り、取り消せる
+    await page.click('.ema-kanau-btn >> nth=0');
+    if (await page.locator('.ema-plaque.fulfilled').count() !== 1) errors.push('叶いましたの印が付かない');
+    if (!(await page.textContent('.ema-kanau-seal')).includes('叶')) errors.push('叶の印が出ない');
+    await page.reload();
+    await page.waitForSelector('#main:not(.hidden)');
+    if (await page.locator('.ema-plaque.fulfilled').count() !== 1) errors.push('リロード後に叶いましたの印が消える');
+    await page.click('.ema-kanau-btn >> nth=0');
+    if (await page.locator('.ema-plaque.fulfilled').count() !== 0) errors.push('叶いましたの印を取り消せない');
+
     // 4. お守りページ：願いのテーマが反映される
     const mamoriText = await page.textContent('#mamori-card');
     if (!mamoriText.includes('推し守')) errors.push('推し守カードが出ない');
@@ -170,6 +180,25 @@ const path = require('path');
     if (titleBox && topbarBox && titleBox.y < topbarBox.y + topbarBox.height) {
         errors.push('願いごとページの見出しが上部バーに隠れている');
     }
+
+    // あの日の願いとの再会：一年前の絵馬があると参道にそっと表示される
+    const memoryContext = await browser.newContext({ viewport: { width: 420, height: 900 } });
+    const page4 = await memoryContext.newPage();
+    page4.on('pageerror', e => errors.push('pageerror(memory): ' + e.message));
+    await page4.addInitScript(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 365);
+        localStorage.setItem('toiro-ema', JSON.stringify([
+            { name: 'あず', wish: '推しの初単独ライブが成功しますように', color: 'purple', date: d.toISOString() }
+        ]));
+        localStorage.setItem('toiro-color', JSON.stringify('purple'));
+    });
+    await page4.goto('file://' + path.resolve(__dirname, '../shrine.html'));
+    await page4.waitForSelector('#main:not(.hidden)');
+    const memoryText = await page4.textContent('#memory-card');
+    if (!memoryText.includes('一年前の今日')) errors.push('一年前の願いのラベルが出ない');
+    if (!memoryText.includes('推しの初単独ライブが成功しますように')) errors.push('一年前の願いの本文が出ない');
+    await memoryContext.close();
 
     // 保存できない環境（プライベートブラウズ等）でも絵馬が即時反映される
     const page2 = await browser.newPage({ viewport: { width: 420, height: 900 } });
