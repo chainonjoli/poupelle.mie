@@ -27,6 +27,8 @@
         '最高の思い出ができますように'
     ];
 
+    /* 日替わりのひとこと。毎日参拝する人が「見たことある」に当たりにくいよう
+       約100日で一巡する在庫を持つ */
     var TODAY_MESSAGES = [
         '今日も、あなたの「好き」がそっと輝いていますように。',
         '推しを想うその時間も、ちゃんとここに残ります。',
@@ -39,7 +41,93 @@
         '焦らず、あなたのペースで推し活を楽しんでください。',
         'この参道は、いつでもあなたを待っています。',
         '推しへの想いは、そのままであなたの宝物です。',
-        '今日という日を、そっと記録しておきましょう。'
+        '今日という日を、そっと記録しておきましょう。',
+        '推しの笑顔を思い出した瞬間、今日はもう良い日です。',
+        '遠くにいても、想いは光のように届いています。',
+        '今日のあなたが元気でいることも、立派な推し活です。',
+        '好きなものを好きと言える毎日で、ありますように。',
+        '推しの声を思い出せるうちは、心は近くにあります。',
+        '今日は、推しの写真を一枚だけ見返してみませんか。',
+        'あなたの応援は、ちゃんと誰かの力になっています。',
+        '推しの頑張りに、今日のあなたの頑張りを重ねて。',
+        '会えない日々も、好きでいる時間は積もっていきます。',
+        '今日という日は、二度と来ない推し活の一日です。',
+        '雨の日も、推しの色を思えば少し明るくなります。',
+        '推しを見つけたあの日の自分に、ありがとうを。',
+        '好きなものの話をする時のあなたは、きっと輝いています。',
+        '推し活に正解はありません。あなたの形がいちばんです。',
+        '今日の小さな幸せを、ひとつだけ数えてみましょう。',
+        '推しの新しい報せが、良いものでありますように。',
+        '待つ時間も、推し活のたいせつな一部です。',
+        '今日のあなたの「好き」は、昨日より少し深い。',
+        '無理はせず、でも好きは諦めず。それでいきましょう。',
+        '推しの色を身につけると、背筋が少し伸びますね。',
+        '想いを言葉にした分だけ、記憶は色濃く残ります。',
+        '今日は自分にも、推しにあげるくらいの優しさを。',
+        'あなたの推し語りを、聞きたい人がきっといます。',
+        '遠征の計画を立てる夜も、もう旅の一部です。',
+        '推しの過去の映像も、今日見ればそれは今日の思い出。',
+        '好きでいることに、理由はいりません。',
+        '今日も参道の灯りは、あなたの色で灯っています。',
+        '推しの誕生日を数える日々が、あなたの暦になります。',
+        'グッズを飾ったその棚が、あなたの小さな社です。',
+        '当落の報せの前は、深呼吸をひとつ。',
+        '推しが今日も無事でありますように。あなたも。',
+        '「尊い」の一言に、今日の全部が詰まっています。',
+        '思い出は増える一方で、減ることはありません。',
+        '今日の参拝が、いつか懐かしい一日になりますように。',
+        '推しの努力を知っているから、あなたも頑張れる。',
+        '好きなものが同じ人と、いつか静かに語れますように。',
+        '推し色の空を見つけたら、それは良い兆しです。',
+        '現場のない日も、心の中にステージはあります。',
+        '積み重ねた「好き」の日々は、裏切りません。',
+        '推しの写真の整理は、思い出の棚卸しです。',
+        '今日のあなたの一日に、推しの分も幸あれ。',
+        '声に出さない応援も、ちゃんと応援です。',
+        '推しを好きな自分のことも、好きでいてください。',
+        '新しいグッズの開封は、いつだって小さな祭りです。',
+        'ライブの余韻は、何日でも味わっていいのです。',
+        '推しの言葉に救われた日のことを、忘れずに。',
+        '今日は推しの好きなものを、あなたも食べてみる日。',
+        '遠い空の下、同じ推しを想う人がきっといます。',
+        '寝る前の推し想いは、良い夢への近道です。',
+        '推し活の予定がある月は、暦がきらめいて見えます。',
+        'チケットの半券も、立派な宝物です。',
+        '推しの成長を見守れることは、しあわせなことです。',
+        '今日の疲れは、推しの声で少し軽くなります。',
+        '「また明日も好きでいよう」それだけで十分です。',
+        '推しに恥じない自分でいたい、その気持ちが尊い。',
+        '応援うちわを作る夜なべも、愛の形です。',
+        '推しの記念日が近づくと、心の準備が始まりますね。',
+        '好きが高じて広がった世界を、大切に。',
+        '推しのいる時代に生まれたことに、感謝を。',
+        '今日の「好き」を明日に持ち越して、また参拝へ。',
+        '推し色のものを一つ持って出かけると、御守りになります。',
+        '誰かの推し語りに頷ける日は、良い日です。',
+        '推しの活躍を祈る心は、そのまま祈りです。',
+        '長く好きでいるために、今日はゆっくり休むのも吉。',
+        '初めて推しを知った日のときめきを、時々思い出して。',
+        '推しからもらった元気は、ちゃんと生活に使いましょう。',
+        '「好き」を書き残すと、未来の自分への手紙になります。',
+        '今日すれ違った誰かも、誰かの推しかもしれません。',
+        '推し活の数だけ、あなたの人生は彩られています。',
+        '発表を待つ間のそわそわも、あとで良い思い出に。',
+        '推しの見る景色を、いつかあなたも見られますように。',
+        '心が疲れた日は、推しの優しい場面だけを見る日に。',
+        '推しの名前を綺麗な字で書けると、少し嬉しい。',
+        '過去の自分の絵馬を見返すと、歩いた道が見えます。',
+        '今日の参拝も、ちゃんと積み重なっています。',
+        '推しへの「ありがとう」は、何度言ってもいい言葉です。',
+        '遠征の朝の高揚感は、何度味わっても新しい。',
+        '推しがくれた「初めて」を、いくつ数えられますか。',
+        '好きなものを守るために、まず自分を守ってください。',
+        '推しの色が街で目に入る日は、少し得した気分に。',
+        '「今日も好きだ」と思えたら、それが今日の収穫です。',
+        '推し活仲間の幸せも、そっと祈れるあなたは素敵です。',
+        'いつかの神席を夢見る夜も、幸せのうちです。',
+        '推しの休養の報せは、安心して見送りましょう。',
+        'あなたの「好き」は、この境内が覚えています。',
+        '明日の参拝でも、お待ちしています。'
     ];
 
     var MAMORI_BLESSINGS = [
@@ -75,6 +163,11 @@
     var MAX_EMA = 24;
     var MAX_ANNIV = 5;
     var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
+
+    /* お賽銭の決済リンク。Stripe Payment Link / OFUSE / Ko-fi などのURLを
+       ここに設定すると、境内に「お賽銭」のセクションが現れる。
+       空のままなら表示されない。 */
+    var SAISEN_URL = '';
 
     var body = document.body;
     var gate = document.getElementById('gate');
@@ -200,6 +293,8 @@
         renderMikujiArea();
         renderCountdown();
         restoreOshiProfile();
+        renderFirstGuide();
+        renderBackupReminder();
         setTimeout(syncScrollOffset, 0);
     }
 
@@ -362,6 +457,7 @@
         document.getElementById('ema-wish').value = '';
         renderMamoriCard();
         renderEmpathyFeed();
+        renderFirstGuide();
     }
 
     /* ---- 4. お守りページ ---- */
@@ -797,6 +893,8 @@
                 playStampCeremony(makeGoshuin(rec, { noSeal: true }), img);
             }
             renderGoshuinBook();
+            renderFirstGuide();
+            renderBackupReminder();
         });
     }
 
@@ -994,11 +1092,31 @@
 
     /* ---- 5. 推しみくじページ（1日1回。結果は日ごとに保存） ---- */
     var MIKUJI_RANKS = [
-        { rank: '推し大吉', weight: 6,  msg: '推しとの縁がひときわ深まる一日。迷ったら、心が動くほうへ。' },
-        { rank: '大吉',     weight: 14, msg: '願いが届きやすい日です。大切な応募や連絡は今日のうちに。' },
-        { rank: '中吉',     weight: 30, msg: 'おだやかな追い風が吹いています。いつもの推し活がいちばんの吉。' },
-        { rank: '小吉',     weight: 30, msg: '小さな幸せを拾える日。推しの写真を見返す時間が福を呼びます。' },
-        { rank: '末吉',     weight: 20, msg: '焦らなくて大丈夫。今日は自分をいたわることが、明日の推し活の力になります。' }
+        { rank: '推し大吉', weight: 6, msgs: [
+            '推しとの縁がひときわ深まる一日。迷ったら、心が動くほうへ。',
+            'めったに出ない大当たりの日。今日の直感は信じてよい日です。',
+            '想いがまっすぐ届く兆し。ずっと言えなかった「好き」を形にしてみて。'
+        ] },
+        { rank: '大吉', weight: 14, msgs: [
+            '願いが届きやすい日です。大切な応募や連絡は今日のうちに。',
+            '巡り合わせの良い日。ふと開いた告知に、良い報せがあるかも。',
+            '推し活の段取りがするすると進む日。後回しの予定を片づける好機。'
+        ] },
+        { rank: '中吉', weight: 30, msgs: [
+            'おだやかな追い風が吹いています。いつもの推し活がいちばんの吉。',
+            '無理のない範囲がちょうどいい日。定位置の幸せを味わって。',
+            '小さな準備が実を結ぶ日。遠征の下調べや貯金に向いています。'
+        ] },
+        { rank: '小吉', weight: 30, msgs: [
+            '小さな幸せを拾える日。推しの写真を見返す時間が福を呼びます。',
+            'ゆっくり進むのが吉。急がず、推しの過去作を一つ味わう日に。',
+            '身近なところに福あり。部屋のグッズをすこし整えると運気が整います。'
+        ] },
+        { rank: '末吉', weight: 20, msgs: [
+            '焦らなくて大丈夫。今日は自分をいたわることが、明日の推し活の力になります。',
+            '待つ運気の日。結果を追いかけず、ゆっくり湯船に浸かって吉。',
+            '今日は充電の日。推しの優しい場面だけを見て、早めにおやすみを。'
+        ] }
     ];
     var MIKUJI_CATEGORIES = ['ライブ運', 'ファンサ運', '金運', '恋愛運', '健康運'];
 
@@ -1013,7 +1131,8 @@
         var stars = MIKUJI_CATEGORIES.map(function () {
             return 1 + Math.floor(Math.random() * 5);
         });
-        return { rank: chosen.rank, msg: chosen.msg, stars: stars, date: todayStr() };
+        var msg = chosen.msgs[Math.floor(Math.random() * chosen.msgs.length)];
+        return { rank: chosen.rank, msg: msg, stars: stars, date: todayStr() };
     }
 
     function renderMikujiResult(result) {
@@ -1059,6 +1178,7 @@
         var result = drawMikujiResult();
         save(STORAGE_MIKUJI, result);
         renderMikujiResult(result);
+        renderFirstGuide();
     }
 
     function renderMikujiArea() {
@@ -1070,6 +1190,65 @@
         var area = document.getElementById('mikuji-area');
         area.innerHTML = '<button id="btn-mikuji-draw" class="btn-main btn-block" type="button">今日のみくじを引く</button>';
         document.getElementById('btn-mikuji-draw').addEventListener('click', drawMikuji);
+    }
+
+    /* ---- はじめての参拝（三つ終えると消える一筆書きの案内） ---- */
+    function renderFirstGuide() {
+        var doneEma = emaList.length > 0;
+        var doneMikuji = load(STORAGE_MIKUJI, null) !== null;
+        var doneGoshuin = load(STORAGE_GOSHUIN_LOG, []).length > 0;
+        var guide = document.getElementById('first-guide');
+        if (doneEma && doneMikuji && doneGoshuin) {
+            guide.classList.add('hidden');
+            return;
+        }
+        guide.classList.remove('hidden');
+        document.getElementById('fg-ema').classList.toggle('done', doneEma);
+        document.getElementById('fg-mikuji').classList.toggle('done', doneMikuji);
+        document.getElementById('fg-goshuin').classList.toggle('done', doneGoshuin);
+    }
+
+    /* ---- 記録のお守りリマインド（参拝30日ごとに書き出しを促す） ---- */
+    var STORAGE_BACKUP_MILESTONE = 'toiro-backup-milestone';
+    function renderBackupReminder() {
+        var card = document.getElementById('backup-card');
+        var visits = load(STORAGE_GOSHUIN_LOG, []).length;
+        var milestone = Math.floor(visits / 30);
+        var acknowledged = load(STORAGE_BACKUP_MILESTONE, 0);
+        if (milestone < 1 || milestone <= acknowledged) {
+            card.classList.add('hidden');
+            return;
+        }
+        card.innerHTML = '';
+        var msg = document.createElement('p');
+        msg.className = 'backup-msg';
+        msg.textContent = '参拝が' + (milestone * 30) + '日分たまりました。大切な記録を、お守り代わりに書き出しておきませんか。';
+        var actions = document.createElement('div');
+        actions.className = 'goshuin-actions';
+        var exportBtn = document.createElement('button');
+        exportBtn.type = 'button';
+        exportBtn.className = 'pill-btn';
+        exportBtn.id = 'btn-backup-now';
+        exportBtn.textContent = '記録を書き出す';
+        exportBtn.addEventListener('click', function () {
+            exportRecords();
+            save(STORAGE_BACKUP_MILESTONE, milestone);
+            renderBackupReminder();
+        });
+        var laterBtn = document.createElement('button');
+        laterBtn.type = 'button';
+        laterBtn.className = 'pill-btn';
+        laterBtn.id = 'btn-backup-later';
+        laterBtn.textContent = 'また今度';
+        laterBtn.addEventListener('click', function () {
+            save(STORAGE_BACKUP_MILESTONE, milestone);
+            renderBackupReminder();
+        });
+        actions.appendChild(exportBtn);
+        actions.appendChild(laterBtn);
+        card.appendChild(msg);
+        card.appendChild(actions);
+        card.classList.remove('hidden');
     }
 
     /* ---- ライブカウントダウン（一番近い記念日を参道に掲げる） ---- */
@@ -1256,6 +1435,12 @@
     document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
     document.getElementById('btn-anniv-ics').addEventListener('click', downloadAnnivIcs);
+
+    /* お賽銭（決済リンクが設定されているときだけ現れる） */
+    if (SAISEN_URL) {
+        document.getElementById('btn-saisen').href = SAISEN_URL;
+        document.getElementById('saisen-section').classList.remove('hidden');
+    }
     document.getElementById('btn-book-prev').addEventListener('click', function () { shiftBookMonth(-1); });
     document.getElementById('btn-book-next').addEventListener('click', function () { shiftBookMonth(1); });
     document.getElementById('btn-export').addEventListener('click', exportRecords);

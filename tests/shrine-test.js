@@ -121,6 +121,15 @@ const path = require('path');
     if (await page.locator('meta[property="og:image"]').count() !== 1) errors.push('og:imageがない');
     if (await page.locator('meta[name="twitter:card"]').count() !== 1) errors.push('twitter:cardがない');
 
+    // お賽銭: 決済リンク未設定の間は表示されない
+    if (await page.locator('#saisen-section:not(.hidden)').count() !== 0) errors.push('決済リンク未設定なのにお賽銭が表示されている');
+
+    // はじめての参拝ガイド: この時点では絵馬のみ✓（みくじ・御朱印は未実施）
+    if (await page.locator('#first-guide:not(.hidden)').count() !== 1) errors.push('はじめての参拝ガイドが出ない');
+    if (await page.locator('#fg-ema.done').count() !== 1) errors.push('絵馬のステップに✓が付かない');
+    if (await page.locator('#fg-mikuji.done').count() !== 0) errors.push('みくじ未実施なのに✓が付いている');
+    if (await page.locator('#fg-goshuin.done').count() !== 0) errors.push('御朱印未取得なのに✓が付いている');
+
     // 8. 共感ページ：推しカラー名・参拝者数の目安・自分の願いごとが匿名で流れる
     const empathyText = await page.textContent('#empathy-section');
     if (!empathyText.includes('パープル')) errors.push('共感ページに推しカラー名が出ない');
@@ -154,6 +163,34 @@ const path = require('path');
     if (await page.inputValue('#oshi-name') !== 'ひかる') errors.push('推しの名前が復元されない');
     if (await page.inputValue('#oshi-group') !== '星屑座') errors.push('グループ名が復元されない');
     if (await page.inputValue('#oshi-live') !== '春のワンマン') errors.push('ライブ名が復元されない');
+
+    // はじめての参拝ガイド: 絵馬・みくじ・御朱印がすべて済むと消える
+    if (await page.locator('#first-guide.hidden').count() !== 1) errors.push('三つ終えたのに参拝ガイドが消えない');
+
+    // 記録のお守りリマインド: 参拝30日でリマインドが出て、「また今度」で消え、リロード後も出ない
+    const backupContext = await browser.newContext({ viewport: { width: 420, height: 900 } });
+    const page5 = await backupContext.newPage();
+    page5.on('pageerror', e => errors.push('pageerror(backup): ' + e.message));
+    await page5.addInitScript(() => {
+        const log = [];
+        for (let i = 30; i >= 1; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            log.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+        }
+        localStorage.setItem('toiro-goshuin-log', JSON.stringify(log));
+        localStorage.setItem('toiro-color', JSON.stringify('green'));
+    });
+    await page5.goto('file://' + path.resolve(__dirname, '../shrine.html'));
+    await page5.waitForSelector('#main:not(.hidden)');
+    if (await page5.locator('#backup-card:not(.hidden)').count() !== 1) errors.push('参拝30日のリマインドが出ない');
+    if (!(await page5.textContent('#backup-card')).includes('30日分')) errors.push('リマインドの日数が出ない');
+    await page5.click('#btn-backup-later');
+    if (await page5.locator('#backup-card.hidden').count() !== 1) errors.push('「また今度」でリマインドが消えない');
+    await page5.reload();
+    await page5.waitForSelector('#main:not(.hidden)');
+    if (await page5.locator('#backup-card:not(.hidden)').count() !== 0) errors.push('一度応えたリマインドが再表示される');
+    await backupContext.close();
 
     // 6. 御朱印帳：参拝日数とカレンダーに今日の日付が反映される
     const bookLead = await page.textContent('#goshuinbook-lead');
