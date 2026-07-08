@@ -563,12 +563,13 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        /* 推しカラーの角印（推しの名前が入っていれば名前のハンコに。
-           本物の印章と同じく、右の列から上→下へ文字を刻む） */
+        /* 角印（推しの名前が入っていれば名前のハンコに。
+           本物の印章と同じく朱色で、右の列から上→下へ文字を刻む） */
+        var VERMILION = '#c43124';
         ctx.save();
         ctx.translate(W / 2, H / 2 + 160);
         ctx.rotate(-0.04);
-        ctx.fillStyle = color.hex;
+        ctx.fillStyle = VERMILION;
         var r = 75;
         ctx.beginPath();
         if (ctx.roundRect) { ctx.roundRect(-r, -r, r * 2, r * 2, 10); } else { ctx.rect(-r, -r, r * 2, r * 2); }
@@ -606,19 +607,14 @@
             drawVertical(ctx, name + ' 様', 92, 320, 48);
         }
 
-        /* 推しのお名前（あなたと推しだけの一枚に） */
-        if (rec.oshi) {
-            ctx.font = '600 34px ' + mincho;
-            ctx.fillStyle = '#3a2f22';
-            ctx.fillText(rec.oshi, W / 2, H - 232);
-            var subParts = [];
-            if (rec.group) subParts.push(rec.group);
-            if (rec.live) subParts.push(rec.live);
-            if (subParts.length) {
-                ctx.font = '400 19px ' + mincho;
-                ctx.fillStyle = '#8d8062';
-                ctx.fillText(subParts.join(' ｜ '), W / 2, H - 196);
-            }
+        /* グループ名・ライブ名（推しの名前は角印に刻まれるため文字では重ねない） */
+        var subParts = [];
+        if (rec.group) subParts.push(rec.group);
+        if (rec.live) subParts.push(rec.live);
+        if (subParts.length) {
+            ctx.font = '400 19px ' + mincho;
+            ctx.fillStyle = '#8d8062';
+            ctx.fillText(subParts.join(' ｜ '), W / 2, H - 200);
         }
 
         /* 願いごと */
