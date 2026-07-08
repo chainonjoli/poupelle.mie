@@ -68,6 +68,7 @@
     var STORAGE_EMA = 'toiro-ema';
     var STORAGE_GOSHUIN_LOG = 'toiro-goshuin-log';
     var STORAGE_GOSHUIN_TODAY = 'toiro-goshuin-today';
+    var STORAGE_GOSHUIN_RECORDS = 'toiro-goshuin-records';
     var STORAGE_ANNIV = 'toiro-anniversaries';
     var MAX_EMA = 24;
     var MAX_ANNIV = 5;
@@ -340,8 +341,14 @@
         var startY = y - ((lines.length - 1) * lineHeight) / 2;
         lines.forEach(function (l, idx) { ctx.fillText(l, x, startY + idx * lineHeight); });
     }
-    function makeGoshuin(name, wish, visitCount, anivLabel) {
-        var color = currentColor();
+    /* rec = { name, wish, visit, aniv, color(色ID), date('YYYY-MM-DD') }
+       過去の御朱印も、この記録から同じ絵柄を再生成できる */
+    function makeGoshuin(rec) {
+        var name = rec.name;
+        var wish = rec.wish;
+        var visitCount = rec.visit;
+        var anivLabel = rec.aniv;
+        var color = findColor(rec.color) || currentColor();
         var W = 720, H = 1000;
         var cv = document.createElement('canvas');
         cv.width = W; cv.height = H;
@@ -409,8 +416,8 @@
         ctx.font = '600 96px ' + mincho;
         drawVertical(ctx, '十色神社', W / 2, 200, 124);
 
-        var now = new Date();
-        var dateText = kanjiNum(now.getFullYear()) + '年' + kanjiNum(now.getMonth() + 1) + '月' + kanjiNum(now.getDate()) + '日';
+        var dateParts = (rec.date || todayStr()).split('-');
+        var dateText = kanjiNum(+dateParts[0]) + '年' + kanjiNum(+dateParts[1]) + '月' + kanjiNum(+dateParts[2]) + '日';
         ctx.font = '600 34px ' + mincho;
         drawVertical(ctx, dateText, W - 92, 300, 42);
 
@@ -472,14 +479,25 @@
         document.getElementById('btn-goshuin-share').addEventListener('click', shareGoshuin);
     }
 
+    function loadGoshuinRecords() { return load(STORAGE_GOSHUIN_RECORDS, {}); }
+
     function claimGoshuin() {
         var today = todayStr();
         var latestEma = emaList[0];
-        var name = latestEma ? latestEma.name : '';
-        var wish = latestEma ? latestEma.wish : '';
         var aniv = todaysAnniversary();
         var log = recordVisit(today);
-        var img = makeGoshuin(name, wish, log.length, aniv ? aniv.label : null);
+        var rec = {
+            name: latestEma ? latestEma.name : '',
+            wish: latestEma ? latestEma.wish : '',
+            visit: log.length,
+            aniv: aniv ? aniv.label : null,
+            color: currentColor().id,
+            date: today
+        };
+        var records = loadGoshuinRecords();
+        records[today] = rec;
+        save(STORAGE_GOSHUIN_RECORDS, records);
+        var img = makeGoshuin(rec);
         save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
         showGoshuinResult(img, false);
         renderGoshuinBook();
@@ -487,9 +505,15 @@
 
     function renderGoshuinArea() {
         var today = todayStr();
-        var claimed = load(STORAGE_GOSHUIN_TODAY, null);
-        if (claimed && claimed.date === today && claimed.img) {
-            showGoshuinResult(claimed.img, true);
+        var records = loadGoshuinRecords();
+        var cached = load(STORAGE_GOSHUIN_TODAY, null);
+        if (cached && cached.date === today && cached.img) {
+            showGoshuinResult(cached.img, true);
+            return;
+        }
+        if (records[today]) {
+            /* 別端末から記録を読み込んだ直後など、画像キャッシュがない場合は記録から再生成 */
+            showGoshuinResult(makeGoshuin(records[today]), true);
             return;
         }
         var aniv = todaysAnniversary();
@@ -559,14 +583,87 @@
             empty.className = 'book-cell empty';
             grid.appendChild(empty);
         }
+        var records = loadGoshuinRecords();
         for (var d = 1; d <= daysInMonth; d++) {
             var ds = y + '-' + pad2(m + 1) + '-' + pad2(d);
             var got = log.indexOf(ds) !== -1;
-            var cell = document.createElement('span');
-            cell.className = 'book-cell' + (got ? ' got' : '');
+            var hasRecord = got && records[ds];
+            var cell = document.createElement(hasRecord ? 'button' : 'span');
+            cell.className = 'book-cell' + (got ? ' got' : '') + (hasRecord ? ' has-record' : '');
             cell.textContent = d;
+            if (hasRecord) {
+                cell.type = 'button';
+                cell.setAttribute('aria-label', ds + ' の御朱印を見る');
+                cell.addEventListener('click', showBookViewer.bind(null, ds));
+            }
             grid.appendChild(cell);
         }
+    }
+
+    /* 御朱印帳: 過去の御朱印を記録から再生成して表示 */
+    function showBookViewer(ds) {
+        var records = loadGoshuinRecords();
+        var rec = records[ds];
+        if (!rec) return;
+        var img = makeGoshuin(rec);
+        var parts = ds.split('-');
+        var viewer = document.getElementById('book-viewer');
+        viewer.classList.remove('hidden');
+        viewer.innerHTML =
+            '<p class="book-viewer-date">' + (+parts[0]) + '年' + (+parts[1]) + '月' + (+parts[2]) + '日の御朱印</p>' +
+            '<img class="goshuin-img" src="' + img + '" alt="' + ds + 'の御朱印">' +
+            '<div class="goshuin-actions">' +
+            '<a class="pill-btn" href="' + img + '" download="toiro-goshuin-' + ds + '.png">画像として保存</a>' +
+            '<button type="button" class="pill-btn" id="btn-viewer-close">とじる</button>' +
+            '</div>';
+        document.getElementById('btn-viewer-close').addEventListener('click', function () {
+            viewer.classList.add('hidden');
+            viewer.innerHTML = '';
+        });
+        viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /* ---- 記録のお引越し（書き出し・読み込み） ---- */
+    var EXPORT_KEYS = [
+        STORAGE_COLOR, STORAGE_MODE, STORAGE_FONTSIZE, STORAGE_EMA,
+        STORAGE_GOSHUIN_LOG, STORAGE_GOSHUIN_RECORDS, STORAGE_ANNIV
+    ];
+
+    function exportRecords() {
+        var payload = { app: 'toiro-shrine', version: 1, exportedAt: new Date().toISOString(), data: {} };
+        EXPORT_KEYS.forEach(function (k) {
+            var v = load(k, null);
+            if (v !== null) payload.data[k] = v;
+        });
+        var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'toiro-shrine-kiroku-' + todayStr() + '.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+
+    function importRecords(file) {
+        var errEl = document.getElementById('import-error');
+        errEl.classList.add('hidden');
+        var reader = new FileReader();
+        reader.onload = function () {
+            try {
+                var parsed = JSON.parse(reader.result);
+                if (!parsed || parsed.app !== 'toiro-shrine' || !parsed.data) throw new Error('invalid');
+                EXPORT_KEYS.forEach(function (k) {
+                    if (k in parsed.data) save(k, parsed.data[k]);
+                });
+                location.reload();
+            } catch (e) {
+                errEl.classList.remove('hidden');
+            }
+        };
+        reader.onerror = function () { errEl.classList.remove('hidden'); };
+        reader.readAsText(file);
     }
 
     /* ---- 7. 記念日登録ページ ---- */
@@ -678,6 +775,11 @@
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
     document.getElementById('btn-book-prev').addEventListener('click', function () { shiftBookMonth(-1); });
     document.getElementById('btn-book-next').addEventListener('click', function () { shiftBookMonth(1); });
+    document.getElementById('btn-export').addEventListener('click', exportRecords);
+    document.getElementById('import-file').addEventListener('change', function (e) {
+        if (e.target.files && e.target.files[0]) importRecords(e.target.files[0]);
+        e.target.value = '';
+    });
 
     /* ---- 参道へもどる（1画面分スクロールしたら現れる） ---- */
     var backBtn = document.getElementById('btn-backtotop');

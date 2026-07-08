@@ -142,7 +142,20 @@
                 <p id="goshuinbook-month" class="book-month"></p>
                 <button id="btn-book-next" class="pill-btn" type="button" aria-label="次の月へ">次の月 →</button>
             </div>
+            <p class="rack-note">御朱印をいただいた日をタップすると、その日の御朱印をもう一度見られます。</p>
             <div id="goshuinbook-grid" class="book-grid"></div>
+            <div id="book-viewer" class="book-viewer hidden"></div>
+
+            <div class="export-block">
+                <h3 class="export-title">記録のお引越し</h3>
+                <p class="rack-note">機種変更やブラウザの変更の際に、これまでの記録（絵馬・御朱印・記念日）をファイルとして書き出し、新しい端末で読み込めます。</p>
+                <div class="goshuin-actions">
+                    <button id="btn-export" class="pill-btn" type="button">記録を書き出す</button>
+                    <label class="pill-btn import-label" for="import-file">記録を読み込む</label>
+                    <input type="file" id="import-file" accept="application/json,.json" class="hidden">
+                </div>
+                <p id="import-error" class="ema-error hidden">読み込めませんでした。「記録を書き出す」で保存したファイルを選んでください。</p>
+            </div>
         </section>
 
         <!-- ===== 7. 記念日登録ページ ===== -->

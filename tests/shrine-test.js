@@ -108,6 +108,38 @@ const path = require('path');
     if (!bookLead.includes('1 日')) errors.push('御朱印帳の参拝日数が反映されない');
     if (await page.locator('.book-cell.got').count() !== 1) errors.push('御朱印帳のカレンダーに参拝日が反映されない');
 
+    // 御朱印帳：参拝日のセルをタップすると、その日の御朱印を再表示できる
+    await page.click('button.book-cell.has-record');
+    await page.waitForSelector('#book-viewer:not(.hidden)');
+    const viewerImg = await page.getAttribute('#book-viewer .goshuin-img', 'src');
+    if (!viewerImg || !viewerImg.startsWith('data:image/png') || viewerImg.length < 5000) errors.push('過去の御朱印が再生成されない');
+    if (!(await page.textContent('.book-viewer-date')).includes('日の御朱印')) errors.push('御朱印ビューアの日付が出ない');
+    await page.click('#btn-viewer-close');
+    if (await page.locator('#book-viewer.hidden').count() !== 1) errors.push('御朱印ビューアが閉じない');
+
+    // 記録のお引越し：書き出し → 別ページで読み込み → 記録が復元される
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click('#btn-export')
+    ]);
+    const exportPath = await download.path();
+    if (!exportPath) errors.push('記録の書き出しファイルが生成されない');
+
+    // 読み込みは「別の端末」を再現するため、localStorageを共有しない独立コンテキストで検証
+    const freshContext = await browser.newContext({ viewport: { width: 420, height: 900 } });
+    const page3 = await freshContext.newPage();
+    page3.on('pageerror', e => errors.push('pageerror(import): ' + e.message));
+    await page3.goto('file://' + path.resolve(__dirname, '../shrine.html'));
+    if (await page3.locator('#gate.hidden').count() !== 0) errors.push('新しい端末（独立コンテキスト）なのに門が出ない');
+    await page3.setInputFiles('#import-file', exportPath);
+    await page3.waitForSelector('#main:not(.hidden)');
+    if (await page3.getAttribute('body', 'data-color') !== 'purple') errors.push('読み込み後に推しカラーが復元されない');
+    if (!(await page3.textContent('#ema-rack')).includes('ライブが当たりますように')) errors.push('読み込み後に絵馬が復元されない');
+    if (!(await page3.textContent('#goshuinbook-lead')).includes('1 日')) errors.push('読み込み後に参拝日数が復元されない');
+    const importedGoshuin = await page3.textContent('#goshuin-area');
+    if (!importedGoshuin.includes('いただき済み')) errors.push('読み込み後に本日の御朱印状態が復元されない');
+    await freshContext.close();
+
     // 御朱印は1日1回まで：再度開くと「いただき済み」表示になる
     await page.reload();
     await page.waitForSelector('#main:not(.hidden)');

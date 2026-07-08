@@ -597,6 +597,38 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
 }
 .book-cell.empty { border: none; }
 .book-cell.got { border-color: var(--oshi); color: var(--text); background: color-mix(in srgb, var(--oshi) 12%, transparent); }
+button.book-cell.has-record {
+    font-family: 'Noto Serif JP', serif;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.2s var(--spring);
+}
+button.book-cell.has-record:hover { background: color-mix(in srgb, var(--oshi) 24%, transparent); transform: translateY(-1px); }
+button.book-cell.has-record:active { transform: scale(0.95); }
+
+/* 過去の御朱印ビューア */
+.book-viewer {
+    margin-top: 22px;
+    padding: 22px 16px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    text-align: center;
+}
+.book-viewer-date {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.94rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+}
+
+/* 記録のお引越し */
+.export-block {
+    margin-top: 36px;
+    padding-top: 26px;
+    border-top: 1px solid var(--hairline);
+}
+.export-title { font-size: 1.02rem; letter-spacing: 0.08em; margin-bottom: 8px; }
+.import-label { display: inline-flex; align-items: center; cursor: pointer; }
 
 /* ============================================================
    境内のご案内（セクションへのリンクマップ）
