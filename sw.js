@@ -1,7 +1,7 @@
 /* 十色神社 Service Worker
    方針: ネットワーク優先＋キャッシュフォールバック。
    更新はすぐ届き、オフライン時は前回の参拝内容で表示できる。 */
-var CACHE_NAME = 'toiro-shrine-v1';
+var CACHE_NAME = 'toiro-shrine-v2';
 var CORE_ASSETS = [
     './shrine.html',
     './styles/shrine.css',
@@ -35,7 +35,9 @@ self.addEventListener('fetch', function (event) {
     if (url.origin !== self.location.origin) return; /* フォント等の外部リソースはブラウザに任せる */
 
     event.respondWith(
-        fetch(event.request).then(function (response) {
+        /* HTTPキャッシュを介さず毎回サーバーに再検証する（更新の取りこぼしで
+           HTMLとJSのバージョンが混ざる事故を防ぐ。未変更なら304で軽い） */
+        fetch(event.request, { cache: 'no-cache' }).then(function (response) {
             /* 取得できたらキャッシュを最新に保つ */
             var copy = response.clone();
             caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, copy); });

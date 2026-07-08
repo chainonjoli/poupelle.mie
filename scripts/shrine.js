@@ -563,7 +563,8 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        /* 推しカラーの角印（中央の縦書き社名と重ならない位置に） */
+        /* 推しカラーの角印（推しの名前が入っていれば名前のハンコに。
+           本物の印章と同じく、右の列から上→下へ文字を刻む） */
         ctx.save();
         ctx.translate(W / 2, H / 2 + 160);
         ctx.rotate(-0.04);
@@ -573,8 +574,19 @@
         if (ctx.roundRect) { ctx.roundRect(-r, -r, r * 2, r * 2, 10); } else { ctx.rect(-r, -r, r * 2, r * 2); }
         ctx.fill();
         ctx.fillStyle = '#fdf9ee';
-        ctx.font = '600 96px ' + mincho;
-        ctx.fillText('推', 0, 5);
+        var sealText = rec.oshi || '推';
+        var sealChars = Array.from(sealText);
+        var cols = Math.ceil(Math.sqrt(sealChars.length));
+        var rows = Math.ceil(sealChars.length / cols);
+        var cell = (r * 2 - 26) / Math.max(cols, rows);
+        ctx.font = '600 ' + Math.floor(cell * 0.86) + 'px ' + mincho;
+        sealChars.forEach(function (ch, idx) {
+            var colIdx = Math.floor(idx / rows);       /* 右の列から */
+            var rowIdx = idx % rows;                   /* 上から下へ */
+            var x = ((cols - 1) / 2 - colIdx) * cell;
+            var y = (rowIdx - (rows - 1) / 2) * cell;
+            ctx.fillText(ch, x, y + cell * 0.04);
+        });
         ctx.restore();
 
         ctx.fillStyle = '#3a2f22';
@@ -674,8 +686,33 @@
             '<div class="goshuin-actions">' +
             '<a class="pill-btn" id="btn-goshuin-save" href="' + img + '" download="toiro-goshuin.png">画像として保存</a>' +
             '<button type="button" class="pill-btn" id="btn-goshuin-share">SNSで共有</button>' +
+            '<button type="button" class="pill-btn" id="btn-goshuin-refresh">入力内容を反映し直す</button>' +
             '</div>';
         document.getElementById('btn-goshuin-share').addEventListener('click', shareGoshuin);
+        document.getElementById('btn-goshuin-refresh').addEventListener('click', refreshTodayGoshuin);
+    }
+
+    /* 御朱印をいただいた後に推しの名前などを入れ直しても、
+       今日の1枚にすぐ反映できる（発行枚数は増えない） */
+    function refreshTodayGoshuin() {
+        var today = todayStr();
+        var records = loadGoshuinRecords();
+        var rec = records[today];
+        if (!rec) return;
+        saveOshiProfile();
+        var profile = loadOshiProfile();
+        var latestEma = emaList[0];
+        rec.oshi = profile.oshi;
+        rec.group = profile.group;
+        rec.live = profile.live;
+        rec.name = latestEma ? latestEma.name : rec.name;
+        rec.wish = latestEma ? latestEma.wish : rec.wish;
+        rec.color = currentColor().id;
+        records[today] = rec;
+        save(STORAGE_GOSHUIN_RECORDS, records);
+        var img = makeGoshuin(rec);
+        save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
+        showGoshuinResult(img, true);
     }
 
     function loadGoshuinRecords() { return load(STORAGE_GOSHUIN_RECORDS, {}); }
