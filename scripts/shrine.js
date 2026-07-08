@@ -699,7 +699,18 @@
         var today = todayStr();
         var records = loadGoshuinRecords();
         var rec = records[today];
-        if (!rec) return;
+        if (!rec) {
+            /* 旧バージョンで御朱印を取得済みの場合、絵柄の記録が残っていない。
+               その場で記録を作り直して反映できるようにする */
+            var log = recordVisit(today);
+            var aniv = todaysAnniversary();
+            rec = {
+                name: '', wish: '', visit: log.length,
+                aniv: aniv ? aniv.label : null,
+                color: currentColor().id, date: today,
+                streak: computeStreak(log)
+            };
+        }
         saveOshiProfile();
         var profile = loadOshiProfile();
         var latestEma = emaList[0];
