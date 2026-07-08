@@ -31,8 +31,8 @@ const path = require('path');
     const todayMsg = await page.textContent('#today-message');
     if (!todayMsg || todayMsg.trim().length < 5) errors.push('今日のひとことが出ない');
 
-    // 境内のご案内：6セクションへのリンクマップと「参道へもどる」ボタン
-    if (await page.locator('.keidai-link').count() !== 6) errors.push('境内のご案内が6件出ない');
+    // 境内のご案内：7セクションへのリンクマップと「参道へもどる」ボタン
+    if (await page.locator('.keidai-link').count() !== 7) errors.push('境内のご案内が7件出ない');
     await page.click('.keidai-link[href="#empathy-section"]');
     await page.waitForTimeout(700);
     const empathyBox = await page.locator('#empathy-section .section-title').boundingBox();
@@ -100,18 +100,44 @@ const path = require('path');
     const goshuinNoteText = await page.textContent('#goshuin-area');
     if (!goshuinNoteText.includes('推しの生誕日')) errors.push('御朱印ページに記念日の案内が出ない');
 
+    // 7. ライブカウントダウン：一番近い記念日が参道に掲げられる
+    const countdownText = await page.textContent('#countdown-card');
+    if (!countdownText.includes('推しの生誕日')) errors.push('カウントダウンにラベルが出ない');
+    if (!countdownText.includes('今日')) errors.push('当日のカウントダウンが「今日」にならない');
+
     // 8. 共感ページ：推しカラー名・参拝者数の目安・自分の願いごとが匿名で流れる
     const empathyText = await page.textContent('#empathy-section');
     if (!empathyText.includes('パープル')) errors.push('共感ページに推しカラー名が出ない');
     if (!empathyText.includes('人が')) errors.push('共感ページに参拝者数の目安が出ない');
     if (!empathyText.includes('ライブが当たりますように')) errors.push('共感ページに自分の願いごとが反映されない');
 
-    // 5. 御朱印ページ：1日1枚生成し、名前と願いごとが反映される
+    // 5. 推しみくじ：1日1回引けて、結果が保存される
+    await page.click('#btn-mikuji-draw');
+    await page.waitForSelector('.mikuji-rank');
+    const mikujiRank = (await page.textContent('.mikuji-rank')).trim();
+    if (!/吉/.test(mikujiRank)) errors.push('みくじの結果が出ない');
+    if (await page.locator('.mikuji-row').count() !== 5) errors.push('みくじの運勢項目が5件出ない');
+    if (await page.locator('#btn-mikuji-draw').count() !== 0) errors.push('みくじを同日に引き直せてしまう');
+    await page.reload();
+    await page.waitForSelector('#main:not(.hidden)');
+    if ((await page.textContent('.mikuji-rank')).trim() !== mikujiRank) errors.push('リロード後にみくじの結果が変わってしまう');
+
+    // 6. 御朱印ページ：推しの名前・グループ名・ライブ名を入れて1日1枚生成
+    await page.fill('#oshi-name', 'ひかる');
+    await page.fill('#oshi-group', '星屑座');
+    await page.fill('#oshi-live', '春のワンマン');
     await page.click('#btn-goshuin-make');
     await page.waitForSelector('.goshuin-img');
     const goshuinSrc = await page.getAttribute('.goshuin-img', 'src');
     if (!goshuinSrc || !goshuinSrc.startsWith('data:image/png') || goshuinSrc.length < 5000) errors.push('御朱印画像が生成されない');
     if (!(await page.getAttribute('#btn-goshuin-save', 'download'))) errors.push('御朱印の保存リンクがない');
+
+    // 推しプロフィールがリロード後も復元される
+    await page.reload();
+    await page.waitForSelector('#main:not(.hidden)');
+    if (await page.inputValue('#oshi-name') !== 'ひかる') errors.push('推しの名前が復元されない');
+    if (await page.inputValue('#oshi-group') !== '星屑座') errors.push('グループ名が復元されない');
+    if (await page.inputValue('#oshi-live') !== '春のワンマン') errors.push('ライブ名が復元されない');
 
     // 6. 御朱印帳：参拝日数とカレンダーに今日の日付が反映される
     const bookLead = await page.textContent('#goshuinbook-lead');

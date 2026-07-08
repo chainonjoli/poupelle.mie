@@ -70,6 +70,8 @@
     var STORAGE_GOSHUIN_TODAY = 'toiro-goshuin-today';
     var STORAGE_GOSHUIN_RECORDS = 'toiro-goshuin-records';
     var STORAGE_ANNIV = 'toiro-anniversaries';
+    var STORAGE_OSHI_PROFILE = 'toiro-oshi-profile';
+    var STORAGE_MIKUJI = 'toiro-mikuji';
     var MAX_EMA = 24;
     var MAX_ANNIV = 5;
     var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
@@ -195,6 +197,9 @@
         renderAnnivList();
         renderEmpathyFeed();
         renderMemory();
+        renderMikujiArea();
+        renderCountdown();
+        restoreOshiProfile();
         setTimeout(syncScrollOffset, 0);
     }
 
@@ -406,7 +411,101 @@
         var startY = y - ((lines.length - 1) * lineHeight) / 2;
         lines.forEach(function (l, idx) { ctx.fillText(l, x, startY + idx * lineHeight); });
     }
-    /* rec = { name, wish, visit, aniv, color(色ID), date('YYYY-MM-DD') }
+    /* ---- 季節の意匠（月ごとに差し替え可能。新しい月の意匠はここに追加する） ---- */
+    function drawPetal(ctx, x, y, scale, rot, fill) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rot);
+        ctx.scale(scale, scale);
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.moveTo(0, -12);
+        ctx.quadraticCurveTo(9, -4, 0, 12);
+        ctx.quadraticCurveTo(-9, -4, 0, -12);
+        ctx.fill();
+        ctx.restore();
+    }
+    function drawSpring(ctx, W, H) {
+        /* 桜の花びら */
+        [[86, 150, 1.1, 0.4], [130, 105, 0.8, -0.6], [615, 130, 1.0, 0.9], [650, 190, 0.7, -0.3],
+         [95, 850, 0.9, 1.2], [640, 870, 1.1, -0.8], [600, 915, 0.7, 0.5]].forEach(function (p) {
+            drawPetal(ctx, p[0], p[1], p[2], p[3], 'rgba(222, 158, 176, 0.55)');
+        });
+    }
+    function drawSummer(ctx, W, H) {
+        /* 青海波（下辺に静かな波） */
+        ctx.strokeStyle = 'rgba(120, 158, 184, 0.4)';
+        ctx.lineWidth = 2;
+        for (var row = 0; row < 2; row++) {
+            for (var x = 70; x <= W - 70; x += 64) {
+                ctx.beginPath();
+                ctx.arc(x + (row % 2 ? 32 : 0), H - 66 + row * 18, 30, Math.PI, 0);
+                ctx.stroke();
+            }
+        }
+    }
+    function drawAutumn(ctx, W, H) {
+        /* 紅葉の葉 */
+        [[95, 130, 1.0, 0.5, '#c9773a'], [140, 175, 0.75, -0.9, '#b3543a'], [625, 110, 0.9, 1.1, '#b3543a'],
+         [590, 165, 0.7, 0.2, '#c9773a'], [100, 870, 0.85, -0.5, '#c9773a'], [635, 880, 1.0, 0.8, '#b3543a']].forEach(function (p) {
+            ctx.save();
+            ctx.translate(p[0], p[1]);
+            ctx.rotate(p[3]);
+            ctx.scale(p[2], p[2]);
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = p[4];
+            for (var i = 0; i < 5; i++) {
+                ctx.save();
+                ctx.rotate((i - 2) * 0.55);
+                ctx.beginPath();
+                ctx.moveTo(0, 2);
+                ctx.lineTo(-4, -8);
+                ctx.lineTo(0, -16);
+                ctx.lineTo(4, -8);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+            ctx.restore();
+        });
+    }
+    function drawWinter(ctx, W, H) {
+        /* 雪（結晶と粉雪） */
+        ctx.strokeStyle = 'rgba(148, 168, 186, 0.5)';
+        ctx.lineWidth = 1.5;
+        [[100, 135, 13], [630, 115, 16], [585, 175, 9], [120, 865, 15], [640, 875, 11]].forEach(function (p) {
+            for (var i = 0; i < 3; i++) {
+                var a = i * Math.PI / 3 + 0.3;
+                ctx.beginPath();
+                ctx.moveTo(p[0] - Math.cos(a) * p[2], p[1] - Math.sin(a) * p[2]);
+                ctx.lineTo(p[0] + Math.cos(a) * p[2], p[1] + Math.sin(a) * p[2]);
+                ctx.stroke();
+            }
+        });
+        ctx.fillStyle = 'rgba(148, 168, 186, 0.35)';
+        [[160, 110, 3], [600, 145, 2.5], [90, 190, 2], [660, 850, 3], [95, 900, 2.5]].forEach(function (p) {
+            ctx.beginPath();
+            ctx.arc(p[0], p[1], p[2], 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+    /* 月→意匠。特定の月だけ特別な意匠に差し替えたい場合はこの表に追加する */
+    var MONTHLY_MOTIFS = {
+        1: drawWinter, 2: drawWinter, 3: drawSpring, 4: drawSpring, 5: drawSpring,
+        6: drawSummer, 7: drawSummer, 8: drawSummer,
+        9: drawAutumn, 10: drawAutumn, 11: drawAutumn, 12: drawWinter
+    };
+
+    /* 連続参拝の詣で印（限定の証） */
+    function streakTierLabel(streak) {
+        if (streak >= 100) return '百日詣';
+        if (streak >= 30) return '三十日詣';
+        if (streak >= 7) return '七日詣';
+        return null;
+    }
+
+    /* rec = { name, wish, visit, aniv, color(色ID), date('YYYY-MM-DD'),
+               oshi(推しの名前), group, live, streak }
        過去の御朱印も、この記録から同じ絵柄を再生成できる */
     function makeGoshuin(rec) {
         var name = rec.name;
@@ -456,21 +555,25 @@
             ctx.strokeRect(42, 42, W - 84, H - 84);
         }
 
+        var dateParts0 = (rec.date || todayStr()).split('-');
+        var motif = MONTHLY_MOTIFS[+dateParts0[1]];
+        if (motif) motif(ctx, W, H);
+
         var mincho = '"Shippori Mincho", "Hiragino Mincho ProN", serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
         /* 推しカラーの角印（中央の縦書き社名と重ならない位置に） */
         ctx.save();
-        ctx.translate(W / 2, H / 2 + 195);
+        ctx.translate(W / 2, H / 2 + 160);
         ctx.rotate(-0.04);
         ctx.fillStyle = color.hex;
-        var r = 85;
+        var r = 75;
         ctx.beginPath();
         if (ctx.roundRect) { ctx.roundRect(-r, -r, r * 2, r * 2, 10); } else { ctx.rect(-r, -r, r * 2, r * 2); }
         ctx.fill();
         ctx.fillStyle = '#fdf9ee';
-        ctx.font = '600 110px ' + mincho;
+        ctx.font = '600 96px ' + mincho;
         ctx.fillText('推', 0, 5);
         ctx.restore();
 
@@ -478,8 +581,8 @@
         ctx.font = '600 32px ' + mincho;
         drawVertical(ctx, '奉拝', 92, 108, 42);
 
-        ctx.font = '600 96px ' + mincho;
-        drawVertical(ctx, '十色神社', W / 2, 200, 124);
+        ctx.font = '600 90px ' + mincho;
+        drawVertical(ctx, '十色神社', W / 2, 185, 116);
 
         var dateParts = (rec.date || todayStr()).split('-');
         var dateText = kanjiNum(+dateParts[0]) + '年' + kanjiNum(+dateParts[1]) + '月' + kanjiNum(+dateParts[2]) + '日';
@@ -491,25 +594,56 @@
             drawVertical(ctx, name + ' 様', 92, 320, 48);
         }
 
+        /* 推しのお名前（あなたと推しだけの一枚に） */
+        if (rec.oshi) {
+            ctx.font = '600 34px ' + mincho;
+            ctx.fillStyle = '#3a2f22';
+            ctx.fillText(rec.oshi, W / 2, H - 232);
+            var subParts = [];
+            if (rec.group) subParts.push(rec.group);
+            if (rec.live) subParts.push(rec.live);
+            if (subParts.length) {
+                ctx.font = '400 19px ' + mincho;
+                ctx.fillStyle = '#8d8062';
+                ctx.fillText(subParts.join(' ｜ '), W / 2, H - 196);
+            }
+        }
+
         /* 願いごと */
-        ctx.font = '500 26px ' + mincho;
+        ctx.font = '500 25px ' + mincho;
         ctx.fillStyle = color.hex;
-        wrapCenterText(ctx, wish || '推しへの想いとともに', W / 2, H - 190, 34, 560);
+        wrapCenterText(ctx, wish || '推しへの想いとともに', W / 2, H - 160, 32, 560);
 
         if (anivLabel) {
-            ctx.font = '600 22px ' + mincho;
-            ctx.fillStyle = GOLD;
-            ctx.fillText('— ' + anivLabel + ' 記念 —', W / 2, H - 140);
-            /* 右上に「限定」の小さな記し */
             ctx.font = '600 20px ' + mincho;
+            ctx.fillStyle = GOLD;
+            ctx.fillText('— ' + anivLabel + ' 記念 —', W / 2, H - 118);
+            /* 右上に「限定」の小さな記し */
             drawVertical(ctx, '限定', W - 92, 108, 26);
         }
 
-        ctx.font = '500 24px ' + mincho;
-        ctx.fillStyle = '#6d6350';
-        ctx.fillText('参拝 ' + visitCount + '回目', W / 2, H - 108);
-        ctx.font = '400 18px sans-serif';
-        ctx.fillText('TOIRO SHRINE — ' + color.jp.toUpperCase(), W / 2, H - 76);
+        /* 参拝回数と、連続参拝の詣で印 */
+        var tier = streakTierLabel(rec.streak || 0);
+        var visitText = '参拝 ' + visitCount + '回目';
+        ctx.font = '500 22px ' + mincho;
+        if (tier) {
+            var tierText = ' ・ ' + tier;
+            var w1 = ctx.measureText(visitText).width;
+            var w2 = ctx.measureText(tierText).width;
+            var startX = W / 2 - (w1 + w2) / 2;
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#6d6350';
+            ctx.fillText(visitText, startX, H - 86);
+            ctx.fillStyle = GOLD;
+            ctx.fillText(tierText, startX + w1, H - 86);
+            ctx.textAlign = 'center';
+        } else {
+            ctx.fillStyle = '#6d6350';
+            ctx.fillText(visitText, W / 2, H - 86);
+        }
+        ctx.font = '400 16px sans-serif';
+        ctx.fillStyle = '#8d8062';
+        ctx.fillText('TOIRO SHRINE — ' + color.jp.toUpperCase(), W / 2, H - 56);
 
         return cv.toDataURL('image/png');
     }
@@ -546,10 +680,28 @@
 
     function loadGoshuinRecords() { return load(STORAGE_GOSHUIN_RECORDS, {}); }
 
+    /* 推しプロフィール（推しの名前・グループ名・ライブ名）の保存と復元 */
+    function loadOshiProfile() { return load(STORAGE_OSHI_PROFILE, { oshi: '', group: '', live: '' }); }
+    function saveOshiProfile() {
+        save(STORAGE_OSHI_PROFILE, {
+            oshi: escAttr(document.getElementById('oshi-name').value.trim()),
+            group: escAttr(document.getElementById('oshi-group').value.trim()),
+            live: escAttr(document.getElementById('oshi-live').value.trim())
+        });
+    }
+    function restoreOshiProfile() {
+        var p = loadOshiProfile();
+        document.getElementById('oshi-name').value = p.oshi || '';
+        document.getElementById('oshi-group').value = p.group || '';
+        document.getElementById('oshi-live').value = p.live || '';
+    }
+
     function claimGoshuin() {
         var today = todayStr();
         var latestEma = emaList[0];
         var aniv = todaysAnniversary();
+        saveOshiProfile();
+        var profile = loadOshiProfile();
         var log = recordVisit(today);
         var rec = {
             name: latestEma ? latestEma.name : '',
@@ -557,7 +709,11 @@
             visit: log.length,
             aniv: aniv ? aniv.label : null,
             color: currentColor().id,
-            date: today
+            date: today,
+            oshi: profile.oshi,
+            group: profile.group,
+            live: profile.live,
+            streak: computeStreak(log)
         };
         var records = loadGoshuinRecords();
         records[today] = rec;
@@ -621,8 +777,9 @@
         document.getElementById('goshuinbook-lead').textContent = 'これまでに ' + log.length + ' 日、参拝しています。';
 
         var badges = [
-            { need: 7, label: '7日連続参拝' },
-            { need: 30, label: '30日連続参拝' }
+            { need: 7, label: '7日連続参拝 — 七日詣' },
+            { need: 30, label: '30日連続参拝 — 三十日詣' },
+            { need: 100, label: '100日連続参拝 — 百日詣' }
         ];
         var badgesEl = document.getElementById('streak-badges');
         badgesEl.innerHTML = '';
@@ -691,7 +848,8 @@
     /* ---- 記録のお引越し（書き出し・読み込み） ---- */
     var EXPORT_KEYS = [
         STORAGE_COLOR, STORAGE_MODE, STORAGE_FONTSIZE, STORAGE_EMA,
-        STORAGE_GOSHUIN_LOG, STORAGE_GOSHUIN_RECORDS, STORAGE_ANNIV
+        STORAGE_GOSHUIN_LOG, STORAGE_GOSHUIN_RECORDS, STORAGE_ANNIV,
+        STORAGE_OSHI_PROFILE, STORAGE_MIKUJI
     ];
 
     function exportRecords() {
@@ -729,6 +887,113 @@
         };
         reader.onerror = function () { errEl.classList.remove('hidden'); };
         reader.readAsText(file);
+    }
+
+    /* ---- 5. 推しみくじページ（1日1回。結果は日ごとに保存） ---- */
+    var MIKUJI_RANKS = [
+        { rank: '推し大吉', weight: 6,  msg: '推しとの縁がひときわ深まる一日。迷ったら、心が動くほうへ。' },
+        { rank: '大吉',     weight: 14, msg: '願いが届きやすい日です。大切な応募や連絡は今日のうちに。' },
+        { rank: '中吉',     weight: 30, msg: 'おだやかな追い風が吹いています。いつもの推し活がいちばんの吉。' },
+        { rank: '小吉',     weight: 30, msg: '小さな幸せを拾える日。推しの写真を見返す時間が福を呼びます。' },
+        { rank: '末吉',     weight: 20, msg: '焦らなくて大丈夫。今日は自分をいたわることが、明日の推し活の力になります。' }
+    ];
+    var MIKUJI_CATEGORIES = ['ライブ運', 'ファンサ運', '金運', '恋愛運', '健康運'];
+
+    function drawMikujiResult() {
+        var total = MIKUJI_RANKS.reduce(function (s, r) { return s + r.weight; }, 0);
+        var roll = Math.random() * total;
+        var chosen = MIKUJI_RANKS[0];
+        for (var i = 0; i < MIKUJI_RANKS.length; i++) {
+            roll -= MIKUJI_RANKS[i].weight;
+            if (roll <= 0) { chosen = MIKUJI_RANKS[i]; break; }
+        }
+        var stars = MIKUJI_CATEGORIES.map(function () {
+            return 1 + Math.floor(Math.random() * 5);
+        });
+        return { rank: chosen.rank, msg: chosen.msg, stars: stars, date: todayStr() };
+    }
+
+    function renderMikujiResult(result) {
+        var area = document.getElementById('mikuji-area');
+        area.innerHTML = '';
+        var paper = document.createElement('div');
+        paper.className = 'mikuji-paper';
+        var title = document.createElement('p');
+        title.className = 'mikuji-paper-title';
+        title.textContent = '推しみくじ ・ ' + result.date.replace(/-/g, '.');
+        var rank = document.createElement('p');
+        rank.className = 'mikuji-rank';
+        rank.textContent = result.rank;
+        var msg = document.createElement('p');
+        msg.className = 'mikuji-msg';
+        msg.textContent = result.msg;
+        paper.appendChild(title);
+        paper.appendChild(rank);
+        paper.appendChild(msg);
+        var list = document.createElement('div');
+        list.className = 'mikuji-luck';
+        MIKUJI_CATEGORIES.forEach(function (cat, i) {
+            var row = document.createElement('p');
+            row.className = 'mikuji-row';
+            var label = document.createElement('span');
+            label.textContent = cat;
+            var stars = document.createElement('span');
+            stars.className = 'mikuji-stars';
+            stars.textContent = '★'.repeat(result.stars[i]) + '☆'.repeat(5 - result.stars[i]);
+            row.appendChild(label);
+            row.appendChild(stars);
+            list.appendChild(row);
+        });
+        paper.appendChild(list);
+        var note = document.createElement('p');
+        note.className = 'mikuji-note';
+        note.textContent = 'みくじは1日1回。また明日、引きにいらしてください。';
+        area.appendChild(paper);
+        area.appendChild(note);
+    }
+
+    function drawMikuji() {
+        var result = drawMikujiResult();
+        save(STORAGE_MIKUJI, result);
+        renderMikujiResult(result);
+    }
+
+    function renderMikujiArea() {
+        var saved = load(STORAGE_MIKUJI, null);
+        if (saved && saved.date === todayStr()) {
+            renderMikujiResult(saved);
+            return;
+        }
+        var area = document.getElementById('mikuji-area');
+        area.innerHTML = '<button id="btn-mikuji-draw" class="btn-main btn-block" type="button">今日のみくじを引く</button>';
+        document.getElementById('btn-mikuji-draw').addEventListener('click', drawMikuji);
+    }
+
+    /* ---- ライブカウントダウン（一番近い記念日を参道に掲げる） ---- */
+    function renderCountdown() {
+        var card = document.getElementById('countdown-card');
+        var list = loadAnniversaries();
+        if (!list.length) { card.classList.add('hidden'); return; }
+        var nearest = null;
+        list.forEach(function (a) {
+            var diff = nextOccurrenceDays(a.month, a.day);
+            if (!nearest || diff < nearest.diff) nearest = { a: a, diff: diff };
+        });
+        if (!nearest) { card.classList.add('hidden'); return; }
+        card.innerHTML = '';
+        var kicker = document.createElement('p');
+        kicker.className = 'countdown-kicker';
+        kicker.textContent = nearest.a.label;
+        var count = document.createElement('p');
+        count.className = 'countdown-count';
+        if (nearest.diff === 0) {
+            count.innerHTML = '<strong>今日</strong> です';
+        } else {
+            count.innerHTML = 'まで あと <strong>' + nearest.diff + '</strong> 日';
+        }
+        card.appendChild(kicker);
+        card.appendChild(count);
+        card.classList.remove('hidden');
     }
 
     /* ---- 7. 記念日登録ページ ---- */
@@ -783,6 +1048,7 @@
         save(STORAGE_ANNIV, result);
         renderAnnivList();
         renderGoshuinArea();
+        renderCountdown();
     }
 
     /* ---- 8. 共感ページ ---- */
