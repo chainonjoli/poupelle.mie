@@ -76,6 +76,11 @@
     var MAX_ANNIV = 5;
     var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
 
+    /* お賽銭の決済リンク。Stripe Payment Link / OFUSE / Ko-fi などのURLを
+       ここに設定すると、境内に「お賽銭」のセクションが現れる。
+       空のままなら表示されない。 */
+    var SAISEN_URL = '';
+
     var body = document.body;
     var gate = document.getElementById('gate');
     var main = document.getElementById('main');
@@ -1256,6 +1261,12 @@
     document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
     document.getElementById('btn-anniv-ics').addEventListener('click', downloadAnnivIcs);
+
+    /* お賽銭（決済リンクが設定されているときだけ現れる） */
+    if (SAISEN_URL) {
+        document.getElementById('btn-saisen').href = SAISEN_URL;
+        document.getElementById('saisen-section').classList.remove('hidden');
+    }
     document.getElementById('btn-book-prev').addEventListener('click', function () { shiftBookMonth(-1); });
     document.getElementById('btn-book-next').addEventListener('click', function () { shiftBookMonth(1); });
     document.getElementById('btn-export').addEventListener('click', exportRecords);

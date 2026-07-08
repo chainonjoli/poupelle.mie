@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/shrine.css?v=20260708f">
+    <link rel="stylesheet" href="styles/shrine.css?v=20260708g">
 </head>
 <body data-mode="ink">
     <div class="grain" aria-hidden="true"></div>
@@ -238,15 +238,30 @@
 
             <div id="empathy-feed" class="empathy-feed"></div>
         </section>
+
+        <!-- ===== 10. お賽銭ページ（決済リンクを設定すると表示されます） ===== -->
+        <section id="saisen-section" class="section reveal hidden">
+            <p class="section-kicker">10 — TOIRO SHRINE</p>
+            <h2 class="section-title">お賽銭</h2>
+            <p class="section-lead">十色神社は、どなたでも無料でお参りいただけます。もしこの場所を気に入っていただけたら、お気持ちだけお賽銭を納めていただけると、新しい意匠づくりと運営の支えになります。</p>
+
+            <div class="saisen-box-wrap">
+                <div class="saisen-box" aria-hidden="true">
+                    <span class="saisen-slat"></span><span class="saisen-slat"></span><span class="saisen-slat"></span><span class="saisen-slat"></span><span class="saisen-slat"></span>
+                </div>
+                <a id="btn-saisen" class="btn-main" href="#" target="_blank" rel="noopener">お賽銭を納める</a>
+                <p class="rack-note">※ 外部の決済ページが開きます。金額は任意です。<br>いただいたお賽銭は、十色神社の運営に大切に使わせていただきます。</p>
+            </div>
+        </section>
     </main>
 
     <button id="btn-backtotop" class="back-to-top" type="button">⛩ 参道へもどる</button>
 
     <footer class="footer">
         <p>「十色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
-        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260708f</span></p>
+        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260708g</span></p>
     </footer>
 
-    <script src="scripts/shrine.js?v=20260708f"></script>
+    <script src="scripts/shrine.js?v=20260708g"></script>
 </body>
 </html>

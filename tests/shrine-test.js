@@ -121,6 +121,9 @@ const path = require('path');
     if (await page.locator('meta[property="og:image"]').count() !== 1) errors.push('og:imageがない');
     if (await page.locator('meta[name="twitter:card"]').count() !== 1) errors.push('twitter:cardがない');
 
+    // お賽銭: 決済リンク未設定の間は表示されない
+    if (await page.locator('#saisen-section:not(.hidden)').count() !== 0) errors.push('決済リンク未設定なのにお賽銭が表示されている');
+
     // 8. 共感ページ：推しカラー名・参拝者数の目安・自分の願いごとが匿名で流れる
     const empathyText = await page.textContent('#empathy-section');
     if (!empathyText.includes('パープル')) errors.push('共感ページに推しカラー名が出ない');

@@ -900,6 +900,54 @@ body[data-mode="ink"] .anniv-card-count { color: var(--oshi); } /* 墨地では�
 }
 
 /* ============================================================
+   10. お賽銭
+   ============================================================ */
+.saisen-box-wrap { text-align: center; }
+.saisen-box {
+    position: relative;
+    width: 150px;
+    height: 64px;
+    margin: 0 auto 26px;
+    border: 2px solid var(--text);
+    border-radius: 3px 3px 5px 5px;
+    opacity: 0.88;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 14px;
+    padding-top: 8px;
+}
+.saisen-box::before {
+    /* 屋根板 */
+    content: "";
+    position: absolute;
+    top: -10px; left: -8px; right: -8px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--text);
+    opacity: 0.9;
+}
+.saisen-box::after {
+    /* 賽銭の小さな光（推し色） */
+    content: "";
+    position: absolute;
+    top: -22px; left: 50%;
+    transform: translateX(-50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--oshi);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--oshi) 18%, transparent);
+}
+.saisen-slat {
+    width: 3px;
+    height: 22px;
+    border-radius: 2px;
+    background: var(--text);
+    opacity: 0.85;
+}
+.saisen-box-wrap .rack-note { margin-top: 14px; }
+
+/* ============================================================
    フッター
    ============================================================ */
 .footer {
