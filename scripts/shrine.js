@@ -358,13 +358,31 @@
             ctx.fillRect(Math.random() * W, Math.random() * H, 1.4, 1.4);
         }
 
-        /* 墨の二重枠 */
-        ctx.strokeStyle = '#3a2f22';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(30, 30, W - 60, H - 60);
-        ctx.strokeStyle = color.hex;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(42, 42, W - 84, H - 84);
+        /* 二重枠（通常は墨＋推し色。記念日は金の限定仕様） */
+        var GOLD = '#b8923a';
+        if (anivLabel) {
+            ctx.strokeStyle = GOLD;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(28, 28, W - 56, H - 56);
+            ctx.lineWidth = 1;
+            ctx.strokeRect(40, 40, W - 80, H - 80);
+            /* 四隅の飾り（金の小さな山形） */
+            ctx.lineWidth = 2;
+            [[52, 52, 1, 1], [W - 52, 52, -1, 1], [52, H - 52, 1, -1], [W - 52, H - 52, -1, -1]].forEach(function (c) {
+                ctx.beginPath();
+                ctx.moveTo(c[0] + 22 * c[2], c[1]);
+                ctx.lineTo(c[0], c[1]);
+                ctx.lineTo(c[0], c[1] + 22 * c[3]);
+                ctx.stroke();
+            });
+        } else {
+            ctx.strokeStyle = '#3a2f22';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(30, 30, W - 60, H - 60);
+            ctx.strokeStyle = color.hex;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(42, 42, W - 84, H - 84);
+        }
 
         var mincho = '"Shippori Mincho", "Hiragino Mincho ProN", serif';
         ctx.textAlign = 'center';
@@ -408,8 +426,11 @@
 
         if (anivLabel) {
             ctx.font = '600 22px ' + mincho;
-            ctx.fillStyle = color.hex;
+            ctx.fillStyle = GOLD;
             ctx.fillText('— ' + anivLabel + ' 記念 —', W / 2, H - 140);
+            /* 右上に「限定」の小さな記し */
+            ctx.font = '600 20px ' + mincho;
+            drawVertical(ctx, '限定', W - 92, 108, 26);
         }
 
         ctx.font = '500 24px ' + mincho;
@@ -493,6 +514,18 @@
         return streak;
     }
 
+    /* 御朱印帳の表示中の月（月送りで過去の参拝を振り返れる） */
+    var bookView = { year: new Date().getFullYear(), month: new Date().getMonth() };
+
+    function shiftBookMonth(delta) {
+        var d = new Date(bookView.year, bookView.month + delta, 1);
+        var now = new Date();
+        if (d > new Date(now.getFullYear(), now.getMonth(), 1)) return; /* 未来の月へは進めない */
+        bookView.year = d.getFullYear();
+        bookView.month = d.getMonth();
+        renderGoshuinBook();
+    }
+
     function renderGoshuinBook() {
         var log = load(STORAGE_GOSHUIN_LOG, []);
         var streak = computeStreak(log);
@@ -513,8 +546,10 @@
         });
 
         var now = new Date();
-        var y = now.getFullYear(), m = now.getMonth();
+        var y = bookView.year, m = bookView.month;
         document.getElementById('goshuinbook-month').textContent = y + '年' + (m + 1) + '月';
+        var isCurrentMonth = (y === now.getFullYear() && m === now.getMonth());
+        document.getElementById('btn-book-next').disabled = isCurrentMonth;
         var firstWeekday = new Date(y, m, 1).getDay();
         var daysInMonth = new Date(y, m + 1, 0).getDate();
         var grid = document.getElementById('goshuinbook-grid');
@@ -641,6 +676,8 @@
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
     document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
+    document.getElementById('btn-book-prev').addEventListener('click', function () { shiftBookMonth(-1); });
+    document.getElementById('btn-book-next').addEventListener('click', function () { shiftBookMonth(1); });
 
     /* ---- 参道へもどる（1画面分スクロールしたら現れる） ---- */
     var backBtn = document.getElementById('btn-backtotop');

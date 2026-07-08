@@ -570,7 +570,19 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
     color: var(--text-muted);
 }
 .streak-badge.achieved { border-color: var(--oshi); color: var(--text); }
-.book-month { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 14px; }
+.book-month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.book-month { font-size: 0.86rem; color: var(--text-muted); }
+.pill-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
 .book-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 .book-cell {
     position: relative;
