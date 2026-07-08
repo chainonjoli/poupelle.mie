@@ -78,7 +78,7 @@
                     <a href="#goshuin-section" class="keidai-link"><span class="keidai-no">05</span>御朱印</a>
                     <a href="#goshuinbook-section" class="keidai-link"><span class="keidai-no">06</span>御朱印帳</a>
                     <a href="#anniversary-section" class="keidai-link"><span class="keidai-no">07</span>記念日</a>
-                    <a href="#empathy-section" class="keidai-link"><span class="keidai-no">08</span>共感</a>
+                    <a href="#empathy-section" class="keidai-link"><span class="keidai-no">08</span>同じ色の願い</a>
                 </div>
             </nav>
         </section>
@@ -137,7 +137,11 @@
             <p id="goshuinbook-lead" class="section-lead"></p>
 
             <div id="streak-badges" class="streak-badges"></div>
-            <p id="goshuinbook-month" class="book-month"></p>
+            <div class="book-month-nav">
+                <button id="btn-book-prev" class="pill-btn" type="button" aria-label="前の月へ">← 前の月</button>
+                <p id="goshuinbook-month" class="book-month"></p>
+                <button id="btn-book-next" class="pill-btn" type="button" aria-label="次の月へ">次の月 →</button>
+            </div>
             <div id="goshuinbook-grid" class="book-grid"></div>
         </section>
 
@@ -155,11 +159,11 @@
             <div id="anniv-list" class="anniv-list"></div>
         </section>
 
-        <!-- ===== 8. 共感ページ ===== -->
+        <!-- ===== 8. 同じ色の願いページ ===== -->
         <section id="empathy-section" class="section reveal">
             <p class="section-kicker">08 — TOIRO SHRINE</p>
-            <h2 class="section-title">共感</h2>
-            <p class="section-lead"><span id="empathy-color-name">推し色</span>を選んだ人たちの祈りです。あなたの絵馬も、名前を伏せてそっと加わります。</p>
+            <h2 class="section-title">同じ色の願い</h2>
+            <p class="section-lead"><span id="empathy-color-name">推し色</span>を選んだ人たちの願いごとです。あなたの絵馬も、名前を伏せてそっと加わります。</p>
             <p id="empathy-count" class="empathy-count"></p>
 
             <div id="empathy-feed" class="empathy-feed"></div>
