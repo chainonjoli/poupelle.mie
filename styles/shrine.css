@@ -357,6 +357,30 @@ h1, h2, h3 { font-family: 'Shippori Mincho', serif; font-weight: 600; }
     border-bottom: 1px solid var(--hairline);
 }
 
+/* ---- ライブカウントダウン ---- */
+.countdown-card {
+    max-width: 420px;
+    margin: 0 auto 24px;
+    padding: 20px 22px;
+    text-align: center;
+    border: 1px solid var(--oshi);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--oshi) 7%, transparent);
+}
+.countdown-kicker {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+}
+.countdown-count { font-size: 0.9rem; color: var(--text-muted); }
+.countdown-count strong {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.7rem;
+    color: var(--oshi);
+    margin: 0 2px;
+}
+
 /* ---- あの日の願いとの再会 ---- */
 .memory-card {
     max-width: 420px;
@@ -595,8 +619,52 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
 .mamori-meta strong { color: var(--oshi-deep); }
 
 /* ============================================================
-   5. 御朱印
+   5. 推しみくじ
    ============================================================ */
+.mikuji-paper {
+    max-width: 340px;
+    margin: 0 auto 18px;
+    padding: 28px 26px 22px;
+    text-align: center;
+    background: linear-gradient(170deg, var(--paper) 0%, var(--paper-deep) 100%);
+    border: 1px solid var(--oshi);
+    border-radius: var(--radius-paper);
+    color: var(--ink);
+}
+.mikuji-paper-title { font-size: 0.72rem; letter-spacing: 0.24em; color: #8a7a55; margin-bottom: 10px; }
+.mikuji-rank {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(2rem, 8vw, 2.6rem);
+    letter-spacing: 0.1em;
+    color: var(--oshi-deep);
+    margin-bottom: 10px;
+}
+.mikuji-msg { font-size: 0.88rem; line-height: 1.9; margin-bottom: 18px; }
+.mikuji-luck { max-width: 230px; margin: 0 auto; text-align: left; }
+.mikuji-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 2px;
+    border-bottom: 1px dashed #d8c9a8;
+    font-size: 0.86rem;
+}
+.mikuji-row:last-child { border-bottom: none; }
+.mikuji-stars { color: var(--oshi-deep); letter-spacing: 0.1em; }
+.mikuji-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); }
+
+/* ============================================================
+   6. 御朱印
+   ============================================================ */
+.oshi-profile {
+    max-width: 520px;
+    margin: 0 auto 24px;
+    padding: 24px 24px 14px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+}
+.oshi-profile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .oshi-profile-row { grid-template-columns: 1fr; gap: 0; } }
 .goshuin-img {
     display: block;
     width: min(78vw, 300px);

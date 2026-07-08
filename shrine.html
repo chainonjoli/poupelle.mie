@@ -75,6 +75,8 @@
 
             <p id="today-message" class="today-message"></p>
 
+            <div id="countdown-card" class="countdown-card hidden"></div>
+
             <div id="memory-card" class="memory-card hidden"></div>
 
             <button id="btn-sanpai" class="btn-main" type="button">参拝する</button>
@@ -84,10 +86,11 @@
                 <div class="keidai-map-grid">
                     <a href="#ema-section" class="keidai-link"><span class="keidai-no">03</span>願いごと</a>
                     <a href="#mamori-section" class="keidai-link"><span class="keidai-no">04</span>お守り</a>
-                    <a href="#goshuin-section" class="keidai-link"><span class="keidai-no">05</span>御朱印</a>
-                    <a href="#goshuinbook-section" class="keidai-link"><span class="keidai-no">06</span>御朱印帳</a>
-                    <a href="#anniversary-section" class="keidai-link"><span class="keidai-no">07</span>記念日</a>
-                    <a href="#empathy-section" class="keidai-link"><span class="keidai-no">08</span>同じ色の願い</a>
+                    <a href="#mikuji-section" class="keidai-link"><span class="keidai-no">05</span>推しみくじ</a>
+                    <a href="#goshuin-section" class="keidai-link"><span class="keidai-no">06</span>御朱印</a>
+                    <a href="#goshuinbook-section" class="keidai-link"><span class="keidai-no">07</span>御朱印帳</a>
+                    <a href="#anniversary-section" class="keidai-link"><span class="keidai-no">08</span>記念日</a>
+                    <a href="#empathy-section" class="keidai-link"><span class="keidai-no">09</span>同じ色の願い</a>
                 </div>
             </nav>
         </section>
@@ -130,18 +133,45 @@
             <button id="btn-mamori-renew" class="btn-main btn-block" type="button">推し守を授かる</button>
         </section>
 
-        <!-- ===== 5. 御朱印ページ ===== -->
-        <section id="goshuin-section" class="section reveal">
+        <!-- ===== 5. 推しみくじページ ===== -->
+        <section id="mikuji-section" class="section reveal">
             <p class="section-kicker">05 — TOIRO SHRINE</p>
+            <h2 class="section-title">推しみくじ</h2>
+            <p class="section-lead">今日の推し活運を占う、1日1回のおみくじです。</p>
+
+            <div id="mikuji-area"></div>
+        </section>
+
+        <!-- ===== 6. 御朱印ページ ===== -->
+        <section id="goshuin-section" class="section reveal">
+            <p class="section-kicker">06 — TOIRO SHRINE</p>
             <h2 class="section-title">御朱印</h2>
-            <p class="section-lead">世界に1枚だけの、今日の推し色御朱印。御朱印は1日に1枚までです。</p>
+            <p class="section-lead">世界に1枚だけの、今日の推し色御朱印。推しのお名前を入れると、あなたと推しだけの一枚になります。御朱印は1日に1枚までです。</p>
+
+            <div class="oshi-profile">
+                <div class="form-group">
+                    <label for="oshi-name">推しのお名前・ニックネーム（任意）</label>
+                    <input type="text" id="oshi-name" maxlength="16" placeholder="例：ひかる" autocomplete="off">
+                </div>
+                <div class="oshi-profile-row">
+                    <div class="form-group">
+                        <label for="oshi-group">グループ名（任意）</label>
+                        <input type="text" id="oshi-group" maxlength="20" placeholder="例：〇〇団" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="oshi-live">ライブ名・イベント名（任意）</label>
+                        <input type="text" id="oshi-live" maxlength="24" placeholder="例：春のワンマン" autocomplete="off">
+                    </div>
+                </div>
+                <p class="rack-note">※ ご自身の記録のためにのみお使いください。入力内容はこの端末にのみ保存されます。</p>
+            </div>
 
             <div id="goshuin-area"></div>
         </section>
 
-        <!-- ===== 6. 御朱印帳ページ ===== -->
+        <!-- ===== 7. 御朱印帳ページ ===== -->
         <section id="goshuinbook-section" class="section reveal">
-            <p class="section-kicker">06 — TOIRO SHRINE</p>
+            <p class="section-kicker">07 — TOIRO SHRINE</p>
             <h2 class="section-title">御朱印帳</h2>
             <p id="goshuinbook-lead" class="section-lead"></p>
 
@@ -167,9 +197,9 @@
             </div>
         </section>
 
-        <!-- ===== 7. 記念日登録ページ ===== -->
+        <!-- ===== 8. 記念日登録ページ ===== -->
         <section id="anniversary-section" class="section reveal">
-            <p class="section-kicker">07 — TOIRO SHRINE</p>
+            <p class="section-kicker">08 — TOIRO SHRINE</p>
             <h2 class="section-title">記念日登録</h2>
             <p class="section-lead">推しの誕生日やライブ日、CD発売日など、大切な記念日を登録しておくと、当日は特別な御朱印が授かれます。</p>
 
@@ -181,9 +211,9 @@
             <div id="anniv-list" class="anniv-list"></div>
         </section>
 
-        <!-- ===== 8. 同じ色の願いページ ===== -->
+        <!-- ===== 9. 同じ色の願いページ ===== -->
         <section id="empathy-section" class="section reveal">
-            <p class="section-kicker">08 — TOIRO SHRINE</p>
+            <p class="section-kicker">09 — TOIRO SHRINE</p>
             <h2 class="section-title">同じ色の願い</h2>
             <p class="section-lead"><span id="empathy-color-name">推し色</span>を選んだ人たちの願いごとです。あなたの絵馬も、名前を伏せてそっと加わります。</p>
             <p id="empathy-count" class="empathy-count"></p>
