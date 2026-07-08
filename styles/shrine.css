@@ -37,6 +37,11 @@ body[data-color="lightblue"] { --oshi: #2f97b8; --oshi-deep: #1c6a83; }
 body[data-color="purple"]    { --oshi: #7a51b8; --oshi-deep: #543583; }
 body[data-color="white"]     { --oshi: #a89a72; --oshi-deep: #7a6f50; }
 
+/* 暗い背景に沈む色は、モードごとに読める色調へ寄せる
+   （ブラック×墨は明るい鈍色に、ホワイト×紙は濃い金茶に） */
+body[data-mode="ink"][data-color="black"]   { --oshi: #918da8; --oshi-deep: #6e6a85; }
+body[data-mode="paper"][data-color="white"] { --oshi: #8a7d5a; --oshi-deep: #6f6448; }
+
 /* ---- 墨（ink）／ 紙（paper）の基調切替 ---- */
 body[data-mode="ink"] {
     /* color-scheme で日付入力などのネイティブUIも墨に合わせる */
@@ -874,6 +879,7 @@ button.book-cell.has-record:active { transform: scale(0.95); }
 .anniv-card.today { border-color: var(--oshi); background: color-mix(in srgb, var(--oshi) 10%, transparent); }
 .anniv-card-label { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 8px; }
 .anniv-card-count { font-family: 'Shippori Mincho', serif; font-size: 1.3rem; color: var(--oshi-deep); }
+body[data-mode="ink"] .anniv-card-count { color: var(--oshi); } /* 墨地では濃色が沈むため明るい側を使う */
 .anniv-card.today .anniv-card-count { color: var(--text); }
 .anniv-calendar { margin-top: 24px; text-align: center; }
 .anniv-calendar .rack-note { margin-top: 10px; }
