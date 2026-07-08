@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/shrine.css?v=20260708g">
+    <link rel="stylesheet" href="styles/shrine.css?v=20260708h">
 </head>
 <body data-mode="ink">
     <div class="grain" aria-hidden="true"></div>
@@ -87,6 +87,16 @@
             </div>
 
             <p id="today-message" class="today-message"></p>
+
+            <div id="first-guide" class="first-guide hidden">
+                <p class="first-guide-title">はじめての参拝</p>
+                <p class="first-guide-lead">まずはこの三つから。すべて終えると、この案内は消えます。</p>
+                <a href="#ema-section" class="first-step" id="fg-ema"><span class="fg-no">一</span><span class="fg-label">絵馬に願いごとを書く</span><span class="fg-check" aria-hidden="true">✓</span></a>
+                <a href="#mikuji-section" class="first-step" id="fg-mikuji"><span class="fg-no">二</span><span class="fg-label">今日のみくじを引く</span><span class="fg-check" aria-hidden="true">✓</span></a>
+                <a href="#goshuin-section" class="first-step" id="fg-goshuin"><span class="fg-no">三</span><span class="fg-label">御朱印をいただく</span><span class="fg-check" aria-hidden="true">✓</span></a>
+            </div>
+
+            <div id="backup-card" class="backup-card hidden"></div>
 
             <div id="countdown-card" class="countdown-card hidden"></div>
 
@@ -259,9 +269,9 @@
 
     <footer class="footer">
         <p>「十色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
-        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260708g</span></p>
+        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260708h</span></p>
     </footer>
 
-    <script src="scripts/shrine.js?v=20260708g"></script>
+    <script src="scripts/shrine.js?v=20260708h"></script>
 </body>
 </html>
