@@ -357,6 +357,26 @@ h1, h2, h3 { font-family: 'Shippori Mincho', serif; font-weight: 600; }
     border-bottom: 1px solid var(--hairline);
 }
 
+/* ---- あの日の願いとの再会 ---- */
+.memory-card {
+    max-width: 420px;
+    margin: 0 auto 34px;
+    padding: 24px 22px;
+    text-align: center;
+    background: linear-gradient(170deg, var(--paper) 0%, var(--paper-deep) 100%);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-paper);
+    color: var(--ink);
+}
+.memory-kicker { font-size: 0.8rem; letter-spacing: 0.1em; color: #8a7a55; margin-bottom: 10px; }
+.memory-wish {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    margin-bottom: 12px;
+}
+.memory-note { font-size: 0.78rem; line-height: 1.8; color: #8a7a55; }
+
 /* ---- ボタン ---- */
 .btn-main {
     display: inline-flex;
@@ -490,6 +510,42 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
 @keyframes ema-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 .ema-wish-text { font-size: 0.84rem; line-height: 1.6; word-break: break-word; }
 .ema-signature { margin-top: 10px; text-align: right; font-size: 0.74rem; color: color-mix(in srgb, var(--ema) 70%, #4a3a1c); font-weight: 600; }
+
+/* 叶いました（願いが叶った絵馬には金の印） */
+.ema-plaque.fulfilled { border-color: var(--gold); border-top-color: var(--gold); }
+.ema-plaque.fulfilled .ema-wish-text { padding-right: 26px; }
+.ema-kanau-seal {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.78rem;
+    color: #fdf9ee;
+    background: var(--gold);
+    border-radius: 50%;
+    transform: rotate(-6deg);
+}
+.ema-kanau-btn {
+    display: block;
+    margin-top: 10px;
+    padding: 6px 2px 4px;
+    min-height: 32px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: #8a7a55;
+    background: none;
+    border: none;
+    border-bottom: 1px solid color-mix(in srgb, #8a7a55 45%, transparent);
+    cursor: pointer;
+    transition: color 0.25s ease, border-color 0.25s ease;
+}
+.ema-kanau-btn:hover { color: var(--gold); border-color: var(--gold); }
 
 /* ============================================================
    4. お守り
