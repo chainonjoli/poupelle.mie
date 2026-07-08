@@ -873,6 +873,7 @@ button.book-cell.has-record:active { transform: scale(0.95); }
     border-top: 1px solid var(--hairline);
 }
 .footer-copy { margin-top: 12px; letter-spacing: 0.14em; }
+.app-version { margin-left: 8px; font-size: 0.68rem; opacity: 0.55; letter-spacing: 0.06em; }
 
 /* ============================================================
    スマホ最適化

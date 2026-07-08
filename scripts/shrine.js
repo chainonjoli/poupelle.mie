@@ -678,10 +678,11 @@
         }
     }
 
-    function showGoshuinResult(img, alreadyClaimed) {
+    function showGoshuinResult(img, alreadyClaimed, noteText) {
         var area = document.getElementById('goshuin-area');
+        var note = noteText || (alreadyClaimed ? '本日の御朱印はいただき済みです。上の欄で推しのお名前を入れ直したら、「入力内容を反映し直す」で今日の1枚にすぐ反映できます。' : '');
         area.innerHTML =
-            (alreadyClaimed ? '<p class="goshuin-note">本日の御朱印はいただき済みです。また明日、参拝にいらしてください。</p>' : '') +
+            (note ? '<p class="goshuin-note">' + note + '</p>' : '') +
             '<img class="goshuin-img" src="' + img + '" alt="今日の推し色御朱印">' +
             '<div class="goshuin-actions">' +
             '<a class="pill-btn" id="btn-goshuin-save" href="' + img + '" download="toiro-goshuin.png">画像として保存</a>' +
@@ -712,7 +713,11 @@
         save(STORAGE_GOSHUIN_RECORDS, records);
         var img = makeGoshuin(rec);
         save(STORAGE_GOSHUIN_TODAY, { date: today, img: img });
-        showGoshuinResult(img, true);
+        var note = profile.oshi
+            ? '入力内容を反映しました。角印が「' + profile.oshi + '」のハンコになっています。'
+            : '入力内容を反映しました。角印を推しの名前のハンコにするには、上の「推しのお名前」欄に入力してからもう一度押してください。';
+        showGoshuinResult(img, true, note);
+        document.querySelector('#goshuin-area .goshuin-img').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function loadGoshuinRecords() { return load(STORAGE_GOSHUIN_RECORDS, {}); }
