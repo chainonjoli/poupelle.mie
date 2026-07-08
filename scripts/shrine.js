@@ -846,6 +846,11 @@
         e.target.value = '';
     });
 
+    /* ---- PWA: Service Worker登録（https/localhost のみ。file:// では動かない） ---- */
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        navigator.serviceWorker.register('sw.js').catch(function () { /* 登録に失敗しても通常表示で動作する */ });
+    }
+
     /* ---- 参道へもどる（1画面分スクロールしたら現れる） ---- */
     var backBtn = document.getElementById('btn-backtotop');
     backBtn.addEventListener('click', function () {
