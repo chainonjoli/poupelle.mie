@@ -105,6 +105,22 @@ const path = require('path');
     if (!countdownText.includes('推しの生誕日')) errors.push('カウントダウンにラベルが出ない');
     if (!countdownText.includes('今日')) errors.push('当日のカウントダウンが「今日」にならない');
 
+    // 記念日のカレンダー連携（.ics）: 毎年の予定＋当日朝の通知が入る
+    const [icsDownload] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click('#btn-anniv-ics')
+    ]);
+    const icsPath = await icsDownload.path();
+    const icsBody = require('fs').readFileSync(icsPath, 'utf8');
+    if (!icsBody.includes('BEGIN:VCALENDAR')) errors.push('icsの形式が不正');
+    if (!icsBody.includes('推しの生誕日（十色神社）')) errors.push('icsに記念日のラベルが入らない');
+    if (!icsBody.includes('RRULE:FREQ=YEARLY')) errors.push('icsが毎年の予定になっていない');
+    if (!icsBody.includes('BEGIN:VALARM')) errors.push('icsに通知が入らない');
+
+    // OGP: SNSシェア用のメタタグが設定されている
+    if (await page.locator('meta[property="og:image"]').count() !== 1) errors.push('og:imageがない');
+    if (await page.locator('meta[name="twitter:card"]').count() !== 1) errors.push('twitter:cardがない');
+
     // 8. 共感ページ：推しカラー名・参拝者数の目安・自分の願いごとが匿名で流れる
     const empathyText = await page.textContent('#empathy-section');
     if (!empathyText.includes('パープル')) errors.push('共感ページに推しカラー名が出ない');

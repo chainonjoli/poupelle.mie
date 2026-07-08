@@ -6,6 +6,19 @@
     <title>十色神社 TOIRO SHRINE - あなたの「好き」を、ちゃんと残せる神社。</title>
     <meta name="description" content="十色神社（といろじんじゃ）は、推しを好きだった時間そのものを残せる、完全オリジナルの架空の神社です。推しカラーを選び、参拝し、願いを書き、お守りや御朱印を授かって、推しへの想いを記録できます。">
     <meta name="theme-color" content="#17140f">
+    <meta property="og:title" content="十色神社 TOIRO SHRINE">
+    <meta property="og:description" content="あなたの「好き」を、ちゃんと残せる神社。推しカラーを選び、願いを込めて、今日の参拝を思い出に。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://chainonjoli.github.io/poupelle.mie/shrine.html">
+    <meta property="og:image" content="https://chainonjoli.github.io/poupelle.mie/assets/ogp.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="十色神社 TOIRO SHRINE">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="十色神社 TOIRO SHRINE">
+    <meta name="twitter:description" content="あなたの「好き」を、ちゃんと残せる神社。推しカラーを選び、願いを込めて、今日の参拝を思い出に。">
+    <meta name="twitter:image" content="https://chainonjoli.github.io/poupelle.mie/assets/ogp.png">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -15,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/shrine.css?v=20260708d">
+    <link rel="stylesheet" href="styles/shrine.css?v=20260708e">
 </head>
 <body data-mode="ink">
     <div class="grain" aria-hidden="true"></div>
@@ -209,6 +222,11 @@
             </div>
 
             <div id="anniv-list" class="anniv-list"></div>
+
+            <div id="anniv-calendar" class="anniv-calendar hidden">
+                <button id="btn-anniv-ics" class="pill-btn" type="button">スマホのカレンダーに追加（.ics）</button>
+                <p class="rack-note">ダウンロードしたファイルを開くと、記念日が毎年の予定としてカレンダーに登録され、当日の朝に通知が届きます。</p>
+            </div>
         </section>
 
         <!-- ===== 9. 同じ色の願いページ ===== -->
@@ -226,9 +244,9 @@
 
     <footer class="footer">
         <p>「十色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
-        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260708d</span></p>
+        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260708e</span></p>
     </footer>
 
-    <script src="scripts/shrine.js?v=20260708d"></script>
+    <script src="scripts/shrine.js?v=20260708e"></script>
 </body>
 </html>
