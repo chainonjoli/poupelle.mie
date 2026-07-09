@@ -125,7 +125,7 @@ const path = require('path');
     if (await page.locator('#saisen-section:not(.hidden)').count() !== 1) errors.push('お賽銭セクションが表示されない');
     if (!(await page.textContent('#saisen-section')).includes('準備中')) errors.push('決済リンク未設定なのに準備中の案内が出ない');
     if (await page.locator('#btn-saisen').count() !== 0) errors.push('決済リンク未設定なのにお賽銭ボタンが残っている');
-    if (!(await page.textContent('#saisen-section')).includes('返礼品')) errors.push('お賽銭の寄付説明（返礼品なし）が出ない');
+    if (!(await page.textContent('#saisen-section')).includes('御礼札')) errors.push('お賽銭の御礼札の説明が出ない');
 
     // はじめての参拝ガイド: この時点では絵馬のみ✓（みくじ・御朱印は未実施）
     if (await page.locator('#first-guide:not(.hidden)').count() !== 1) errors.push('はじめての参拝ガイドが出ない');

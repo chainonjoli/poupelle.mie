@@ -164,7 +164,7 @@
     var MAX_ANNIV = 5;
     var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
 
-    /* お賽銭の決済リンク。Stripe Payment Link / OFUSE / Ko-fi などのURLを
+    /* お賽銭の決済リンク。STORES のショップURL（または Stripe Payment Link 等）を
        ここに設定すると「お賽銭を納める」ボタンが有効になる。
        空のあいだはボタンの代わりに「準備中」の案内を表示する
        （決済アカウント審査時にサイト上で用途説明が確認できるようにするため）。 */
