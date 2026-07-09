@@ -31,8 +31,8 @@ const path = require('path');
     const todayMsg = await page.textContent('#today-message');
     if (!todayMsg || todayMsg.trim().length < 5) errors.push('今日のひとことが出ない');
 
-    // 境内のご案内：7セクションへのリンクマップと「参道へもどる」ボタン
-    if (await page.locator('.keidai-link').count() !== 7) errors.push('境内のご案内が7件出ない');
+    // 境内のご案内：8セクションへのリンクマップと「参道へもどる」ボタン
+    if (await page.locator('.keidai-link').count() !== 8) errors.push('境内のご案内が8件出ない');
     await page.click('.keidai-link[href="#empathy-section"]');
     await page.waitForTimeout(700);
     const empathyBox = await page.locator('#empathy-section .section-title').boundingBox();
@@ -71,6 +71,19 @@ const path = require('path');
     const rackText = await page.textContent('#ema-rack');
     if (!rackText.includes('ライブが当たりますように')) errors.push('絵馬掛けに願いが出ない');
     if (!rackText.includes('あず より')) errors.push('絵馬掛けに名前が出ない');
+
+    // 絵馬の共有：奉納後に投稿ボタンが現れ、共有APIのない環境ではXの投稿画面URLが開く
+    if (await page.locator('#btn-ema-share:not(.hidden)').count() !== 1) errors.push('奉納後に絵馬の投稿ボタンが出ない');
+    await page.evaluate(() => {
+        window.__opened = null;
+        window.open = u => { window.__opened = u; };
+        try { navigator.share = null; navigator.canShare = null; } catch (e) {}
+    });
+    await page.click('#btn-ema-share');
+    const emaShareUrl = await page.evaluate(() => window.__opened);
+    if (!emaShareUrl || !emaShareUrl.includes('twitter.com/intent/tweet')) errors.push('絵馬の投稿でX投稿画面が開かない');
+    if (!emaShareUrl.includes(encodeURIComponent('祈願'))) errors.push('絵馬の投稿文に祈願が入らない');
+    if (!emaShareUrl.includes(encodeURIComponent('#十色神社'))) errors.push('投稿文にハッシュタグが入らない');
 
     // 叶いました：印を付けると金の「叶」が現れ、リロード後も残り、取り消せる
     await page.click('.ema-kanau-btn >> nth=0');
@@ -121,8 +134,11 @@ const path = require('path');
     if (await page.locator('meta[property="og:image"]').count() !== 1) errors.push('og:imageがない');
     if (await page.locator('meta[name="twitter:card"]').count() !== 1) errors.push('twitter:cardがない');
 
-    // お賽銭: 決済リンク未設定の間は表示されない
-    if (await page.locator('#saisen-section:not(.hidden)').count() !== 0) errors.push('決済リンク未設定なのにお賽銭が表示されている');
+    // お賽銭: セクションは常に見え、決済リンク未設定の間は「準備中」の案内が出る
+    if (await page.locator('#saisen-section:not(.hidden)').count() !== 1) errors.push('お賽銭セクションが表示されない');
+    if (!(await page.textContent('#saisen-section')).includes('準備中')) errors.push('決済リンク未設定なのに準備中の案内が出ない');
+    if (await page.locator('#btn-saisen').count() !== 0) errors.push('決済リンク未設定なのにお賽銭ボタンが残っている');
+    if (!(await page.textContent('#saisen-section')).includes('御礼札')) errors.push('お賽銭の御礼札の説明が出ない');
 
     // はじめての参拝ガイド: この時点では絵馬のみ✓（みくじ・御朱印は未実施）
     if (await page.locator('#first-guide:not(.hidden)').count() !== 1) errors.push('はじめての参拝ガイドが出ない');
@@ -143,6 +159,18 @@ const path = require('path');
     if (!/吉/.test(mikujiRank)) errors.push('みくじの結果が出ない');
     if (await page.locator('.mikuji-row').count() !== 5) errors.push('みくじの運勢項目が5件出ない');
     if (await page.locator('#btn-mikuji-draw').count() !== 0) errors.push('みくじを同日に引き直せてしまう');
+
+    // みくじの共有：結果に投稿ボタンが付き、投稿文に結果の運勢が入る
+    if (await page.locator('#btn-mikuji-share').count() !== 1) errors.push('みくじの投稿ボタンが出ない');
+    await page.evaluate(() => {
+        window.__opened = null;
+        window.open = u => { window.__opened = u; };
+        try { navigator.share = null; navigator.canShare = null; } catch (e) {}
+    });
+    await page.click('#btn-mikuji-share');
+    const mikujiShareUrl = await page.evaluate(() => window.__opened);
+    if (!mikujiShareUrl || !mikujiShareUrl.includes('twitter.com/intent/tweet')) errors.push('みくじの投稿でX投稿画面が開かない');
+    if (!mikujiShareUrl.includes(encodeURIComponent(mikujiRank))) errors.push('みくじの投稿文に運勢が入らない');
     await page.reload();
     await page.waitForSelector('#main:not(.hidden)');
     if ((await page.textContent('.mikuji-rank')).trim() !== mikujiRank) errors.push('リロード後にみくじの結果が変わってしまう');
@@ -156,6 +184,7 @@ const path = require('path');
     const goshuinSrc = await page.getAttribute('.goshuin-img', 'src');
     if (!goshuinSrc || !goshuinSrc.startsWith('data:image/png') || goshuinSrc.length < 5000) errors.push('御朱印画像が生成されない');
     if (!(await page.getAttribute('#btn-goshuin-save', 'download'))) errors.push('御朱印の保存リンクがない');
+    if (await page.locator('#btn-goshuin-share').count() !== 1) errors.push('御朱印の投稿ボタンが出ない');
 
     // 推しプロフィールがリロード後も復元される
     await page.reload();
