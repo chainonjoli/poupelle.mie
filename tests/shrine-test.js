@@ -31,8 +31,8 @@ const path = require('path');
     const todayMsg = await page.textContent('#today-message');
     if (!todayMsg || todayMsg.trim().length < 5) errors.push('今日のひとことが出ない');
 
-    // 境内のご案内：7セクションへのリンクマップと「参道へもどる」ボタン
-    if (await page.locator('.keidai-link').count() !== 7) errors.push('境内のご案内が7件出ない');
+    // 境内のご案内：8セクションへのリンクマップと「参道へもどる」ボタン
+    if (await page.locator('.keidai-link').count() !== 8) errors.push('境内のご案内が8件出ない');
     await page.click('.keidai-link[href="#empathy-section"]');
     await page.waitForTimeout(700);
     const empathyBox = await page.locator('#empathy-section .section-title').boundingBox();
@@ -121,8 +121,11 @@ const path = require('path');
     if (await page.locator('meta[property="og:image"]').count() !== 1) errors.push('og:imageがない');
     if (await page.locator('meta[name="twitter:card"]').count() !== 1) errors.push('twitter:cardがない');
 
-    // お賽銭: 決済リンク未設定の間は表示されない
-    if (await page.locator('#saisen-section:not(.hidden)').count() !== 0) errors.push('決済リンク未設定なのにお賽銭が表示されている');
+    // お賽銭: セクションは常に見え、決済リンク未設定の間は「準備中」の案内が出る
+    if (await page.locator('#saisen-section:not(.hidden)').count() !== 1) errors.push('お賽銭セクションが表示されない');
+    if (!(await page.textContent('#saisen-section')).includes('準備中')) errors.push('決済リンク未設定なのに準備中の案内が出ない');
+    if (await page.locator('#btn-saisen').count() !== 0) errors.push('決済リンク未設定なのにお賽銭ボタンが残っている');
+    if (!(await page.textContent('#saisen-section')).includes('返礼品')) errors.push('お賽銭の寄付説明（返礼品なし）が出ない');
 
     // はじめての参拝ガイド: この時点では絵馬のみ✓（みくじ・御朱印は未実施）
     if (await page.locator('#first-guide:not(.hidden)').count() !== 1) errors.push('はじめての参拝ガイドが出ない');

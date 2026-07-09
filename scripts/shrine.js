@@ -165,8 +165,9 @@
     var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
 
     /* お賽銭の決済リンク。Stripe Payment Link / OFUSE / Ko-fi などのURLを
-       ここに設定すると、境内に「お賽銭」のセクションが現れる。
-       空のままなら表示されない。 */
+       ここに設定すると「お賽銭を納める」ボタンが有効になる。
+       空のあいだはボタンの代わりに「準備中」の案内を表示する
+       （決済アカウント審査時にサイト上で用途説明が確認できるようにするため）。 */
     var SAISEN_URL = '';
 
     var body = document.body;
@@ -1436,10 +1437,17 @@
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
     document.getElementById('btn-anniv-ics').addEventListener('click', downloadAnnivIcs);
 
-    /* お賽銭（決済リンクが設定されているときだけ現れる） */
+    /* お賽銭。セクションは常に見せ、決済リンク未設定のあいだは
+       ボタンの代わりに「準備中」の案内を出す。 */
+    document.getElementById('saisen-section').classList.remove('hidden');
     if (SAISEN_URL) {
         document.getElementById('btn-saisen').href = SAISEN_URL;
-        document.getElementById('saisen-section').classList.remove('hidden');
+    } else {
+        var saisenBtn = document.getElementById('btn-saisen');
+        var saisenNote = document.createElement('p');
+        saisenNote.className = 'saisen-preparing';
+        saisenNote.textContent = 'お賽銭箱は、ただいま準備中です。';
+        saisenBtn.parentNode.replaceChild(saisenNote, saisenBtn);
     }
     document.getElementById('btn-book-prev').addEventListener('click', function () { shiftBookMonth(-1); });
     document.getElementById('btn-book-next').addEventListener('click', function () { shiftBookMonth(1); });
