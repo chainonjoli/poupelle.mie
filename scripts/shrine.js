@@ -439,6 +439,14 @@
         card.classList.remove('hidden');
     }
 
+    /* 直近に奉納した願い（Xの祈願投稿文化に合わせて、願いごと本文を共有できるように） */
+    var lastEmaWish = null;
+
+    function shareEma() {
+        if (!lastEmaWish) return;
+        shareToSns('【祈願】' + lastEmaWish + '\n十色神社に絵馬を奉納しました。');
+    }
+
     function dedicateEma() {
         var name = document.getElementById('ema-name').value.trim();
         var wish = document.getElementById('ema-wish').value.trim();
@@ -455,6 +463,8 @@
         var doneEl = document.getElementById('ema-done');
         doneEl.textContent = name + 'さんの絵馬を奉納しました。';
         doneEl.classList.remove('hidden');
+        lastEmaWish = wish;
+        document.getElementById('btn-ema-share').classList.remove('hidden');
         document.getElementById('ema-wish').value = '';
         renderMamoriCard();
         renderEmpathyFeed();
@@ -780,24 +790,48 @@
         return log;
     }
 
-    function shareGoshuin() {
-        var text = '十色神社で今日の推し色御朱印をいただきました。';
-        if (navigator.share) {
-            navigator.share({ text: text, url: PAGE_URL }).catch(function () { /* ユーザーがキャンセルした場合など */ });
-        } else {
-            window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(PAGE_URL), '_blank', 'noopener');
+    /* 共有の共通処理。ハッシュタグを添えて、
+       - 画像を渡せる環境（主にスマホ）: 共有シートから画像付きで投稿できる
+       - navigator.share がある環境: テキスト＋URLの共有シート
+       - それ以外（主にPC）: Xの投稿画面を開く */
+    function shareToSns(text, imageDataUrl) {
+        var full = text + '\n#十色神社 #推し活';
+        if (imageDataUrl && navigator.canShare && window.File) {
+            try {
+                var bin = atob(imageDataUrl.split(',')[1]);
+                var bytes = new Uint8Array(bin.length);
+                for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                var file = new File([bytes], 'toiro-goshuin.png', { type: 'image/png' });
+                if (navigator.canShare({ files: [file] })) {
+                    /* 画像共有ではurl欄が無視されるアプリが多いため、本文にURLを含める */
+                    navigator.share({ files: [file], text: full + '\n' + PAGE_URL }).catch(function () { /* キャンセル時 */ });
+                    return;
+                }
+            } catch (e) { /* 変換に失敗したらテキスト共有へ */ }
         }
+        if (navigator.share) {
+            navigator.share({ text: full, url: PAGE_URL }).catch(function () { /* キャンセル時 */ });
+            return;
+        }
+        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(full) + '&url=' + encodeURIComponent(PAGE_URL), '_blank', 'noopener');
+    }
+
+    var lastGoshuinImg = null;
+
+    function shareGoshuin() {
+        shareToSns('十色神社で今日の推し色御朱印をいただきました。', lastGoshuinImg);
     }
 
     function showGoshuinResult(img, alreadyClaimed, noteText) {
         var area = document.getElementById('goshuin-area');
+        lastGoshuinImg = img;
         var note = noteText || (alreadyClaimed ? '本日の御朱印はいただき済みです。上の欄で推しのお名前を入れ直したら、「入力内容を反映し直す」で今日の1枚にすぐ反映できます。' : '');
         area.innerHTML =
             (note ? '<p class="goshuin-note">' + note + '</p>' : '') +
             '<img class="goshuin-img" src="' + img + '" alt="今日の推し色御朱印">' +
             '<div class="goshuin-actions">' +
             '<a class="pill-btn" id="btn-goshuin-save" href="' + img + '" download="toiro-goshuin.png">画像として保存</a>' +
-            '<button type="button" class="pill-btn" id="btn-goshuin-share">SNSで共有</button>' +
+            '<button type="button" class="pill-btn" id="btn-goshuin-share">Xに投稿・共有</button>' +
             '<button type="button" class="pill-btn" id="btn-goshuin-refresh">入力内容を反映し直す</button>' +
             '</div>';
         document.getElementById('btn-goshuin-share').addEventListener('click', shareGoshuin);
@@ -1168,10 +1202,19 @@
             list.appendChild(row);
         });
         paper.appendChild(list);
+        var shareBtn = document.createElement('button');
+        shareBtn.type = 'button';
+        shareBtn.id = 'btn-mikuji-share';
+        shareBtn.className = 'pill-btn mikuji-share';
+        shareBtn.textContent = '結果をXに投稿・共有する';
+        shareBtn.addEventListener('click', function () {
+            shareToSns('今日の推しみくじは「' + result.rank + '」でした。');
+        });
         var note = document.createElement('p');
         note.className = 'mikuji-note';
         note.textContent = 'みくじは1日1回。また明日、引きにいらしてください。';
         area.appendChild(paper);
+        area.appendChild(shareBtn);
         area.appendChild(note);
     }
 
@@ -1433,6 +1476,7 @@
         document.getElementById('ema-section').scrollIntoView({ behavior: 'smooth' });
     });
     document.getElementById('btn-dedicate').addEventListener('click', dedicateEma);
+    document.getElementById('btn-ema-share').addEventListener('click', shareEma);
     document.getElementById('btn-mamori-renew').addEventListener('click', renderMamoriCard);
     document.getElementById('btn-anniv-save').addEventListener('click', saveAnniversaries);
     document.getElementById('btn-anniv-ics').addEventListener('click', downloadAnnivIcs);

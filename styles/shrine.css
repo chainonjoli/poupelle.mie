@@ -722,6 +722,8 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
 .mikuji-row:last-child { border-bottom: none; }
 .mikuji-stars { color: var(--oshi-deep); letter-spacing: 0.1em; }
 .mikuji-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); }
+.mikuji-share { display: block; margin: 16px auto 10px; }
+.ema-share { display: block; margin: 12px auto 0; }
 
 /* ============================================================
    6. 御朱印
