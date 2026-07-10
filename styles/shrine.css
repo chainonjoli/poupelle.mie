@@ -1035,6 +1035,14 @@ body[data-mode="ink"] .anniv-card-count { color: var(--oshi); } /* 墨地では�
     color: var(--text-muted);
     border-top: 1px solid var(--hairline);
 }
+.footer-sns { margin-top: 14px; }
+.footer-sns a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+    letter-spacing: 0.08em;
+}
 .footer-copy { margin-top: 12px; letter-spacing: 0.14em; }
 .app-version { margin-left: 8px; font-size: 0.68rem; opacity: 0.55; letter-spacing: 0.06em; }
 

@@ -163,6 +163,7 @@
     var MAX_EMA = 24;
     var MAX_ANNIV = 5;
     var PAGE_URL = 'https://chainonjoli.github.io/poupelle.mie/shrine.html';
+    var X_ACCOUNT = 'toiro_shrine'; /* 公式Xアカウント。投稿画面に「via @toiro_shrine」が付く */
 
     /* お賽銭の決済リンク。STORES のショップURL（または Stripe Payment Link 等）を
        ここに設定すると「お賽銭を納める」ボタンが有効になる。
@@ -813,7 +814,7 @@
             navigator.share({ text: full, url: PAGE_URL }).catch(function () { /* キャンセル時 */ });
             return;
         }
-        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(full) + '&url=' + encodeURIComponent(PAGE_URL), '_blank', 'noopener');
+        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(full) + '&url=' + encodeURIComponent(PAGE_URL) + '&via=' + X_ACCOUNT, '_blank', 'noopener');
     }
 
     var lastGoshuinImg = null;
