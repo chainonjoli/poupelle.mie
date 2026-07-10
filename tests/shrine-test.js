@@ -84,6 +84,10 @@ const path = require('path');
     if (!emaShareUrl || !emaShareUrl.includes('twitter.com/intent/tweet')) errors.push('絵馬の投稿でX投稿画面が開かない');
     if (!emaShareUrl.includes(encodeURIComponent('祈願'))) errors.push('絵馬の投稿文に祈願が入らない');
     if (!emaShareUrl.includes(encodeURIComponent('#十色神社'))) errors.push('投稿文にハッシュタグが入らない');
+    if (!emaShareUrl.includes('via=toiro_shrine')) errors.push('投稿に公式アカウントのviaが付かない');
+
+    // フッターに公式Xへのリンクがある
+    if (await page.locator('.footer-sns a[href="https://x.com/toiro_shrine"]').count() !== 1) errors.push('フッターに公式Xリンクがない');
 
     // 叶いました：印を付けると金の「叶」が現れ、リロード後も残り、取り消せる
     await page.click('.ema-kanau-btn >> nth=0');
