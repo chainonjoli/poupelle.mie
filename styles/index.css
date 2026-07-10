@@ -220,6 +220,52 @@ h1, h2, h3, .subtitle {
     margin-bottom: 15px;
 }
 
+/* Story Section */
+.story-body {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.story-body p {
+    margin-bottom: 20px;
+    color: var(--text-muted);
+}
+
+.story-body strong {
+    color: #fff;
+}
+
+.story-quote {
+    margin: 30px auto;
+    padding: 24px 28px;
+    background: rgba(252, 211, 77, 0.06);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 0 12px 12px 0;
+    font-family: 'Kiwi Maru', serif;
+}
+
+.story-quote p {
+    margin-bottom: 8px;
+    color: #fff;
+    font-size: 1.15rem;
+    line-height: 1.8;
+}
+
+.story-quote cite {
+    font-style: normal;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.story-link-wrap {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.story-link {
+    margin-top: 12px;
+}
+
 /* Form Settings */
 .reservation-form {
     max-width: 600px;
