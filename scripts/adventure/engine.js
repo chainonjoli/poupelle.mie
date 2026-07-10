@@ -15,6 +15,36 @@
 const AdvEngine = (() => {
     const STORAGE_KEY = 'pupelle_adventure_v1';
 
+    /* ================= 出題バリエーション用の乱数ヘルパー ================= */
+    /* データ側の gen(r) / variants に渡す。物語は固定のまま、数字や
+     * 言い回しだけを毎回変えて「同じ問題ばかり」を防ぐ。 */
+    const rnd = {
+        int: (min, max) => min + Math.floor(Math.random() * (max - min + 1)),
+        pick: arr => arr[Math.floor(Math.random() * arr.length)],
+        // step 刻みの値（例: step(10,90,10) → 10〜90の10円単位）
+        step: (min, max, s) => min + Math.floor(Math.random() * ((max - min) / s + 1)) * s
+    };
+
+    /*
+     * 生ステップ（データ）を、実際に出題する1問へ解決する。
+     *   - variants: [部分上書き, …] があれば1つ抽選して上書き
+     *   - gen(r): があれば呼び出し、返ったフィールドで上書き（数字ランダム化）
+     * 解決結果はセッションにキャッシュし、その問題の表示〜採点で一貫させる。
+     */
+    function resolveStep(raw) {
+        if (!raw) return raw;
+        let step = raw;
+        if (Array.isArray(raw.variants) && raw.variants.length) {
+            step = Object.assign({}, raw, rnd.pick(raw.variants));
+            delete step.variants;
+        }
+        if (typeof step.gen === 'function') {
+            step = Object.assign({}, step, step.gen(rnd) || {});
+            delete step.gen;
+        }
+        return step;
+    }
+
     /* ================= 保存・読み込み ================= */
 
     function blankState() {
@@ -153,6 +183,7 @@ const AdvEngine = (() => {
         session = {
             quest, tier,
             stepIndex: 0,
+            resolved: null,      // いま出題中の解決済みステップ（数字ランダム化を固定）
             wrongCount: 0,       // いまのステップでの誤答数
             hinted: false,
             results: [],         // {ok, hinted, revealed}
@@ -160,6 +191,7 @@ const AdvEngine = (() => {
             bonusOffered: false,
             startedAt: Date.now()
         };
+        session.resolved = resolveStep(quest.tiers[tier].steps[0]);
         return session;
     }
 
@@ -173,7 +205,7 @@ const AdvEngine = (() => {
 
     function currentStep() {
         if (!session) return null;
-        return session.quest.tiers[session.tier].steps[session.stepIndex];
+        return session.resolved;
     }
 
     /* 解答の判定。number型は誤差・許容値も見る */
@@ -237,7 +269,8 @@ const AdvEngine = (() => {
     function getBonusStep() {
         session.bonusOffered = true;
         const pool = ADV_DATA.bonus.byTier[Math.min(4, session.tier + 1)] || ADV_DATA.bonus.byTier[session.tier];
-        return pool[Math.floor(Math.random() * pool.length)];
+        session.bonusStep = resolveStep(rnd.pick(pool));
+        return session.bonusStep;
     }
 
     function submitBonus(step, value) {
@@ -256,7 +289,9 @@ const AdvEngine = (() => {
         session.stepIndex++;
         session.wrongCount = 0;
         session.hinted = false;
-        if (session.stepIndex >= session.quest.tiers[session.tier].steps.length) return null;
+        const steps = session.quest.tiers[session.tier].steps;
+        if (session.stepIndex >= steps.length) { session.resolved = null; return null; }
+        session.resolved = resolveStep(steps[session.stepIndex]);
         return currentStep();
     }
 
