@@ -293,6 +293,16 @@ const path = require('path');
         errors.push('願いごとページの見出しが上部バーに隠れている');
     }
 
+    // お焚き上げ：2タップ確認 → 絵馬が外れ、保存にも反映される
+    await page.evaluate(() => document.getElementById('ema-section').scrollIntoView());
+    await page.click('.ema-taki-btn >> nth=0');
+    if (!(await page.textContent('.ema-taki-btn >> nth=0')).includes('もう一度')) errors.push('お焚き上げの確認表示が出ない');
+    await page.click('.ema-taki-btn >> nth=0');
+    await page.waitForTimeout(1500);
+    if ((await page.textContent('#ema-rack')).includes('ライブが当たりますように')) errors.push('お焚き上げで絵馬が消えない');
+    const storedAfterBurn = await page.evaluate(() => localStorage.getItem('toiro-ema'));
+    if (storedAfterBurn && storedAfterBurn.includes('ライブが当たりますように')) errors.push('お焚き上げが保存に反映されない');
+
     // あの日の願いとの再会：一年前の絵馬があると参道にそっと表示される
     const memoryContext = await browser.newContext({ viewport: { width: 420, height: 900 } });
     const page4 = await memoryContext.newPage();

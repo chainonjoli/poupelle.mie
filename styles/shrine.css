@@ -642,6 +642,40 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
 }
 .ema-kanau-btn:hover { color: var(--gold); border-color: var(--gold); }
 
+/* お焚き上げ（役目を終えた絵馬を外す。静かな金の火で天に還す） */
+.ema-taki-btn { margin-top: 2px; font-size: 0.68rem; color: #a08a5a; }
+.ema-taki-btn.confirm { color: #b3543d; font-weight: 600; }
+.ema-plaque.burning {
+    animation: ema-burnout 1.15s ease forwards;
+    pointer-events: none;
+}
+@keyframes ema-burnout {
+    0% { opacity: 1; transform: none; }
+    35% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--gold-soft) 55%, transparent); }
+    100% { opacity: 0; transform: translateY(-10px) scale(0.94); }
+}
+.ember {
+    position: absolute;
+    bottom: 30%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #f6e3ae 0%, var(--gold) 90%);
+    box-shadow: 0 0 7px var(--gold-soft);
+    pointer-events: none;
+    opacity: 0;
+    animation: ember-up 1s ease-out forwards;
+}
+@keyframes ember-up {
+    0% { opacity: 0; transform: translate(0, 0); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--ex), -64px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ema-plaque.burning { animation-duration: 0.3s; }
+    .ember { animation: none; }
+}
+
 /* ============================================================
    4. お守り
    ============================================================ */

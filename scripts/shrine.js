@@ -364,6 +364,37 @@
         renderEmaRack();
     }
 
+    /* 役目を終えた絵馬は「お焚き上げ」で天に還す。
+       誤タップで消えないよう、2回目のタップで確定（2.6秒で自動キャンセル） */
+    function burnEma(index, plaque, btn) {
+        if (!btn.classList.contains('confirm')) {
+            btn.classList.add('confirm');
+            btn.textContent = 'もう一度タップで焚き上げ';
+            setTimeout(function () {
+                btn.classList.remove('confirm');
+                btn.textContent = 'お焚き上げ';
+            }, 2600);
+            return;
+        }
+        plaque.classList.add('burning');
+        for (var i = 0; i < 8; i++) {
+            var ember = document.createElement('span');
+            ember.className = 'ember';
+            ember.style.left = 25 + Math.random() * 50 + '%';
+            ember.style.setProperty('--ex', (Math.random() * 36 - 18) + 'px');
+            ember.style.animationDelay = (Math.random() * 0.3) + 's';
+            plaque.appendChild(ember);
+        }
+        setTimeout(function () {
+            emaList.splice(index, 1);
+            saveEma();
+            renderEmaRack();
+            renderMamoriCard();
+            renderEmpathyFeed();
+            renderMemory();
+        }, 1150);
+    }
+
     function renderEmaRack() {
         var rack = document.getElementById('ema-rack');
         rack.innerHTML = '';
@@ -392,6 +423,13 @@
             toggleBtn.textContent = item.fulfilled ? '取り消す' : '叶いました';
             toggleBtn.addEventListener('click', function () { toggleFulfilled(index); });
             plaque.appendChild(toggleBtn);
+            var takiBtn = document.createElement('button');
+            takiBtn.type = 'button';
+            takiBtn.className = 'ema-kanau-btn ema-taki-btn';
+            takiBtn.textContent = 'お焚き上げ';
+            takiBtn.setAttribute('aria-label', 'この絵馬をお焚き上げする（絵馬掛けから外す）');
+            takiBtn.addEventListener('click', function () { burnEma(index, plaque, takiBtn); });
+            plaque.appendChild(takiBtn);
             rack.appendChild(plaque);
         });
     }
