@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function kanaGrade() {
         const p = AdvEngine.getProfile();
         if (!p) return 6;
+        if (p.grade === 'adult') return 6;   // おとなはふりがな無し
         if (p.grade === 'pre') return 0;
         const g = parseInt(p.grade, 10);
         if (g >= 1 && g <= 6) return g;
@@ -108,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <option value="">えらぶ</option>
                         <option value="pre" ${d.grade==='pre'?'selected':''}>未就学（年中・年長）</option>
                         ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${String(g)===d.grade?'selected':''}>小学${g}年生</option>`).join('')}
+                        <option value="adult" ${d.grade==='adult'?'selected':''}>おとな（大人）｜おまけコース</option>
                     </select>
                 </div>
             </div>
@@ -664,7 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const p = d.profile;
         const goalLabel = id => (ADV_DATA.goals.find(g => g.id === id) || {}).label || id;
         const interestLabel = id => { const i = ADV_DATA.interests.find(x => x.id === id); return i ? i.label : id; };
-        const tierNames = { 1: '5〜6歳向け', 2: '小1〜2向け', 3: '小3〜4向け', 4: '小5〜6向け' };
+        const tierNames = { 1: '5〜6歳向け', 2: '小1〜2向け', 3: '小3〜4向け', 4: '小5〜6向け', 5: 'おとな向け' };
 
         app.innerHTML = `
         <div class="town-wrap parent-wrap">

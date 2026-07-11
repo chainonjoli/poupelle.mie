@@ -107,11 +107,15 @@ const AdvEngine = (() => {
 
     function getProfile() { return state.profile; }
 
+    /* tierの最大値（1〜4=こども、5=おとな） */
+    const MAX_TIER = 5;
+
     /* 年齢・学年から基本tierを決める */
     function baseTier() {
         const p = state.profile;
         if (!p) return 2;
         if (p.grade) {
+            if (p.grade === 'adult') return 5;   // おとなコース
             if (p.grade === 'pre') return 1;
             const g = parseInt(p.grade, 10);
             if (g <= 2) return 2;
@@ -122,12 +126,15 @@ const AdvEngine = (() => {
         if (age <= 6) return 1;
         if (age <= 8) return 2;
         if (age <= 10) return 3;
-        return 4;
+        if (age <= 15) return 4;
+        return 5;
     }
+
+    function isAdult() { return baseTier() >= 5; }
 
     /* 適応込みの実効tier */
     function effectiveTier() {
-        return Math.max(1, Math.min(4, baseTier() + state.tierAdjust));
+        return Math.max(1, Math.min(MAX_TIER, baseTier() + state.tierAdjust));
     }
 
     /* ================= クエスト選択（パーソナライズ） ================= */
@@ -161,8 +168,11 @@ const AdvEngine = (() => {
     /* 今日のおすすめクエスト（エリア開放済みの中から） */
     function recommendQuests(n) {
         const areas = unlockedAreas().map(a => a.id);
+        const adult = isAdult();
         const list = ADV_DATA.quests
             .filter(q => areas.includes(q.area))
+            // おとなは tier5 を持つクエストだけ。こどもは通常どおり全クエスト
+            .filter(q => adult ? !!q.tiers[5] : true)
             .map(q => ({ q, s: scoreQuest(q) }))
             .sort((a, b) => b.s - a.s);
         return list.slice(0, n || 3).map(x => x.q);
