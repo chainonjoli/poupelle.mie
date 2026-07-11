@@ -1,0 +1,919 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>愛のテレパシー OP</title>
+<style>
+  html,body{margin:0;background:#000;height:100%;display:grid;place-items:center}
+  canvas{max-width:100vw;max-height:100vh}
+</style>
+<canvas id="cv" width="1280" height="720"></canvas>
+<script>
+'use strict';
+const W = 1280, H = 720, DUR = 100;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+// offscreen scene buffer (post FX composites it onto cv)
+const sc = document.createElement('canvas'); sc.width = W; sc.height = H;
+let g = sc.getContext('2d');
+
+/* ---------- utils ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const TAU = Math.PI*2;
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,x)=>a+(b-a)*x;
+const smooth=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
+const ease=(t,a,b)=>smooth((t-a)/(b-a));
+function rgba(r,gg,b,a){return `rgba(${r|0},${gg|0},${b|0},${a})`}
+
+/* ---------- persistent star fields ---------- */
+function makeStars(seed,n){const r=mulberry32(seed);const s=[];for(let i=0;i<n;i++)s.push({x:r()*W,y:r()*H,z:r(),tw:r()*TAU});return s}
+const STARS = makeStars(11,240);
+const MOTES = makeStars(77,90);
+
+function drawStars(t,alpha,drift=0){
+  for(const s of STARS){
+    const a = alpha*(0.35+0.65*(0.5+0.5*Math.sin(t*1.7+s.tw)))*(0.3+0.7*s.z);
+    const x=(s.x+drift*t*(4+10*s.z))%W, y=s.y;
+    g.fillStyle=rgba(255,240,235,a);
+    const r=0.6+1.5*s.z;
+    g.fillRect(x-r/2,y-r/2,r,r);
+    if(s.z>0.85){ g.fillStyle=rgba(255,220,235,a*0.5); g.fillRect(x-r*2,y-.5,r*4,1); g.fillRect(x-.5,y-r*2,1,r*4); }
+  }
+}
+function drawMotes(t,alpha,hueShift=0){ // floating light particles
+  for(const m of MOTES){
+    const x=(m.x+Math.sin(t*0.4+m.tw)*30+t*8)%W;
+    const y=(m.y+Math.sin(t*0.23+m.tw*2)*24 - t*6 %H + H*3)%H;
+    const r=1.5+3.5*m.z, a=alpha*(0.25+0.5*(0.5+0.5*Math.sin(t*2+m.tw)));
+    const gr=g.createRadialGradient(x,y,0,x,y,r*3);
+    gr.addColorStop(0,rgba(255,230-hueShift*40,240,a));
+    gr.addColorStop(1,rgba(255,200,230,0));
+    g.fillStyle=gr; g.beginPath(); g.arc(x,y,r*3,0,TAU); g.fill();
+  }
+}
+function shootingStars(t,seed,rate,alpha){
+  const r=mulberry32(seed);
+  for(let i=0;i<14;i++){
+    const t0=r()*100, period=6+r()*8, x0=r()*W*1.2, y0=r()*H*0.5, sp=300+r()*250, ang=2.6+r()*0.25;
+    const lt=((t-t0)%period+period)%period;
+    if(lt<1.1 && r()<rate){
+      const p=lt/1.1, x=x0+Math.cos(ang)*sp*lt, y=y0+Math.sin(ang)*sp*lt*(-0.35);
+      const a=alpha*Math.sin(p*Math.PI);
+      const dx=Math.cos(ang), dy=-0.35*Math.sin(ang);
+      const grd=g.createLinearGradient(x,y,x-dx*90,y-dy*90);
+      grd.addColorStop(0,rgba(255,245,235,a)); grd.addColorStop(1,rgba(255,245,235,0));
+      g.strokeStyle=grd; g.lineWidth=2; g.beginPath(); g.moveTo(x,y); g.lineTo(x-dx*90,y-dy*90); g.stroke();
+    }
+  }
+}
+
+/* ---------- environment ---------- */
+function skyGrad(stops){const gr=g.createLinearGradient(0,0,0,H);for(const[p,c]of stops)gr.addColorStop(p,c);g.fillStyle=gr;g.fillRect(0,0,W,H)}
+
+// pre-rendered crescent (avoids destination-out punching a hole in the glow)
+const moonCv=document.createElement('canvas'); moonCv.width=moonCv.height=256;
+{ const mc=moonCv.getContext('2d');
+  mc.beginPath(); mc.arc(128,128,100,0,TAU); mc.fillStyle='#fff6d8'; mc.fill();
+  mc.globalCompositeOperation='destination-out';
+  mc.beginPath(); mc.arc(128+45,128-28,92,0,TAU); mc.fill(); }
+function crescentMoon(x,y,R,glow){
+  const gx=x-R*0.35, gy=y+R*0.25; // glow hugs the lit limb
+  const gr=g.createRadialGradient(gx,gy,R*0.2,gx,gy,R*3.4);
+  gr.addColorStop(0,rgba(255,244,214,0.5*glow)); gr.addColorStop(1,rgba(255,244,214,0));
+  g.fillStyle=gr; g.beginPath(); g.arc(gx,gy,R*3.4,0,TAU); g.fill();
+  const s=R/100*256;
+  g.drawImage(moonCv,x-s/2,y-s/2,s,s);
+}
+
+function clockTower(x,baseY,scale,t,litFace){
+  // silhouette clock tower, girl stands on its spire platform
+  g.save(); g.translate(x,baseY); g.scale(scale,scale);
+  g.fillStyle='#141024';
+  // body
+  g.beginPath();
+  g.moveTo(-90,0); g.lineTo(-70,-320); g.lineTo(70,-320); g.lineTo(90,0); g.closePath(); g.fill();
+  // clock housing
+  g.fillRect(-84,-400,168,86);
+  // roof
+  g.beginPath(); g.moveTo(-92,-400); g.lineTo(0,-470); g.lineTo(92,-400); g.closePath(); g.fill();
+  // platform + spire
+  g.fillRect(-26,-486,52,18);
+  g.fillRect(-4,-540,8,58);
+  // clock face
+  const fx=0,fy=-357,fr=34;
+  g.beginPath(); g.arc(fx,fy,fr,0,TAU);
+  g.fillStyle=litFace?'#ffe9b0':'#241d3a'; g.fill();
+  if(litFace){
+    const gr=g.createRadialGradient(fx,fy,4,fx,fy,fr*2.6);
+    gr.addColorStop(0,rgba(255,225,160,0.5)); gr.addColorStop(1,rgba(255,225,160,0));
+    g.fillStyle=gr; g.beginPath(); g.arc(fx,fy,fr*2.6,0,TAU); g.fill();
+    g.strokeStyle='#7a5a20'; g.lineWidth=3;
+    const a1=t*0.05, a2=t*0.6;
+    g.beginPath(); g.moveTo(fx,fy); g.lineTo(fx+Math.cos(a1)*fr*0.55,fy+Math.sin(a1)*fr*0.55); g.stroke();
+    g.beginPath(); g.moveTo(fx,fy); g.lineTo(fx+Math.cos(a2)*fr*0.8,fy+Math.sin(a2)*fr*0.8); g.stroke();
+  }
+  // little windows
+  g.fillStyle=litFace?'#ffd98c':'#1c1730';
+  for(let i=0;i<3;i++){ g.fillRect(-10,-120-70*i,20,30); }
+  g.restore();
+}
+
+function citySilhouette(y,alpha,t){
+  const r=mulberry32(5);
+  g.fillStyle=rgba(18,14,38,alpha);
+  g.beginPath(); g.moveTo(0,H);
+  let x=0;
+  while(x<W){ const w=30+r()*70, h=30+r()*120; g.lineTo(x,y-h); g.lineTo(x+w,y-h); x+=w; }
+  g.lineTo(W,H); g.closePath(); g.fill();
+  // window lights
+  const r2=mulberry32(9);
+  for(let i=0;i<60;i++){ const wx=r2()*W, wy=y-r2()*110-8;
+    if(r2()<0.7){ g.fillStyle=rgba(255,214,140,alpha*(0.3+0.4*Math.sin(t+i))); g.fillRect(wx,wy,3,4); } }
+}
+
+/* ---------- the girl ---------- */
+const OUTL='rgba(120,72,84,0.6)';
+const HAIR='#edb3a6', HAIR_D='#d3948a', HAIR_HI='#ffdfd2';
+const SKIN='#ffe8dc', DRESS='#fdfbff', DRESS_B='#bcd8f2', RIB='#ff9ec4';
+
+function hairLock(x0,y0,len,baseAng,wave,t,width,color){
+  // one flowing lock as a tapered bezier ribbon
+  g.beginPath();
+  const seg=7; let pts=[];
+  for(let i=0;i<=seg;i++){
+    const p=i/seg;
+    const ang=baseAng + Math.sin(t*1.8+p*3+wave)*0.28*p + p*0.5*Math.sin(wave);
+    const l=len*p;
+    pts.push([x0+Math.cos(ang)*l + Math.sin(t*2.2+wave+p*4)*8*p, y0+Math.sin(ang)*l]);
+  }
+  g.moveTo(pts[0][0],pts[0][1]);
+  for(let i=0;i<seg;i++){
+    const wd=width*(1-i/seg*0.85);
+    const [x,y]=pts[i], [nx,ny]=pts[i+1];
+    const dx=ny-y, dy=-(nx-x), dl=Math.hypot(dx,dy)||1;
+    g.lineTo(nx+dx/dl*wd, ny+dy/dl*wd);
+  }
+  for(let i=seg;i>0;i--){
+    const wd=width*(1-i/seg*0.85);
+    const [x,y]=pts[i], [px,py]=pts[i-1];
+    const dx=py-y, dy=-(px-x), dl=Math.hypot(dx,dy)||1;
+    g.lineTo(px+dx/dl*wd, py+dy/dl*wd);
+  }
+  g.closePath(); g.fillStyle=color; g.fill();
+}
+
+// big swaying hair mass: head at (x0,y0), falls to y0+len
+function hairMass(x0,y0,len,t,wind,c1,c2,hi){
+  const s1=Math.sin(t*1.5)*10*wind, s2=Math.sin(t*1.5+1.3)*18*wind, s3=Math.sin(t*1.5+2.4)*26*wind;
+  g.fillStyle=c1;
+  g.beginPath();
+  g.moveTo(x0-25,y0-8);
+  g.bezierCurveTo(x0-42+s1, y0+len*0.3, x0-50+s2, y0+len*0.68, x0-36+s3, y0+len*0.98);
+  // wavy tips
+  g.quadraticCurveTo(x0-20+s3, y0+len*1.06, x0-6+s3*0.8, y0+len*0.96);
+  g.quadraticCurveTo(x0+8+s3, y0+len*1.08, x0+24+s3*0.9, y0+len*0.94);
+  g.quadraticCurveTo(x0+38+s3, y0+len*1.02, x0+44+s3*0.7, y0+len*0.9);
+  g.bezierCurveTo(x0+50+s2, y0+len*0.6, x0+42+s1, y0+len*0.26, x0+27, y0-10);
+  g.closePath(); g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=2.5; g.stroke();
+  // inner shade lock
+  g.fillStyle=c2;
+  g.beginPath();
+  g.moveTo(x0-8,y0+4);
+  g.bezierCurveTo(x0-18+s1, y0+len*0.35, x0-22+s2, y0+len*0.65, x0-8+s3, y0+len*0.92);
+  g.quadraticCurveTo(x0+2+s3, y0+len*0.8, x0+2+s2, y0+len*0.55);
+  g.bezierCurveTo(x0+4+s1, y0+len*0.3, x0+4, y0+len*0.1, x0+6, y0+4);
+  g.closePath(); g.fill();
+  // glossy highlight band
+  g.strokeStyle=hi; g.lineWidth=5; g.lineCap='round';
+  g.beginPath();
+  g.moveTo(x0-16,y0+len*0.16);
+  g.quadraticCurveTo(x0+s1*0.5, y0+len*0.22, x0+18, y0+len*0.15);
+  g.stroke();
+}
+
+// back-view girl standing; scale ~ pixel height/260; wind = hair blow strength
+function girlStanding(x,y,scale,t,opts={}){
+  const {wind=1, armsUp=false, rim=null, dark=0} = opts;
+  g.save(); g.translate(x,y); g.scale(scale,scale);
+  const hc = dark? '#9c7a72' : HAIR, hd = dark? '#7e5e56' : HAIR_D;
+  const dc = dark? '#9a97ad' : DRESS;
+  const hh = dark? rgba(255,230,218,0.35) : HAIR_HI;
+  const cw=Math.sin(t*1.6)*14*wind;
+  // cape streaming in wind
+  g.beginPath();
+  g.moveTo(-26,-176);
+  g.bezierCurveTo(-70+cw,-120, -95+cw*1.5,-40, -70+cw*2, -2);
+  g.lineTo(46+cw*2, -6);
+  g.bezierCurveTo(62+cw,-70, 40,-140, 26,-176);
+  g.closePath();
+  g.fillStyle=dark? '#8d8aa5' : '#eef4ff'; g.fill();
+  g.strokeStyle=dark? '#6d6a85' : DRESS_B; g.lineWidth=3; g.stroke();
+  // dress
+  g.beginPath();
+  g.moveTo(-20,-170); g.bezierCurveTo(-40,-90, -52+cw,-30, -40+cw, 0);
+  g.lineTo(40+cw,0); g.bezierCurveTo(50,-40, 34,-100, 20,-170);
+  g.closePath(); g.fillStyle=dc; g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=2.5; g.stroke();
+  // torso
+  g.fillStyle=dc; g.beginPath();
+  g.moveTo(-18,-176); g.lineTo(-15,-120); g.lineTo(15,-120); g.lineTo(18,-176); g.closePath(); g.fill();
+  // pink sash at the hem so the dress reads below the hair
+  g.strokeStyle=dark? '#b5798f' : RIB; g.lineWidth=5;
+  g.beginPath(); g.moveTo(-38+cw,-8); g.quadraticCurveTo(0,0,38+cw,-8); g.stroke();
+  // head then hair mass over the back (waist-length)
+  g.fillStyle=hc; g.beginPath(); g.arc(0,-218,26,0,TAU); g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=2.5; g.stroke();
+  hairMass(0,-218,140,t,wind,hc,hd,hh);
+  // waist ribbon peeking at sides of hair
+  g.fillStyle=dark? '#c07f96' : RIB;
+  g.beginPath(); g.moveTo(-40,-118); g.lineTo(-64,-96); g.lineTo(-50,-120); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(40,-118); g.lineTo(64,-96); g.lineTo(50,-120); g.closePath(); g.fill();
+  // arms (over hair so the pose reads)
+  g.strokeStyle=dark? '#c9b2a8' : SKIN; g.lineWidth=10; g.lineCap='round';
+  if(armsUp){
+    const sway=Math.sin(t*1.2)*4;
+    g.beginPath(); g.moveTo(-18,-166); g.lineTo(-56,-206-sway); g.stroke();
+    g.beginPath(); g.moveTo(18,-166); g.lineTo(56,-206+sway); g.stroke();
+  }
+  // top-of-head sheen
+  g.strokeStyle=hh; g.lineWidth=4;
+  g.beginPath(); g.arc(0,-220,20,-2.6,-0.6); g.stroke();
+  // ambient gem glow spilling around her waist
+  const gg2=g.createRadialGradient(0,-150,2,0,-150,30);
+  gg2.addColorStop(0,rgba(255,178,214,0.35)); gg2.addColorStop(1,rgba(255,178,214,0));
+  g.fillStyle=gg2; g.beginPath(); g.arc(0,-150,30,0,TAU); g.fill();
+  // rim light
+  if(rim){
+    g.strokeStyle=rim; g.lineWidth=3.5; g.lineCap='round';
+    g.beginPath(); g.arc(0,-218,26,-2.9,-1.2); g.stroke();
+    g.beginPath(); g.moveTo(26,-176); g.bezierCurveTo(40,-140,52,-70,46+cw*2,-8); g.stroke();
+  }
+  g.restore();
+}
+
+// flying pose (battle): soaring toward upper-right, dress and hair trail down-left
+function girlFlying(x,y,scale,t,ang){
+  g.save(); g.translate(x,y); g.rotate(ang); g.scale(scale,scale);
+  const w1=Math.sin(t*2.6)*8, w2=Math.sin(t*2.6+1.4)*13;
+  // hair streaming down-left behind her
+  g.fillStyle=HAIR;
+  g.beginPath();
+  g.moveTo(18,-88);
+  g.bezierCurveTo(-30,-70+w1, -70,-30+w2, -108,14+w2);
+  g.quadraticCurveTo(-124,34+w2, -104,32+w2);
+  g.quadraticCurveTo(-86,26+w1, -76,14+w1);
+  g.quadraticCurveTo(-88,44+w2, -70,40+w2);
+  g.bezierCurveTo(-40,26+w1, -6,-16, 34,-52);
+  g.closePath(); g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=2.5; g.stroke();
+  g.fillStyle=HAIR_D;
+  g.beginPath();
+  g.moveTo(14,-72);
+  g.bezierCurveTo(-24,-50+w1, -56,-18+w2, -84,14+w2);
+  g.quadraticCurveTo(-52,0+w1, -22,-26+w1);
+  g.quadraticCurveTo(0,-46, 14,-60);
+  g.closePath(); g.fill();
+  g.strokeStyle=HAIR_HI; g.lineWidth=3.5; g.lineCap='round';
+  g.beginPath(); g.moveTo(6,-74); g.quadraticCurveTo(-40,-42+w1,-86,4+w2); g.stroke();
+  // torso leaning up-right
+  g.fillStyle=DRESS; g.beginPath();
+  g.moveTo(2,-58); g.bezierCurveTo(14,-70,30,-70,38,-58);
+  g.bezierCurveTo(40,-44,32,-30,18,-26);
+  g.bezierCurveTo(6,-30,0,-44,2,-58); g.closePath(); g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=2.5; g.stroke();
+  // skirt flaring down-left, wavy hem
+  g.fillStyle=DRESS; g.beginPath();
+  g.moveTo(8,-32);
+  g.bezierCurveTo(-16,-24+w1*0.3, -38,-4+w1, -46,18+w2*0.5);
+  g.quadraticCurveTo(-30,14, -22,6);
+  g.quadraticCurveTo(-22,22, -8,14);
+  g.quadraticCurveTo(0,10, 6,0);
+  g.quadraticCurveTo(20,-8, 26,-26);
+  g.closePath(); g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=2.5; g.stroke();
+  g.strokeStyle=RIB; g.lineWidth=3;
+  g.beginPath(); g.moveTo(-46,18+w2*0.5); g.quadraticCurveTo(-16,14,6,0); g.stroke();
+  // legs below the skirt, together
+  g.strokeStyle=SKIN; g.lineWidth=8; g.lineCap='round';
+  g.beginPath(); g.moveTo(-8,10); g.quadraticCurveTo(-16,34,-30,52+Math.sin(t*3)*4); g.stroke();
+  g.beginPath(); g.moveTo(2,14); g.quadraticCurveTo(-4,38,-16,58+Math.sin(t*3+0.8)*4); g.stroke();
+  // little pink shoes
+  g.fillStyle=RIB;
+  g.beginPath(); g.ellipse(-33,55+Math.sin(t*3)*4,7,4.5,0.9,0,TAU); g.fill();
+  g.beginPath(); g.ellipse(-19,61+Math.sin(t*3+0.8)*4,7,4.5,0.9,0,TAU); g.fill();
+  // trailing arm
+  g.strokeStyle=SKIN; g.lineWidth=7;
+  g.beginPath(); g.moveTo(6,-52); g.lineTo(-18,-36); g.stroke();
+  // head above torso, facing up-right
+  g.fillStyle=SKIN; g.beginPath(); g.arc(32,-86,16,0,TAU); g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=2.5; g.stroke();
+  // hair cap + fringe
+  g.fillStyle=HAIR;
+  g.beginPath(); g.arc(28,-90,18,Math.PI*0.55,Math.PI*1.9); g.fill();
+  g.beginPath(); g.moveTo(42,-102); g.quadraticCurveTo(50,-92,44,-82);
+  g.quadraticCurveTo(48,-92,42,-102); g.closePath(); g.fill();
+  // profile eye + open smile (determined)
+  g.fillStyle='#6e3a48'; g.beginPath(); g.ellipse(41,-84,2.4,3.8,0.15,0,TAU); g.fill();
+  g.fillStyle=rgba(255,150,170,0.35); g.beginPath(); g.ellipse(37,-77,3.2,1.8,0,0,TAU); g.fill();
+  g.strokeStyle='#c96a76'; g.lineWidth=1.8;
+  g.beginPath(); g.arc(44,-75,2.6,0.4,1.9); g.stroke();
+  // wand arm raised up-right
+  g.strokeStyle=SKIN; g.lineWidth=8;
+  g.beginPath(); g.moveTo(34,-60); g.lineTo(66,-98); g.stroke();
+  // wand
+  g.save(); g.translate(66,-98); g.rotate(0.65);
+  g.fillStyle='#fff'; g.fillRect(-3,-46,6,52);
+  drawStar(0,-54,12,rgba(255,214,120,1)); g.restore();
+  // chest gem
+  drawGem(22,-48,6,t);
+  g.restore();
+}
+
+function drawStar(x,y,r,color){
+  g.save(); g.translate(x,y); g.fillStyle=color; g.beginPath();
+  for(let i=0;i<10;i++){ const rr=i%2?r*0.45:r, a=-Math.PI/2+i*Math.PI/5;
+    i?g.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):g.moveTo(Math.cos(a)*rr,Math.sin(a)*rr); }
+  g.closePath(); g.fill(); g.restore();
+}
+function drawGem(x,y,r,t){
+  const gr=g.createRadialGradient(x,y,0,x,y,r*4);
+  gr.addColorStop(0,rgba(255,190,220,0.9)); gr.addColorStop(1,rgba(255,190,220,0));
+  g.fillStyle=gr; g.beginPath(); g.arc(x,y,r*4,0,TAU); g.fill();
+  g.fillStyle='#ffd3e8'; g.beginPath();
+  g.moveTo(x,y-r); g.lineTo(x+r*0.8,y); g.lineTo(x,y+r); g.lineTo(x-r*0.8,y); g.closePath(); g.fill();
+  g.fillStyle=rgba(255,255,255,0.7+0.3*Math.sin(t*5));
+  g.beginPath(); g.moveTo(x,y-r*0.6); g.lineTo(x+r*0.35,y); g.lineTo(x,y+r*0.2); g.lineTo(x-r*0.35,y); g.closePath(); g.fill();
+}
+
+/* ---------- magic circle ---------- */
+function magicCircle(x,y,R,t,color,persp=0.35,alpha=1){
+  g.save(); g.translate(x,y); g.scale(1,persp);
+  g.globalAlpha=alpha;
+  g.strokeStyle=color; g.lineWidth=3;
+  g.shadowColor=color; g.shadowBlur=18;
+  g.beginPath(); g.arc(0,0,R,0,TAU); g.stroke();
+  g.lineWidth=1.6;
+  g.beginPath(); g.arc(0,0,R*0.82,0,TAU); g.stroke();
+  g.beginPath(); g.arc(0,0,R*0.5,0,TAU); g.stroke();
+  // rotating polygon + runes
+  g.save(); g.rotate(t*0.5);
+  g.beginPath();
+  for(let i=0;i<6;i++){ const a=i/6*TAU; const px=Math.cos(a)*R*0.82, py=Math.sin(a)*R*0.82; i?g.lineTo(px,py):g.moveTo(px,py); }
+  g.closePath(); g.stroke();
+  g.beginPath();
+  for(let i=0;i<6;i++){ const a=(i/6+0.5/6)*TAU; const px=Math.cos(a)*R*0.5, py=Math.sin(a)*R*0.5; i?g.lineTo(px,py):g.moveTo(px,py); }
+  g.closePath(); g.stroke();
+  g.restore();
+  g.save(); g.rotate(-t*0.3);
+  for(let i=0;i<12;i++){ const a=i/12*TAU;
+    g.save(); g.translate(Math.cos(a)*R*0.91,Math.sin(a)*R*0.91); g.rotate(a+Math.PI/2);
+    g.strokeRect(-4,-4,8,8); g.restore(); }
+  g.restore();
+  g.restore(); g.globalAlpha=1; g.shadowBlur=0;
+}
+
+/* ---------- title logo ---------- */
+function titleLogo(t,alpha,y=H*0.40,size=92){
+  if(alpha<=0)return;
+  g.save();
+  g.textAlign='center'; g.textBaseline='middle';
+  g.font=`${size}px "IPAMincho","IPAexMincho",serif`;
+  const x=W/2;
+  // aura behind
+  const gr=g.createRadialGradient(x,y,10,x,y,W*0.36);
+  gr.addColorStop(0,rgba(255,170,205,0.30*alpha)); gr.addColorStop(1,rgba(255,170,205,0));
+  g.fillStyle=gr; g.fillRect(0,0,W,H);
+  // soft glow text
+  g.shadowColor=rgba(255,160,200,alpha); g.shadowBlur=26;
+  g.fillStyle=rgba(255,235,244,alpha);
+  g.fillText('愛のテレパシー',x,y);
+  g.shadowBlur=0;
+  g.fillStyle=rgba(255,255,255,alpha*0.92);
+  g.fillText('愛のテレパシー',x,y);
+  // thin pink underline flourish
+  g.strokeStyle=rgba(255,158,196,alpha*0.9); g.lineWidth=2;
+  g.beginPath(); g.moveTo(x-size*3.2,y+size*0.66);
+  g.quadraticCurveTo(x,y+size*0.82,x+size*3.2,y+size*0.66); g.stroke();
+  drawStarG(x+size*3.35,y+size*0.6,7,rgba(255,222,150,alpha));
+  drawStarG(x-size*3.35,y+size*0.6,7,rgba(255,222,150,alpha));
+  g.font=`22px "IPAMincho",serif`;
+  g.fillStyle=rgba(255,225,238,alpha*0.85);
+  g.fillText('- TELEPATHY OF LOVE -',x,y+size*1.05);
+  g.restore();
+}
+function drawStarG(x,y,r,color){ g.save(); g.shadowColor=color; g.shadowBlur=10; drawStar(x,y,r,color); g.restore(); }
+
+/* ---------- scenes ---------- */
+function scene1(t){ // 0-10 title intro: night, moon, tower, girl, title
+  skyGrad([[0,'#0a0721'],[0.55,'#191038'],[0.85,'#301b4e'],[1,'#43265e']]);
+  drawStars(t,0.9);
+  crescentMoon(W*0.76,H*0.24,54,0.9+0.1*Math.sin(t));
+  shootingStars(t,31,0.8,0.5);
+  citySilhouette(H*0.98,0.9,t);
+  // slow track-in
+  const z=lerp(1.0,1.12,ease(t,0,10));
+  g.save(); g.translate(W/2,H*0.62); g.scale(z,z); g.translate(-W/2,-H*0.62);
+  clockTower(W*0.38,H*1.02,1.0,t,true);
+  // pink aura behind girl
+  const ax=W*0.38, gy1=H*1.02-486+4;
+  const aur=g.createRadialGradient(ax,gy1-85,10,ax,gy1-85,240);
+  aur.addColorStop(0,rgba(255,150,200,0.35)); aur.addColorStop(1,rgba(255,150,200,0));
+  g.fillStyle=aur; g.beginPath(); g.arc(ax,gy1-85,240,0,TAU); g.fill();
+  girlStanding(ax,gy1,0.62,t,{wind:1.2,rim:rgba(255,200,225,0.9),dark:0.4});
+  g.restore();
+  drawMotes(t,0.8);
+  titleLogo(t, ease(t,3.2,5.6)*(1-ease(t,9.0,9.9)));
+}
+
+function scene2(t){ // 10-20 dawn from the tower
+  const p=ease(t,10,20);
+  skyGrad([[0,'#241a4a'],[0.4,'#4a2f63'],[0.66,'#a05a72'],[0.84,'#e8926f'],[1,'#ffc98a']]);
+  // sun glow rising
+  const sy=lerp(H*0.86,H*0.74,p);
+  const sun=g.createRadialGradient(W*0.62,sy,4,W*0.62,sy,320);
+  sun.addColorStop(0,rgba(255,235,180,0.95)); sun.addColorStop(0.25,rgba(255,190,130,0.55)); sun.addColorStop(1,rgba(255,170,110,0));
+  g.fillStyle=sun; g.fillRect(0,0,W,H);
+  drawStars(t,0.25*(1-p));
+  // soft cloud banks
+  for(let i=0;i<5;i++){ const cy=H*0.30+i*46, cx=(i*277+t*6)%(W+500)-250;
+    const cg2=g.createRadialGradient(cx,cy,10,cx,cy,190);
+    cg2.addColorStop(0,rgba(255,196,176,0.22)); cg2.addColorStop(1,rgba(255,196,176,0));
+    g.save(); g.translate(cx,cy); g.scale(1,0.16); g.translate(-cx,-cy);
+    g.fillStyle=cg2; g.beginPath(); g.arc(cx,cy,190,0,TAU); g.fill(); g.restore(); }
+  citySilhouette(H*1.0,1,t);
+  // camera slowly circles: tower drifts, girl in fore
+  const drift=lerp(-30,30,p);
+  clockTower(W*0.30+drift,H*1.06,1.1,t,false);
+  const gx=W*0.30+drift, gy=H*1.06-486*1.1+6;
+  // warm backlight rim
+  girlStanding(gx,gy,0.6,t,{wind:1.5,rim:rgba(255,220,170,1)});
+  // lens glow across
+  const fl=g.createRadialGradient(W*0.62,sy,0,W*0.62,sy,W*0.8);
+  fl.addColorStop(0,rgba(255,220,170,0.28)); fl.addColorStop(1,rgba(255,220,170,0));
+  g.fillStyle=fl; g.fillRect(0,0,W,H);
+  drawMotes(t,0.5,1);
+}
+
+function scene3(t){ // 20-30 transformation
+  const lt=t-20;
+  skyGrad([[0,'#170a2e'],[1,'#3d1050']]);
+  drawStars(t,0.4);
+  const cx=W/2, cy=H*0.52;
+  // swirling vortex of pink & aqua light
+  for(let i=0;i<46;i++){
+    const p=(i/46 + (t*0.22)%1)%1;
+    const ang=p*TAU*3 + t*1.4;
+    const rad=lerp(340,26,p);
+    const x=cx+Math.cos(ang)*rad, y=cy+Math.sin(ang)*rad*0.62;
+    const col=i%2? rgba(255,150,205,0.34*(1-p*0.4)) : rgba(140,225,255,0.30*(1-p*0.4));
+    const s=lerp(16,4,p);
+    const gr=g.createRadialGradient(x,y,0,x,y,s*2.4);
+    gr.addColorStop(0,col); gr.addColorStop(1,col.replace(/[\d.]+\)$/,'0)'));
+    g.fillStyle=gr; g.beginPath(); g.arc(x,y,s*2.4,0,TAU); g.fill();
+  }
+  // ribbons spiraling upward
+  g.lineWidth=14; g.lineCap='round';
+  g.shadowBlur=14;
+  for(let k=0;k<3;k++){
+    g.shadowColor=[rgba(255,158,196,0.8),rgba(150,220,255,0.7),rgba(255,255,255,0.6)][k];
+    g.strokeStyle=[rgba(255,158,196,0.55),rgba(150,220,255,0.45),rgba(255,255,255,0.4)][k];
+    g.beginPath();
+    for(let i=0;i<=40;i++){ const p=i/40;
+      const a=p*TAU*2.2 + t*1.5 + k*2.1;
+      const x=cx+Math.cos(a)*lerp(210,30,p), y=cy+220-p*430+Math.sin(a)*24;
+      i?g.lineTo(x,y):g.moveTo(x,y); }
+    g.stroke();
+  }
+  g.shadowBlur=0;
+  // star sparkles converging
+  const r=mulberry32(3);
+  for(let i=0;i<26;i++){
+    const ph=(t*0.5+r())%1;
+    const ang=r()*TAU;
+    const rad=lerp(400,20,ph);
+    drawStarG(cx+Math.cos(ang)*rad, cy+Math.sin(ang)*rad*0.7, 4+r()*5, rgba(255,235,170,(1-ph)*0.9));
+  }
+  // girl: silhouette during 20-27, revealed pose 27-30
+  const rev=ease(lt,6.6,7.4);
+  if(rev<1){
+    g.save(); g.globalAlpha=1-rev;
+    // glowing silhouette
+    g.filter='blur(1px)';
+    girlStanding(cx,cy+215,0.95,t,{wind:2,dark:1,rim:rgba(255,210,235,1),armsUp:lt>3.5});
+    g.filter='none'; g.restore();
+  }
+  if(rev>0){
+    g.save(); g.globalAlpha=rev;
+    girlStanding(cx,cy+215,1.0,t,{wind:2.2,rim:rgba(255,235,250,1),armsUp:true});
+    drawGem(cx,cy+66,9,t);
+    g.restore();
+  }
+  // white flash at reveal and at end
+  const fl=Math.max( Math.exp(-Math.pow((lt-7.0)*3,2)), Math.exp(-Math.pow((lt-9.9)*2.2,2)) );
+  if(fl>0.01){ g.fillStyle=rgba(255,245,250,fl); g.fillRect(0,0,W,H); }
+}
+
+function scene4(t){ // 30-45 magic activation
+  const lt=t-30;
+  skyGrad([[0,'#0c0a2c'],[0.6,'#241448'],[1,'#3c1e5c']]);
+  drawStars(t,0.85);
+  shootingStars(t,53,0.7,0.5);
+  const gx=W*0.46, gy=H*0.86;
+  // expanding magic circle at feet
+  const R=lerp(40,290,ease(lt,0.3,2.4));
+  magicCircle(gx,gy+8,R,t,rgba(255,168,210,0.95),0.30, ease(lt,0.2,1));
+  magicCircle(gx,gy+8,R*0.55,-t*1.4,rgba(170,225,255,0.8),0.30, ease(lt,0.8,1.8));
+  // pillars of light rising
+  for(let i=0;i<7;i++){
+    const a=i/7*TAU + t*0.35;
+    const px=gx+Math.cos(a)*R*0.9;
+    const h=lerp(0,H*0.95,ease(lt,1.6+i*0.12,3.2+i*0.12))*(0.7+0.3*Math.sin(t*2+i));
+    const grd=g.createLinearGradient(px,gy,px,gy-h);
+    grd.addColorStop(0,rgba(255,190,225,0.55)); grd.addColorStop(1,rgba(255,190,225,0));
+    g.fillStyle=grd; g.fillRect(px-5,gy-h,10,h);
+  }
+  // central beam skyward
+  const bh=ease(lt,2.2,3.4);
+  if(bh>0){
+    const grd=g.createLinearGradient(gx,gy-140,gx,0);
+    grd.addColorStop(0,rgba(255,225,245,0.8*bh)); grd.addColorStop(1,rgba(255,225,245,0));
+    g.fillStyle=grd;
+    g.beginPath(); g.moveTo(gx-26,gy-150); g.lineTo(gx-70,0); g.lineTo(gx+70,0); g.lineTo(gx+26,gy-150); g.closePath(); g.fill();
+  }
+  // resonating stars: pulses
+  for(const s of STARS){ if(s.z>0.8){
+    const pu=0.5+0.5*Math.sin(t*3+s.tw*5);
+    drawStarG(s.x,s.y,3+4*pu*bh,rgba(255,240,200,0.5*pu*bh));
+  }}
+  // girl with wand raised (use standing pose + wand)
+  girlStanding(gx,gy+6,0.9,t,{wind:1.6,rim:rgba(255,205,235,1),armsUp:true});
+  // wand in right hand
+  g.save(); g.translate(gx+48,gy-190); g.rotate(0.5+Math.sin(t)*0.05);
+  g.fillStyle='#fff'; g.fillRect(-3,-64,6,70);
+  drawStarG(0,-72,15,rgba(255,220,130,1));
+  g.restore();
+  drawMotes(t,0.9);
+}
+
+function scene5(t){ // 45-60 battle
+  const lt=t-45;
+  skyGrad([[0,'#070716'],[0.6,'#141033'],[1,'#251549']]);
+  drawStars(t,1,1.2);
+  shootingStars(t,7,1.4,0.9);
+  // dark shadow mass on right, being purified
+  const purify=ease(lt,6,13);
+  const sx=W*0.8, sy=H*0.42;
+  g.save(); g.globalAlpha=(1-purify);
+  // ominous violet haze
+  const mh=g.createRadialGradient(sx,sy,20,sx,sy,260);
+  mh.addColorStop(0,rgba(70,20,90,0.5)); mh.addColorStop(1,rgba(70,20,90,0));
+  g.fillStyle=mh; g.beginPath(); g.arc(sx,sy,260,0,TAU); g.fill();
+  for(let i=0;i<9;i++){
+    const a=t*0.9+i, r=95+28*Math.sin(t*1.7+i*2.4);
+    g.fillStyle=rgba(14,5,30,0.85);
+    g.beginPath(); g.arc(sx+Math.cos(a)*36,sy+Math.sin(a*1.3)*32,r*(1-purify*0.5),0,TAU); g.fill();
+  }
+  // wisps curling off the mass
+  g.strokeStyle=rgba(40,14,60,0.7); g.lineWidth=7; g.lineCap='round';
+  for(let i=0;i<5;i++){
+    const a=i/5*TAU+t*0.6;
+    g.beginPath(); g.moveTo(sx+Math.cos(a)*90,sy+Math.sin(a)*80);
+    g.quadraticCurveTo(sx+Math.cos(a)*150,sy+Math.sin(a)*140+Math.sin(t*2+i)*20,
+                       sx+Math.cos(a+0.5)*180,sy+Math.sin(a+0.5)*160);
+    g.stroke();
+  }
+  // menacing glowing eyes
+  g.shadowColor=rgba(255,70,140,1); g.shadowBlur=22;
+  g.fillStyle=rgba(255,90,150,0.95*(1-purify));
+  g.beginPath(); g.ellipse(sx-26,sy-10,8,14,0.25,0,TAU); g.fill();
+  g.beginPath(); g.ellipse(sx+24,sy-12,8,14,-0.25,0,TAU); g.fill();
+  g.shadowBlur=0;
+  g.restore();
+  // girl flying arc across
+  const path=Math.min(lt/15,1);
+  const gx=lerp(W*0.16,W*0.42,path)+Math.sin(t*1.1)*16;
+  const gy=lerp(H*0.62,H*0.34,Math.sin(path*Math.PI))+Math.sin(t*1.7)*10;
+  // spiral beam from wand to shadow
+  const beam=clamp(Math.sin(lt*0.9)*1.4,0,1)*ease(lt,1.5,2.5);
+  if(beam>0.02){
+    const hx=gx+108, hy=gy-155;
+    for(let k=0;k<3;k++){
+      g.strokeStyle=[rgba(255,170,215,0.85*beam),rgba(160,225,255,0.7*beam),rgba(255,255,255,0.8*beam)][k];
+      g.lineWidth=5-k;
+      g.beginPath();
+      for(let i=0;i<=50;i++){ const p=i/50;
+        const bx=lerp(hx,sx,p), by=lerp(hy,sy,p);
+        const off=Math.sin(p*22-t*14+k*2.1)*26*(1-Math.abs(p-0.5)*1.4);
+        const nx=-(sy-hy), ny=(sx-hx), nl=Math.hypot(nx,ny);
+        i?g.lineTo(bx+nx/nl*off,by+ny/nl*off):g.moveTo(bx,by); }
+      g.stroke();
+    }
+    // impact glow
+    const ig=g.createRadialGradient(sx,sy,0,sx,sy,150);
+    ig.addColorStop(0,rgba(255,225,245,0.75*beam)); ig.addColorStop(1,rgba(255,225,245,0));
+    g.fillStyle=ig; g.beginPath(); g.arc(sx,sy,150,0,TAU); g.fill();
+  }
+  // several small magic circles around her
+  for(let i=0;i<3;i++){
+    const a=t*0.8+i*TAU/3;
+    magicCircle(gx+Math.cos(a)*130, gy+Math.sin(a)*72, 40, t*2+i, rgba(255,180,220,0.7), 0.5, 0.8);
+  }
+  // speed streaks (short, diagonal, subtle)
+  g.strokeStyle=rgba(255,255,255,0.10); g.lineWidth=1.5;
+  const r=mulberry32(Math.floor(t*6));
+  for(let i=0;i<12;i++){ const y=r()*H, x0=r()*W;
+    g.beginPath(); g.moveTo(x0,y); g.lineTo(x0+180,y-26); g.stroke(); }
+  girlFlying(gx,gy,1.1,t,-0.12+Math.sin(t*0.9)*0.05);
+  drawMotes(t,0.6);
+  // purification bloom
+  if(purify>0){ const pg=g.createRadialGradient(sx,sy,0,sx,sy,340*purify);
+    pg.addColorStop(0,rgba(255,235,248,0.5*purify*(1-ease(lt,13,15)))); pg.addColorStop(1,rgba(255,235,248,0));
+    g.fillStyle=pg; g.beginPath(); g.arc(sx,sy,340,0,TAU); g.fill();
+    // petals of light drifting
+    for(let i=0;i<16;i++){ const rr=mulberry32(i+40);
+      const px=sx+ (rr()-0.5)*380*purify, py=sy+(rr()-0.5)*300*purify - (lt-6)*14;
+      drawStarG(px,py,4+rr()*4,rgba(255,225,205,0.7*purify*(1-ease(lt,12.5,15)))); }
+  }
+}
+
+function scene6(t){ // 60-75 the three friends
+  const lt=t-60;
+  skyGrad([[0,'#0e0b2a'],[0.7,'#221645'],[1,'#37205a']]);
+  drawStars(t,0.9);
+  shootingStars(t,19,0.7,0.6);
+  const cy=H*0.78;
+  // triple magic circle blossoming
+  const R=lerp(30,190,ease(lt,0.5,2.8));
+  magicCircle(W*0.32,cy+16,R,t,rgba(150,215,255,0.85),0.28,1);
+  magicCircle(W*0.68,cy+16,R,-t,rgba(255,225,150,0.85),0.28,1);
+  magicCircle(W*0.50,cy+26,R*1.15,t*0.7,rgba(255,168,210,0.95),0.28,1);
+  // beams meet above center
+  const mix=ease(lt,3,5);
+  if(mix>0){
+    const mx=W/2,my=H*0.3;
+    for(const [x0,c] of [[W*0.32,rgba(150,215,255,0.55*mix)],[W*0.68,rgba(255,225,150,0.55*mix)],[W*0.5,rgba(255,168,210,0.6*mix)]]){
+      const grd=g.createLinearGradient(x0,cy-140,mx,my);
+      grd.addColorStop(0,c); grd.addColorStop(1,c.replace(/[\d.]+\)$/,'0.05)'));
+      g.strokeStyle=grd; g.lineWidth=10;
+      g.beginPath(); g.moveTo(x0,cy-150); g.lineTo(mx,my); g.stroke();
+    }
+    const bg=g.createRadialGradient(mx,my,0,mx,my,120*mix);
+    bg.addColorStop(0,rgba(255,245,250,0.85*mix)); bg.addColorStop(1,rgba(255,245,250,0));
+    g.fillStyle=bg; g.beginPath(); g.arc(mx,my,120*mix,0,TAU); g.fill();
+    drawStarG(mx,my,18*mix,rgba(255,240,220,0.9*mix));
+  }
+  // left: black-haired girl with pale-blue sword
+  g.save(); g.translate(W*0.32,cy); g.scale(0.82,0.82);
+  g.fillStyle='#e8ecf6'; g.beginPath(); g.moveTo(-18,-176); g.lineTo(-34,0); g.lineTo(34,0); g.lineTo(18,-176); g.closePath(); g.fill();
+  g.strokeStyle='#9db8e8'; g.lineWidth=3; g.stroke();
+  g.fillStyle='#332a4c'; g.beginPath(); g.arc(0,-218,25,0,TAU); g.fill();
+  hairMass(0,-218,205,t,1.1,'#332a4c','#241d3a',rgba(150,140,210,0.55));
+  // sword raised
+  g.save(); g.translate(40,-200); g.rotate(-0.5+Math.sin(t)*0.03);
+  const sg=g.createLinearGradient(0,0,0,-120);
+  sg.addColorStop(0,rgba(200,235,255,0.95)); sg.addColorStop(1,rgba(200,235,255,0.2));
+  g.fillStyle=sg; g.beginPath(); g.moveTo(-5,0); g.lineTo(0,-125); g.lineTo(5,0); g.closePath(); g.fill();
+  g.shadowColor='#bfe4ff'; g.shadowBlur=16; g.fill(); g.shadowBlur=0;
+  g.fillStyle='#8fa8d8'; g.fillRect(-12,-2,24,5); g.restore();
+  g.strokeStyle=SKIN; g.lineWidth=8; g.beginPath(); g.moveTo(14,-168); g.lineTo(40,-200); g.stroke();
+  g.restore();
+  // right: yellow curly girl with star light
+  g.save(); g.translate(W*0.68,cy); g.scale(0.82,0.82);
+  for(let i=0;i<10;i++){ const a=i/10*TAU;
+    g.fillStyle=i%2?'#f4cf6a':'#eaba4a';
+    g.beginPath(); g.arc(Math.cos(a)*26, -218+Math.sin(a)*26+8, 15+4*Math.sin(t*2+i), 0,TAU); g.fill(); }
+  g.fillStyle='#fff6ea'; g.beginPath(); g.moveTo(-18,-176); g.lineTo(-36,0); g.lineTo(36,0); g.lineTo(18,-176); g.closePath(); g.fill();
+  g.strokeStyle='#ecc46a'; g.lineWidth=3; g.stroke();
+  g.fillStyle='#f4cf6a'; g.beginPath(); g.arc(0,-218,24,0,TAU); g.fill();
+  g.strokeStyle=SKIN; g.lineWidth=8; g.beginPath(); g.moveTo(-14,-168); g.lineTo(-42,-206); g.stroke();
+  const spin=t*2;
+  drawStarG(-48,-216,16+3*Math.sin(spin),rgba(255,235,150,0.95));
+  for(let i=0;i<5;i++){ const a=spin+i/5*TAU; drawStarG(-48+Math.cos(a)*34,-216+Math.sin(a)*34,5,rgba(255,235,150,0.7)); }
+  g.restore();
+  // center: protagonist with wand
+  girlStanding(W*0.50,cy+8,0.9,t,{wind:1.4,rim:rgba(255,205,235,1)});
+  g.save(); g.translate(W*0.5+44,cy-176); g.rotate(0.45);
+  g.fillStyle='#fff'; g.fillRect(-3,-60,6,66); drawStarG(0,-68,14,rgba(255,220,130,1)); g.restore();
+  drawMotes(t,0.7);
+}
+
+function scene7(t){ // 75-90 quiet afterglow: face close-up, night->dawn
+  const lt=t-75, p=ease(lt,4,14);
+  // sky night to sunrise
+  const top=[lerp(12,58,p),lerp(9,38,p),lerp(40,92,p)];
+  const mid=[lerp(38,190,p),lerp(22,110,p),lerp(78,120,p)];
+  const bot=[lerp(70,255,p),lerp(38,178,p),lerp(110,140,p)];
+  skyGrad([[0,rgba(...top,1)],[0.55,rgba(...mid,1)],[1,rgba(...bot,1)]]);
+  drawStars(t,0.8*(1-p),0.4);
+  shootingStars(t,43,1.1,0.8*(1-p*0.6));
+  // face close-up (right of frame), looking up-left
+  const fx=W*0.60, fy=H*0.58, S=2.6;
+  g.save(); g.translate(fx,fy); g.scale(S,S);
+  // hair: soft voluminous mass behind head and shoulders
+  const hs1=Math.sin(t*1.1)*5, hs2=Math.sin(t*1.1+1.4)*9;
+  g.fillStyle=HAIR;
+  g.beginPath();
+  g.moveTo(0,-96);
+  g.bezierCurveTo(-52,-96,-58,-52,-52+hs1,-8);
+  g.bezierCurveTo(-50+hs2,26,-58+hs2,52,-44+hs2,66);
+  g.quadraticCurveTo(-30+hs2,58,-26+hs1,44);
+  g.lineTo(26+hs1,44);
+  g.quadraticCurveTo(30+hs2,60,46+hs2,68);
+  g.bezierCurveTo(58+hs2,50,52+hs2,24,52+hs1,-10);
+  g.bezierCurveTo(58,-54,52,-96,0,-96);
+  g.closePath(); g.fill();
+  g.strokeStyle=OUTL; g.lineWidth=1.6; g.stroke();
+  g.fillStyle=HAIR_D;
+  g.beginPath();
+  g.moveTo(-44,-40);
+  g.bezierCurveTo(-48+hs1,0,-46+hs2,34,-38+hs2,58);
+  g.quadraticCurveTo(-40+hs1,26,-40,-14);
+  g.closePath(); g.fill();
+  g.beginPath();
+  g.moveTo(44,-40);
+  g.bezierCurveTo(48+hs1,0,48+hs2,36,40+hs2,60);
+  g.quadraticCurveTo(44+hs1,26,40,-14);
+  g.closePath(); g.fill();
+  // neck/shoulders
+  g.fillStyle=SKIN; g.fillRect(-10,-14,20,26);
+  g.fillStyle=DRESS; g.beginPath(); g.moveTo(-52,40); g.quadraticCurveTo(0,-2,52,40); g.lineTo(52,60); g.lineTo(-52,60); g.closePath(); g.fill();
+  g.strokeStyle=DRESS_B; g.lineWidth=2; g.beginPath(); g.moveTo(-52,40); g.quadraticCurveTo(0,-2,52,40); g.stroke();
+  drawGem(0,26,5,t);
+  // face
+  g.fillStyle=SKIN;
+  g.beginPath();
+  g.moveTo(-34,-64); g.bezierCurveTo(-36,-30,-26,-6,0,0);
+  g.bezierCurveTo(26,-6,36,-30,34,-64);
+  g.bezierCurveTo(30,-92,-30,-92,-34,-64); g.closePath(); g.fill();
+  g.strokeStyle='rgba(190,120,120,0.5)'; g.lineWidth=1.2; g.stroke();
+  // fringe
+  g.fillStyle=HAIR;
+  g.beginPath(); g.moveTo(-36,-58);
+  g.bezierCurveTo(-40,-104,40,-104,36,-58);
+  g.lineTo(30,-52); g.lineTo(22,-66) ; g.lineTo(12,-52); g.lineTo(2,-68);
+  g.lineTo(-8,-52); g.lineTo(-18,-66); g.lineTo(-28,-52); g.closePath(); g.fill();
+  g.strokeStyle=HAIR_HI; g.lineWidth=2.4;
+  g.beginPath(); g.arc(0,-58,30,-2.7,-1.9); g.stroke();
+  // eyes: big, looking up; blink at 5.5s & 11s
+  const blink = Math.max(Math.exp(-Math.pow((lt-5.5)*9,2)), Math.exp(-Math.pow((lt-11)*9,2)));
+  const eh = 11*(1-blink*0.92);
+  for(const sgn of [-1,1]){
+    const ex=sgn*15, ey=-38;
+    // white
+    g.fillStyle='#fff'; g.beginPath(); g.ellipse(ex,ey,8.5,eh,0,0,TAU); g.fill();
+    if(eh>2){
+      // iris (pale pink, catching light)
+      const ir=g.createRadialGradient(ex,ey-3,1,ex,ey,8);
+      ir.addColorStop(0,'#ffd9e8'); ir.addColorStop(0.5,'#e88aa8'); ir.addColorStop(1,'#a04868');
+      g.fillStyle=ir; g.beginPath(); g.ellipse(ex,ey-1.5,6.4,Math.min(eh,9.4),0,0,TAU); g.fill();
+      g.fillStyle='#5c2438'; g.beginPath(); g.ellipse(ex,ey-2,2.8,Math.min(eh*0.55,5),0,0,TAU); g.fill();
+      // star highlights
+      g.fillStyle='#fff'; g.beginPath(); g.arc(ex-2.4,ey-4.6,2.1,0,TAU); g.fill();
+      g.fillStyle=rgba(255,255,255,0.85); g.beginPath(); g.arc(ex+2.6,ey+1.5,1.1,0,TAU); g.fill();
+    }
+    // upper lash
+    g.strokeStyle='#8a4a58'; g.lineWidth=2.6; g.lineCap='round';
+    g.beginPath(); g.ellipse(ex,ey-1,9,eh+1,0,Math.PI*1.05,Math.PI*1.95); g.stroke();
+    // brow
+    g.strokeStyle=HAIR_D; g.lineWidth=1.8;
+    g.beginPath(); g.moveTo(ex-8,ey-16); g.quadraticCurveTo(ex,ey-19.5,ex+8,ey-16.5); g.stroke();
+  }
+  // blush
+  g.fillStyle=rgba(255,150,170,0.30);
+  g.beginPath(); g.ellipse(-22,-22,7,3.6,0.2,0,TAU); g.fill();
+  g.beginPath(); g.ellipse(22,-22,7,3.6,-0.2,0,TAU); g.fill();
+  // gentle smile
+  g.strokeStyle='#c96a76'; g.lineWidth=2; g.lineCap='round';
+  g.beginPath(); g.moveTo(-6,-12); g.quadraticCurveTo(0,-8+Math.sin(t)*0.4,6,-12); g.stroke();
+  // nose hint
+  g.strokeStyle=rgba(200,120,120,0.5); g.lineWidth=1.4;
+  g.beginPath(); g.moveTo(1,-26); g.lineTo(2.5,-23); g.stroke();
+  // side locks framing the face
+  const sl=Math.sin(t*1.3)*3;
+  for(const sgn of [-1,1]){
+    g.fillStyle=HAIR;
+    g.beginPath();
+    g.moveTo(sgn*30,-72);
+    g.bezierCurveTo(sgn*(40+sl),-40, sgn*(38-sl),-6, sgn*(32+sl),22);
+    g.quadraticCurveTo(sgn*(28+sl),30, sgn*(24+sl),22);
+    g.bezierCurveTo(sgn*28,-8, sgn*24,-40, sgn*22,-66);
+    g.closePath(); g.fill();
+  }
+  g.restore();
+  // warm light strokes the cheek: soft glow from upper-left
+  const cg=g.createRadialGradient(W*0.2,H*0.2,0,W*0.2,H*0.2,W*0.9);
+  cg.addColorStop(0,rgba(255,225,190,0.24+0.2*p)); cg.addColorStop(1,rgba(255,225,190,0));
+  g.fillStyle=cg; g.fillRect(0,0,W,H);
+  drawMotes(t,0.85,p);
+}
+
+function scene8(t){ // 90-100 last cut: arms spread on tower, logo, fade
+  const lt=t-90;
+  skyGrad([[0,'#3c2a6a'],[0.45,'#8a4f7c'],[0.72,'#e08a82'],[1,'#ffc490']]);
+  drawStars(t,0.4,0.4);
+  shootingStars(t,61,1.5,0.95);
+  const sun=g.createRadialGradient(W*0.5,H*0.9,10,W*0.5,H*0.9,520);
+  sun.addColorStop(0,rgba(255,235,185,0.8)); sun.addColorStop(1,rgba(255,200,140,0));
+  g.fillStyle=sun; g.fillRect(0,0,W,H);
+  citySilhouette(H*1.02,0.85,t);
+  // slow pull-back
+  const z=lerp(1.15,1.0,ease(lt,0,9));
+  g.save(); g.translate(W/2,H*0.7); g.scale(z,z); g.translate(-W/2,-H*0.7);
+  clockTower(W*0.5,H*1.12,1.05,t,true);
+  const gy=H*1.12-486*1.05+4;
+  // radiant aura
+  const aur=g.createRadialGradient(W*0.5,gy-95,10,W*0.5,gy-95,320);
+  aur.addColorStop(0,rgba(255,200,225,0.5)); aur.addColorStop(1,rgba(255,200,225,0));
+  g.fillStyle=aur; g.beginPath(); g.arc(W*0.5,gy-95,320,0,TAU); g.fill();
+  girlStanding(W*0.5,gy,0.72,t,{wind:1.8,rim:rgba(255,235,215,1),armsUp:true});
+  g.restore();
+  drawMotes(t,1,0.5);
+  // logo returns
+  titleLogo(t, ease(lt,2.2,4.2)*(1-ease(lt,9.2,10)), H*0.34, 84);
+  // golden-pink envelop + fadeout
+  const env=ease(lt,6.5,10);
+  if(env>0){
+    const eg=g.createRadialGradient(W/2,H/2,50,W/2,H/2,W*0.75);
+    eg.addColorStop(0,rgba(255,225,210,0.15*env)); eg.addColorStop(1,rgba(255,190,160,0.55*env));
+    g.fillStyle=eg; g.fillRect(0,0,W,H);
+  }
+  const fade=ease(lt,8.6,10);
+  if(fade>0){ g.fillStyle=rgba(255,248,244,fade); g.fillRect(0,0,W,H); }
+}
+
+const SCENES=[[0,10,scene1],[10,20,scene2],[20,30,scene3],[30,45,scene4],[45,60,scene5],[60,75,scene6],[75,90,scene7],[90,100,scene8]];
+
+/* ---------- post FX: chroma shift, bloom, grain, vignette, scanlines ---------- */
+const grainCv=document.createElement('canvas'); grainCv.width=256; grainCv.height=256;
+{ const gc=grainCv.getContext('2d'); const id=gc.createImageData(256,256); const r=mulberry32(99);
+  for(let i=0;i<id.data.length;i+=4){ const v=r()*255|0; id.data[i]=id.data[i+1]=id.data[i+2]=v; id.data[i+3]=26; }
+  gc.putImageData(id,0,0); }
+
+function postFX(t){
+  ctx.clearRect(0,0,W,H);
+  // slight VHS wobble: vertical sine offset applied to whole frame
+  const wob=Math.sin(t*13.7)*0.6+Math.sin(t*3.1)*0.4;
+  // base
+  ctx.drawImage(sc,wob,0);
+  // chromatic aberration: red/blue ghost copies
+  ctx.globalCompositeOperation='screen';
+  ctx.globalAlpha=0.20;
+  ctx.drawImage(sc,wob+2.2,0.6);
+  ctx.drawImage(sc,wob-2.2,-0.6);
+  ctx.globalAlpha=1;
+  // bloom: blurred bright copy
+  ctx.filter='blur(7px) brightness(1.15)';
+  ctx.globalAlpha=0.34;
+  ctx.drawImage(sc,wob,0);
+  ctx.filter='none'; ctx.globalAlpha=1;
+  ctx.globalCompositeOperation='source-over';
+  // film grain
+  ctx.globalAlpha=0.5;
+  const ox=(Math.sin(t*61)*128+128)|0, oy=(Math.cos(t*47)*128+128)|0;
+  for(let y=-1;y<Math.ceil(H/256)+1;y++)for(let x=-1;x<Math.ceil(W/256)+1;x++)
+    ctx.drawImage(grainCv,x*256+ox%256-256,y*256+oy%256-256);
+  ctx.globalAlpha=1;
+  // scanlines (subtle)
+  ctx.fillStyle='rgba(0,0,0,0.05)';
+  for(let y=0;y<H;y+=3) ctx.fillRect(0,y,W,1);
+  // vignette
+  const vg=ctx.createRadialGradient(W/2,H/2,H*0.45,W/2,H/2,H*0.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(10,4,20,0.42)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  // warm pastel cast
+  ctx.globalCompositeOperation='overlay';
+  ctx.fillStyle='rgba(255,210,225,0.06)'; ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='source-over';
+}
+
+/* ---------- crossfades between scenes ---------- */
+function renderFrame(t){
+  t=Math.min(t,DUR-0.001);
+  g.clearRect(0,0,W,H);
+  let cur=SCENES.find(s=>t>=s[0]&&t<s[1])||SCENES[SCENES.length-1];
+  cur[2](t);
+  // 0.8s crossfade into next scene (except flash-based scene3->4 handled by white)
+  const FADE=0.8;
+  const idx=SCENES.indexOf(cur);
+  if(idx<SCENES.length-1 && cur[1]-t<FADE && idx!==2){
+    const nx=SCENES[idx+1];
+    const a=1-(cur[1]-t)/FADE;
+    // draw next scene into temp and blend
+    const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
+    const old=g; // ugly but simple: re-point g
+    const tg=tmp.getContext('2d');
+    swapCtx(tg); nx[2](nx[0]+ (t-(cur[1]-FADE)) ); swapCtx(old);
+    g.globalAlpha=smooth(a); g.drawImage(tmp,0,0); g.globalAlpha=1;
+  }
+  postFX(t);
+}
+function swapCtx(ng){ g=ng; }
+
+/* ---------- realtime preview / headless API ---------- */
+window.renderAt = function(t){ renderFrame(t); };
+window.frameJPEG = function(t,q){ renderFrame(t); return cv.toDataURL('image/jpeg', q||0.92); };
+if(!window.__headless){
+  const t0=performance.now();
+  (function loop(){ renderFrame(((performance.now()-t0)/1000)%DUR); requestAnimationFrame(loop); })();
+}
+</script>
