@@ -642,6 +642,40 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
 }
 .ema-kanau-btn:hover { color: var(--gold); border-color: var(--gold); }
 
+/* お焚き上げ（役目を終えた絵馬を外す。静かな金の火で天に還す） */
+.ema-taki-btn { margin-top: 2px; font-size: 0.68rem; color: #a08a5a; }
+.ema-taki-btn.confirm { color: #b3543d; font-weight: 600; }
+.ema-plaque.burning {
+    animation: ema-burnout 1.15s ease forwards;
+    pointer-events: none;
+}
+@keyframes ema-burnout {
+    0% { opacity: 1; transform: none; }
+    35% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--gold-soft) 55%, transparent); }
+    100% { opacity: 0; transform: translateY(-10px) scale(0.94); }
+}
+.ember {
+    position: absolute;
+    bottom: 30%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #f6e3ae 0%, var(--gold) 90%);
+    box-shadow: 0 0 7px var(--gold-soft);
+    pointer-events: none;
+    opacity: 0;
+    animation: ember-up 1s ease-out forwards;
+}
+@keyframes ember-up {
+    0% { opacity: 0; transform: translate(0, 0); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--ex), -64px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ema-plaque.burning { animation-duration: 0.3s; }
+    .ember { animation: none; }
+}
+
 /* ============================================================
    4. お守り
    ============================================================ */
@@ -1022,6 +1056,45 @@ body[data-mode="ink"] .anniv-card-count { color: var(--oshi); } /* 墨地では�
     font-size: 0.85rem;
     letter-spacing: 0.1em;
     color: var(--text-muted);
+}
+
+/* ============================================================
+   このアプリについて・プライバシーポリシー
+   ============================================================ */
+.about-section {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 20px 40px;
+    border-top: 1px solid var(--hairline);
+}
+.about-body { font-size: 0.84rem; color: var(--text-muted); }
+.about-body p + p { margin-top: 12px; }
+.about-subtitle {
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    margin: 22px 0 10px;
+}
+.about-list { list-style: none; }
+.about-list li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 10px;
+    line-height: 1.8;
+}
+.about-list li::before {
+    content: "・";
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+}
+.about-list strong, .about-body strong { color: var(--text); font-weight: 600; }
+.about-contact { margin-top: 18px; }
+.about-contact a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
 }
 
 /* ============================================================

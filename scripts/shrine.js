@@ -364,6 +364,37 @@
         renderEmaRack();
     }
 
+    /* 役目を終えた絵馬は「お焚き上げ」で天に還す。
+       誤タップで消えないよう、2回目のタップで確定（2.6秒で自動キャンセル） */
+    function burnEma(index, plaque, btn) {
+        if (!btn.classList.contains('confirm')) {
+            btn.classList.add('confirm');
+            btn.textContent = 'もう一度タップで焚き上げ';
+            setTimeout(function () {
+                btn.classList.remove('confirm');
+                btn.textContent = 'お焚き上げ';
+            }, 2600);
+            return;
+        }
+        plaque.classList.add('burning');
+        for (var i = 0; i < 8; i++) {
+            var ember = document.createElement('span');
+            ember.className = 'ember';
+            ember.style.left = 25 + Math.random() * 50 + '%';
+            ember.style.setProperty('--ex', (Math.random() * 36 - 18) + 'px');
+            ember.style.animationDelay = (Math.random() * 0.3) + 's';
+            plaque.appendChild(ember);
+        }
+        setTimeout(function () {
+            emaList.splice(index, 1);
+            saveEma();
+            renderEmaRack();
+            renderMamoriCard();
+            renderEmpathyFeed();
+            renderMemory();
+        }, 1150);
+    }
+
     function renderEmaRack() {
         var rack = document.getElementById('ema-rack');
         rack.innerHTML = '';
@@ -392,6 +423,13 @@
             toggleBtn.textContent = item.fulfilled ? '取り消す' : '叶いました';
             toggleBtn.addEventListener('click', function () { toggleFulfilled(index); });
             plaque.appendChild(toggleBtn);
+            var takiBtn = document.createElement('button');
+            takiBtn.type = 'button';
+            takiBtn.className = 'ema-kanau-btn ema-taki-btn';
+            takiBtn.textContent = 'お焚き上げ';
+            takiBtn.setAttribute('aria-label', 'この絵馬をお焚き上げする（絵馬掛けから外す）');
+            takiBtn.addEventListener('click', function () { burnEma(index, plaque, takiBtn); });
+            plaque.appendChild(takiBtn);
             rack.appendChild(plaque);
         });
     }
@@ -1126,29 +1164,33 @@
         reader.readAsText(file);
     }
 
-    /* ---- 5. 推しみくじページ（1日1回。結果は日ごとに保存） ---- */
+    /* ---- 5. 推しみくじページ（1日1回。結果は日ごとに保存） ----
+       starDist は星1〜5が出る確率。ランクが上なほど星も高くなるよう連動させ、
+       小吉・末吉では星5が出ない（「小吉なのに星5」の違和感を防ぐ）。
+       星の全体期待値は約3.98（>= 3.9）。ファンの背中を押すみくじなので
+       悪い結果は出しすぎない */
     var MIKUJI_RANKS = [
-        { rank: '推し大吉', weight: 6, msgs: [
+        { rank: '推し大吉', weight: 6, starDist: [0, 0, 0, 0, 1], msgs: [
             '推しとの縁がひときわ深まる一日。迷ったら、心が動くほうへ。',
             'めったに出ない大当たりの日。今日の直感は信じてよい日です。',
             '想いがまっすぐ届く兆し。ずっと言えなかった「好き」を形にしてみて。'
         ] },
-        { rank: '大吉', weight: 14, msgs: [
+        { rank: '大吉', weight: 14, starDist: [0, 0, 0, 0.25, 0.75], msgs: [
             '願いが届きやすい日です。大切な応募や連絡は今日のうちに。',
             '巡り合わせの良い日。ふと開いた告知に、良い報せがあるかも。',
             '推し活の段取りがするすると進む日。後回しの予定を片づける好機。'
         ] },
-        { rank: '中吉', weight: 30, msgs: [
+        { rank: '中吉', weight: 30, starDist: [0, 0, 0.20, 0.55, 0.25], msgs: [
             'おだやかな追い風が吹いています。いつもの推し活がいちばんの吉。',
             '無理のない範囲がちょうどいい日。定位置の幸せを味わって。',
             '小さな準備が実を結ぶ日。遠征の下調べや貯金に向いています。'
         ] },
-        { rank: '小吉', weight: 30, msgs: [
+        { rank: '小吉', weight: 30, starDist: [0, 0, 0.25, 0.75, 0], msgs: [
             '小さな幸せを拾える日。推しの写真を見返す時間が福を呼びます。',
             'ゆっくり進むのが吉。急がず、推しの過去作を一つ味わう日に。',
             '身近なところに福あり。部屋のグッズをすこし整えると運気が整います。'
         ] },
-        { rank: '末吉', weight: 20, msgs: [
+        { rank: '末吉', weight: 20, starDist: [0, 0, 0.65, 0.35, 0], msgs: [
             '焦らなくて大丈夫。今日は自分をいたわることが、明日の推し活の力になります。',
             '待つ運気の日。結果を追いかけず、ゆっくり湯船に浸かって吉。',
             '今日は充電の日。推しの優しい場面だけを見て、早めにおやすみを。'
@@ -1165,7 +1207,13 @@
             if (roll <= 0) { chosen = MIKUJI_RANKS[i]; break; }
         }
         var stars = MIKUJI_CATEGORIES.map(function () {
-            return 1 + Math.floor(Math.random() * 5);
+            /* ランク固有の分布から星を引く（ランクと星の整合を保証） */
+            var r = Math.random(), cum = 0, n = 5;
+            for (var k = 0; k < 5; k++) {
+                cum += chosen.starDist[k];
+                if (r < cum) { n = k + 1; break; }
+            }
+            return n;
         });
         var msg = chosen.msgs[Math.floor(Math.random() * chosen.msgs.length)];
         return { rank: chosen.rank, msg: msg, stars: stars, date: todayStr() };
