@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>BAND STACK｜バンドザウルス公式パズルゲーム</title>
+  <meta name="description" content="バンドザウルス公式落ちものパズル『BAND STACK』。サウンドピースを積んでライブを成功させ、ファンを増やそう！">
+  <meta name="theme-color" content="#12081f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦖</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=M+PLUS+1p:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/bandstack.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= スプラッシュ ================= -->
+  <section class="screen active" id="screen-splash">
+    <div class="splash-inner">
+      <div class="splash-logo-mark" id="splash-mark"></div>
+      <p class="splash-brand">BANDZAURUS PRESENTS</p>
+      <div class="loading-bar"><i></i></div>
+    </div>
+  </section>
+
+  <!-- ================= タイトル ================= -->
+  <section class="screen" id="screen-title">
+    <div class="title-stagelight l1"></div>
+    <div class="title-stagelight l2"></div>
+    <div class="title-inner">
+      <p class="title-presents">バンドザウルス公式ゲーム</p>
+      <h1 class="game-logo"><span class="logo-band">BAND</span><span class="logo-stack">STACK</span></h1>
+      <p class="title-sub">つんで・そろえて・ライブでドーン！</p>
+      <div class="title-band" id="title-band"></div>
+      <button class="btn-big btn-start" id="btn-title-start">🎸 タップして スタート！</button>
+      <p class="title-copy">&copy; BANDZAURUS</p>
+    </div>
+  </section>
+
+  <!-- ================= ホーム ================= -->
+  <section class="screen" id="screen-home">
+    <header class="home-head">
+      <h2 class="game-logo small"><span class="logo-band">BAND</span><span class="logo-stack">STACK</span></h2>
+      <div class="home-stats">
+        <div class="stat"><span class="stat-label">ハイスコア</span><span class="stat-val" id="home-hiscore">0</span></div>
+        <div class="stat"><span class="stat-label">そうファンすう</span><span class="stat-val" id="home-fans">0</span></div>
+      </div>
+    </header>
+    <div class="home-band" id="home-band"></div>
+    <nav class="home-menu">
+      <button class="btn-big btn-primary" id="btn-home-play">🎤 ライブを はじめる</button>
+      <div class="home-menu-grid">
+        <button class="btn-menu" id="btn-home-chara">🦖 メンバー</button>
+        <button class="btn-menu" id="btn-home-venue">🏟️ ライブ会場</button>
+        <button class="btn-menu" id="btn-home-howto">📖 あそびかた</button>
+        <button class="btn-menu" id="btn-home-settings">⚙️ せってい</button>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ================= モード選択 ================= -->
+  <section class="screen" id="screen-mode">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>モードをえらぶ</h2></header>
+    <div class="mode-list">
+      <button class="mode-card" id="btn-mode-endless">
+        <span class="mode-icon">🎸</span>
+        <span class="mode-info"><b>エンドレスライブ</b><small>ゲームオーバーまで スコアとファンを のばそう！</small></span>
+      </button>
+      <button class="mode-card" id="btn-mode-challenge">
+        <span class="mode-icon">🔥</span>
+        <span class="mode-info"><b>ライブチャレンジ</b><small>せいげん時間内に 目標ファンすうを たっせいせよ！</small></span>
+      </button>
+      <button class="mode-card" id="btn-mode-tutorial">
+        <span class="mode-icon">🎓</span>
+        <span class="mode-info"><b>チュートリアル</b><small>あそびながら ルールを おぼえよう！</small></span>
+      </button>
+    </div>
+    <div class="challenge-list" id="challenge-list" hidden></div>
+  </section>
+
+  <!-- ================= キャラクター選択 ================= -->
+  <section class="screen" id="screen-chara">
+    <header class="sub-head"><button class="btn-back" data-back="mode">◀</button><h2>センターをえらぶ</h2></header>
+    <p class="chara-note">えらんだメンバーの「ライブスキル」がつかえるよ！</p>
+    <div class="chara-grid" id="chara-grid"></div>
+    <button class="btn-big btn-primary" id="btn-chara-go">このメンバーで ライブ開始！</button>
+  </section>
+
+  <!-- ================= 会場選択 ================= -->
+  <section class="screen" id="screen-venue">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>ライブ会場</h2></header>
+    <div class="venue-list" id="venue-list"></div>
+  </section>
+
+  <!-- ================= キャラクター紹介 ================= -->
+  <section class="screen" id="screen-charaintro">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>バンドメンバー</h2></header>
+    <div class="intro-list" id="intro-list"></div>
+  </section>
+
+  <!-- ================= あそびかた ================= -->
+  <section class="screen" id="screen-howto">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>あそびかた</h2></header>
+    <div class="howto-body">
+      <div class="howto-card">
+        <h3>🎵 サウンドピース</h3>
+        <p>上から2つセットの「サウンドピース」がおちてくるよ。<br>スワイプでうごかし、タップでむきをかえよう。</p>
+        <div class="howto-pieces" id="howto-pieces"></div>
+      </div>
+      <div class="howto-card">
+        <h3>✨ けし方は2つ！</h3>
+        <p><b>① サウンドライン</b><br>おなじ楽器をタテかヨコに<b>3つ</b>ならべると消えて演奏スタート！</p>
+        <p><b>② バンドセット</b><br><b>4種類の楽器</b>を2×2の四角にあつめると、バンド結成の大ボーナス！！</p>
+      </div>
+      <div class="howto-card">
+        <h3>🎶 音符と化石</h3>
+        <p><b>音符</b>はどの楽器のかわりにもなるオールマイティ。<br><b>化石</b>はそのままでは消えないけど、となりのピースが消えるといっしょにくだけるよ。</p>
+      </div>
+      <div class="howto-card">
+        <h3>🔥 コンボとライブゲージ</h3>
+        <p>れんぞくで消すとコンボ！スコアもファンもふえる。<br>ゲージがまんタンになったら、スキルボタンでメンバーのひっさつワザ！</p>
+      </div>
+      <div class="howto-card">
+        <h3>🕹️ そうさ</h3>
+        <p>スワイプ左右：いどう ／ タップ：かいてん<br>下スワイプ：はやおとし ／ つよい下スワイプ：いっきにおとす<br>画面下のボタンでもあそべるよ（PCは矢印キー＋スペース）</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= せってい ================= -->
+  <section class="screen" id="screen-settings">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>せってい</h2></header>
+    <div class="settings-body">
+      <label class="setting-row"><span>🔔 こうかおん</span><input type="checkbox" id="set-sfx" checked><i class="toggle"></i></label>
+      <label class="setting-row"><span>🎵 BGM</span><input type="checkbox" id="set-bgm" checked><i class="toggle"></i></label>
+      <label class="setting-row"><span>🎮 そうさボタンをひょうじ</span><input type="checkbox" id="set-buttons" checked><i class="toggle"></i></label>
+      <div class="setting-records">
+        <h3>プレイきろく</h3>
+        <dl id="records-list"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ゲーム ================= -->
+  <section class="screen" id="screen-game">
+    <div class="stage-bg" id="stage-bg">
+      <div class="spotlights" id="spotlights"></div>
+      <div class="crowd" id="crowd"></div>
+    </div>
+
+    <header class="game-hud">
+      <div class="hud-stats">
+        <div class="hud-item"><span class="hud-label">スコア</span><b id="hud-score">0</b></div>
+        <div class="hud-item"><span class="hud-label">ファン</span><b id="hud-fans">0</b></div>
+        <div class="hud-item"><span class="hud-label">Lv</span><b id="hud-level">1</b></div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-next"><span class="hud-label">つぎ</span><canvas id="next-canvas" width="60" height="120"></canvas></div>
+        <button class="btn-pause" id="btn-pause" aria-label="一時停止">⏸</button>
+      </div>
+    </header>
+
+    <div class="board-wrap" id="board-wrap">
+      <canvas id="board-canvas"></canvas>
+      <div class="combo-pop" id="combo-pop"></div>
+      <div class="challenge-hud" id="challenge-hud" hidden>
+        <span id="challenge-time">0:00</span>
+        <span id="challenge-goal"></span>
+      </div>
+      <div class="danger-flash" id="danger-flash"></div>
+    </div>
+
+    <div class="game-bottom">
+      <div class="gauge-row">
+        <span class="gauge-label">LIVE</span>
+        <div class="live-gauge"><div class="gauge-fill" id="gauge-fill"></div></div>
+        <button class="btn-skill" id="btn-skill" disabled>SKILL</button>
+      </div>
+      <div class="stage-row" id="stage-row"></div>
+      <div class="ctrl-row" id="ctrl-row">
+        <button class="btn-ctrl" id="ctrl-left" aria-label="左へ">◀</button>
+        <button class="btn-ctrl" id="ctrl-rot" aria-label="回転">⟳</button>
+        <button class="btn-ctrl" id="ctrl-down" aria-label="高速落下">▼</button>
+        <button class="btn-ctrl" id="ctrl-drop" aria-label="即落下">⤓</button>
+        <button class="btn-ctrl" id="ctrl-right" aria-label="右へ">▶</button>
+      </div>
+    </div>
+
+    <!-- スキルカットイン -->
+    <div class="skill-cutin" id="skill-cutin" hidden>
+      <div class="cutin-char" id="cutin-char"></div>
+      <div class="cutin-text"><b id="cutin-name"></b><span id="cutin-skill"></span></div>
+    </div>
+
+    <!-- チュートリアルメッセージ -->
+    <div class="tutorial-bar" id="tutorial-bar" hidden>
+      <div class="tutorial-chara" id="tutorial-chara"></div>
+      <p id="tutorial-text"></p>
+      <button class="btn-mini" id="btn-tutorial-skip">スキップ</button>
+    </div>
+
+    <!-- ポーズ -->
+    <div class="overlay" id="overlay-pause" hidden>
+      <div class="overlay-card">
+        <h2>ひとやすみ</h2>
+        <button class="btn-big btn-primary" id="btn-resume">▶ つづける</button>
+        <button class="btn-big" id="btn-restart">🔁 さいしょから</button>
+        <button class="btn-big" id="btn-quit">🏠 ホームへ</button>
+        <label class="setting-row"><span>🔔 こうかおん</span><input type="checkbox" id="pause-sfx"><i class="toggle"></i></label>
+        <label class="setting-row"><span>🎵 BGM</span><input type="checkbox" id="pause-bgm"><i class="toggle"></i></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= リザルト ================= -->
+  <section class="screen" id="screen-result">
+    <div class="result-inner">
+      <h2 class="result-title" id="result-title">ライブしゅうりょう！</h2>
+      <div class="result-band" id="result-band"></div>
+      <p class="result-comment" id="result-comment"></p>
+      <dl class="result-stats">
+        <div><dt>スコア</dt><dd id="res-score">0</dd></div>
+        <div><dt>かくとくファン</dt><dd id="res-fans">0</dd></div>
+        <div><dt>さいだいコンボ</dt><dd id="res-combo">0</dd></div>
+        <div><dt>レベル</dt><dd id="res-level">1</dd></div>
+      </dl>
+      <div class="result-badges" id="result-badges"></div>
+      <div class="result-btns">
+        <button class="btn-big btn-primary" id="btn-res-retry">🔁 もういちど！</button>
+        <button class="btn-big" id="btn-res-home">🏠 ホームへ</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="scripts/bandstack/engine.js"></script>
+<script src="scripts/bandstack/data.js"></script>
+<script src="scripts/bandstack/characters.js"></script>
+<script src="scripts/bandstack/audio.js"></script>
+<script src="scripts/bandstack/app.js"></script>
+</body>
+</html>
