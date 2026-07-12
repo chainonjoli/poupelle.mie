@@ -28,7 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/shrine.css?v=20260711a">
+    <link rel="stylesheet" href="styles/shrine.css?v=20260711b">
 </head>
 <body data-mode="ink">
     <div class="grain" aria-hidden="true"></div>
@@ -269,12 +269,39 @@
 
     <button id="btn-backtotop" class="back-to-top" type="button">⛩ 参道へもどる</button>
 
+    <!-- ===== このアプリについて・プライバシーポリシー ===== -->
+    <section id="privacy-section" class="section about-section">
+        <h2 class="section-title">このアプリについて</h2>
+        <div class="about-body">
+            <p>
+                十色神社（TOIRO SHRINE）は、推し活の想いを記録するための完全オリジナルの架空の神社です。
+                実在するアイドル・アーティスト・キャラクター・作品・団体・宗教法人とは一切関係ありません。
+                みくじやお守りの内容は、fortune（占い）をモチーフにしたエンターテインメントであり、
+                効果・効能を保証するものではありません。
+            </p>
+            <h3 class="about-subtitle">プライバシーポリシー</h3>
+            <ul class="about-list">
+                <li><strong>入力内容はすべて端末内にのみ保存されます。</strong>お名前・願いごと・推しのお名前・記念日などが、私たちのサーバーへ送信されることはありません（サーバー自体を持っていません）。</li>
+                <li><strong>アクセス解析・広告・トラッキングは一切行っていません。</strong>Cookie も使用しません。</li>
+                <li>外部との通信は次の3つだけです： 表示用フォントの読み込み（Google Fonts）／あなたが共有ボタンを押したときの X・共有シートへの受け渡し／お賽銭ページから外部決済サイトを開くとき。</li>
+                <li>記録を消したいときは、絵馬の「お焚き上げ」またはブラウザのサイトデータ削除でいつでも消去できます。</li>
+            </ul>
+            <p class="about-contact">お問い合わせ：<a href="https://x.com/toiro_shrine" target="_blank" rel="noopener">公式X ＠toiro_shrine</a></p>
+        </div>
+    </section>
+
     <footer class="footer">
         <p>「十色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
-        <p class="footer-sns"><a href="https://x.com/toiro_shrine" target="_blank" rel="noopener">公式X ＠toiro_shrine</a></p>
-        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260709d</span></p>
+        <p class="footer-sns"><a href="https://x.com/toiro_shrine" target="_blank" rel="noopener">公式X ＠toiro_shrine</a> ・ <a href="#privacy-section">このアプリについて</a></p>
+        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260711b</span></p>
     </footer>
 
-    <script src="scripts/shrine.js?v=20260711a"></script>
+    <noscript>
+        <p style="text-align:center; padding: 24px 16px; font-size: 0.9rem;">
+            十色神社の参拝には JavaScript が必要です。ブラウザの設定で JavaScript を有効にしてから、もう一度お参りください。
+        </p>
+    </noscript>
+
+    <script src="scripts/shrine.js?v=20260711b"></script>
 </body>
 </html>

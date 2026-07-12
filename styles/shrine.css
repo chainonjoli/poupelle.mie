@@ -1059,6 +1059,45 @@ body[data-mode="ink"] .anniv-card-count { color: var(--oshi); } /* 墨地では�
 }
 
 /* ============================================================
+   このアプリについて・プライバシーポリシー
+   ============================================================ */
+.about-section {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 20px 40px;
+    border-top: 1px solid var(--hairline);
+}
+.about-body { font-size: 0.84rem; color: var(--text-muted); }
+.about-body p + p { margin-top: 12px; }
+.about-subtitle {
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    margin: 22px 0 10px;
+}
+.about-list { list-style: none; }
+.about-list li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 10px;
+    line-height: 1.8;
+}
+.about-list li::before {
+    content: "・";
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+}
+.about-list strong, .about-body strong { color: var(--text); font-weight: 600; }
+.about-contact { margin-top: 18px; }
+.about-contact a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+}
+
+/* ============================================================
    フッター
    ============================================================ */
 .footer {

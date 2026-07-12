@@ -10,6 +10,20 @@ const path = require('path');
     const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
     const page = await browser.newPage({ viewport: { width: 420, height: 900 } });
     const errors = [];
+
+    // リリース整合: HTMLのキャッシュバスター・sw.jsのプリキャッシュ・表示バージョンが一致していること
+    const fs0 = require('fs');
+    const htmlSrc = fs0.readFileSync(path.resolve(__dirname, '../shrine.html'), 'utf8');
+    const swSrc = fs0.readFileSync(path.resolve(__dirname, '../sw.js'), 'utf8');
+    const relVer = (htmlSrc.match(/shrine\.css\?v=(\w+)/) || [])[1];
+    if (!relVer) errors.push('HTMLにCSSのバージョンがない');
+    if (relVer && !htmlSrc.includes('shrine.js?v=' + relVer)) errors.push('HTML内のJSバージョンがCSSと不一致');
+    if (relVer && (!swSrc.includes('shrine.css?v=' + relVer) || !swSrc.includes('shrine.js?v=' + relVer))) errors.push('sw.jsのプリキャッシュのバージョンがHTMLと不一致');
+    if (relVer && !htmlSrc.includes('>v' + relVer + '<')) errors.push('フッターの表示バージョンがリリースと不一致');
+    // PWA: マニフェストにmaskableアイコンがあり、実ファイルも存在する
+    const manifest = JSON.parse(fs0.readFileSync(path.resolve(__dirname, '../manifest.webmanifest'), 'utf8'));
+    if (!manifest.icons.some(i => i.purpose === 'maskable')) errors.push('manifestにmaskableアイコンがない');
+    manifest.icons.forEach(i => { if (!fs0.existsSync(path.resolve(__dirname, '..', i.src))) errors.push('アイコン実ファイルがない: ' + i.src); });
     page.on('pageerror', e => errors.push('pageerror: ' + e.message));
     page.on('console', m => { if (m.type() === 'error' && !m.text().includes('Failed to load resource')) errors.push('console: ' + m.text()); });
 
@@ -178,6 +192,25 @@ const path = require('path');
     await page.reload();
     await page.waitForSelector('#main:not(.hidden)');
     if ((await page.textContent('.mikuji-rank')).trim() !== mikujiRank) errors.push('リロード後にみくじの結果が変わってしまう');
+
+    // みくじの星はランクに連動する（小吉・末吉で星5が出ない／推し大吉は全★5）
+    for (let d = 0; d < 4; d++) {
+        await page.evaluate(() => localStorage.removeItem('toiro-mikuji'));
+        await page.reload();
+        await page.waitForSelector('#main:not(.hidden)');
+        await page.click('#btn-mikuji-draw');
+        await page.waitForSelector('.mikuji-rank');
+        const coRank = (await page.textContent('.mikuji-rank')).trim();
+        const coStars = await page.locator('.mikuji-stars').allTextContents();
+        if ((coRank === '小吉' || coRank === '末吉') && coStars.includes('★★★★★')) errors.push('低ランクなのに星5が出た: ' + coRank);
+        if (coRank === '推し大吉' && coStars.some(s => s !== '★★★★★')) errors.push('推し大吉なのに星5未満がある');
+    }
+
+    // このアプリについて・プライバシーポリシー
+    const privacyText = await page.textContent('#privacy-section');
+    if (!privacyText.includes('プライバシーポリシー')) errors.push('プライバシーポリシーが出ない');
+    if (!privacyText.includes('端末内にのみ保存')) errors.push('端末内保存の説明が出ない');
+    if (!privacyText.includes('トラッキング')) errors.push('トラッキング不使用の説明が出ない');
 
     // 6. 御朱印ページ：推しの名前・グループ名・ライブ名を入れて1日1枚生成
     await page.fill('#oshi-name', 'ひかる');
