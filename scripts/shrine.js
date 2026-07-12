@@ -557,7 +557,28 @@
         var startY = y - ((lines.length - 1) * lineHeight) / 2;
         lines.forEach(function (l, idx) { ctx.fillText(l, x, startY + idx * lineHeight); });
     }
-    /* ---- 季節の意匠（月ごとに差し替え可能。新しい月の意匠はここに追加する） ---- */
+    /* ---- 御朱印の意匠 ----
+       毎日ちがう一枚に見えるよう、絵柄は三層で決まる:
+       1) 季節の大意匠（月で変わり、日付の種で配置・密度が揺れる）
+       2) 推し色の紋（10色それぞれ固有の透かし）
+       3) 日替わりの細部（左右反転・押印の傾きなど）  */
+
+    /* 日付文字列から意匠の揺らぎ用の種をつくる（同じ日は必ず同じ絵柄） */
+    function dateSeed(dateStr) {
+        var h = 0;
+        for (var i = 0; i < dateStr.length; i++) h = (h * 31 + dateStr.charCodeAt(i)) | 0;
+        return Math.abs(h);
+    }
+    /* 種から 0〜1 の擬似乱数列を引く */
+    function seededRand(seed) {
+        var s = seed % 2147483647;
+        if (s <= 0) s += 2147483646;
+        return function () {
+            s = (s * 16807) % 2147483647;
+            return (s - 1) / 2147483646;
+        };
+    }
+
     function drawPetal(ctx, x, y, scale, rot, fill) {
         ctx.save();
         ctx.translate(x, y);
@@ -571,35 +592,88 @@
         ctx.fill();
         ctx.restore();
     }
-    function drawSpring(ctx, W, H) {
-        /* 桜の花びら */
-        [[86, 150, 1.1, 0.4], [130, 105, 0.8, -0.6], [615, 130, 1.0, 0.9], [650, 190, 0.7, -0.3],
-         [95, 850, 0.9, 1.2], [640, 870, 1.1, -0.8], [600, 915, 0.7, 0.5]].forEach(function (p) {
-            drawPetal(ctx, p[0], p[1], p[2], p[3], 'rgba(222, 158, 176, 0.55)');
-        });
+    /* 五弁の花（桜・梅の共用。gap>0 で花弁の間が空く） */
+    function drawBlossom(ctx, x, y, r, fill, centerFill) {
+        ctx.save();
+        ctx.translate(x, y);
+        for (var i = 0; i < 5; i++) {
+            var a = -Math.PI / 2 + i * (Math.PI * 2 / 5);
+            drawPetal(ctx, Math.cos(a) * r * 0.55, Math.sin(a) * r * 0.55, r / 16, a + Math.PI / 2, fill);
+        }
+        ctx.fillStyle = centerFill;
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
     }
-    function drawSummer(ctx, W, H) {
-        /* 青海波（下辺に静かな波） */
-        ctx.strokeStyle = 'rgba(120, 158, 184, 0.4)';
-        ctx.lineWidth = 2;
-        for (var row = 0; row < 2; row++) {
-            for (var x = 70; x <= W - 70; x += 64) {
+
+    function drawSpring(ctx, W, H, seed) {
+        var rand = seededRand(seed);
+        var right = seed % 2 === 0; /* 枝の出る側が日替わり */
+        var bx = right ? W - 40 : 40, dir = right ? -1 : 1;
+        /* 桜の枝（上の角から一筆） */
+        ctx.strokeStyle = 'rgba(107, 79, 56, 0.55)';
+        ctx.lineWidth = 7;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(bx, 34);
+        ctx.quadraticCurveTo(bx + dir * 120, 120, bx + dir * 250, 150);
+        ctx.stroke();
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(bx + dir * 130, 118);
+        ctx.quadraticCurveTo(bx + dir * 180, 190, bx + dir * 160, 240);
+        ctx.stroke();
+        /* 枝先の桜 */
+        [[bx + dir * 250, 150, 34], [bx + dir * 175, 115, 26], [bx + dir * 160, 240, 30], [bx + dir * 95, 70, 22]].forEach(function (f) {
+            drawBlossom(ctx, f[0], f[1], f[2], 'rgba(226, 155, 176, 0.75)', 'rgba(184, 146, 58, 0.8)');
+        });
+        /* 舞う花びら（配置が日替わり） */
+        var n = 9 + Math.floor(rand() * 5);
+        for (var i = 0; i < n; i++) {
+            drawPetal(ctx, 60 + rand() * (W - 120), 90 + rand() * (H - 260), 0.6 + rand() * 0.8, rand() * Math.PI * 2, 'rgba(222, 158, 176, 0.45)');
+        }
+    }
+    function drawSummer(ctx, W, H, seed) {
+        var rand = seededRand(seed);
+        /* 青海波（下辺にたっぷり三〜四段） */
+        var rows = 3 + (seed % 2);
+        ctx.strokeStyle = 'rgba(96, 142, 176, 0.5)';
+        ctx.lineWidth = 2.5;
+        for (var row = 0; row < rows; row++) {
+            for (var x = 40; x <= W - 40; x += 64) {
                 ctx.beginPath();
-                ctx.arc(x + (row % 2 ? 32 : 0), H - 66 + row * 18, 30, Math.PI, 0);
+                ctx.arc(x + (row % 2 ? 32 : 0), H - 60 + row * 20 - rows * 14, 30, Math.PI, 0);
                 ctx.stroke();
             }
         }
+        /* 千鳥（波の上を二、三羽。位置が日替わり） */
+        ctx.strokeStyle = 'rgba(70, 100, 130, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        var birds = 2 + (seed % 2);
+        for (var b = 0; b < birds; b++) {
+            var cx2 = 110 + rand() * (W - 220);
+            var cy2 = H - 200 - rand() * 90;
+            var s2 = 0.8 + rand() * 0.5;
+            ctx.beginPath();
+            ctx.arc(cx2 - 11 * s2, cy2, 11 * s2, Math.PI, Math.PI * 1.85);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(cx2 + 11 * s2, cy2, 11 * s2, Math.PI * 1.15, Math.PI * 2);
+            ctx.stroke();
+        }
     }
-    function drawAutumn(ctx, W, H) {
-        /* 紅葉の葉 */
-        [[95, 130, 1.0, 0.5, '#c9773a'], [140, 175, 0.75, -0.9, '#b3543a'], [625, 110, 0.9, 1.1, '#b3543a'],
-         [590, 165, 0.7, 0.2, '#c9773a'], [100, 870, 0.85, -0.5, '#c9773a'], [635, 880, 1.0, 0.8, '#b3543a']].forEach(function (p) {
+    function drawAutumn(ctx, W, H, seed) {
+        var rand = seededRand(seed);
+        var right = seed % 2 === 0;
+        function momiji(x, y, scale, rot, fill, alpha) {
             ctx.save();
-            ctx.translate(p[0], p[1]);
-            ctx.rotate(p[3]);
-            ctx.scale(p[2], p[2]);
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = p[4];
+            ctx.translate(x, y);
+            ctx.rotate(rot);
+            ctx.scale(scale, scale);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = fill;
             for (var i = 0; i < 5; i++) {
                 ctx.save();
                 ctx.rotate((i - 2) * 0.55);
@@ -613,27 +687,52 @@
                 ctx.restore();
             }
             ctx.restore();
-        });
+        }
+        /* 紅葉の吹き流し（対角線に沿って大小の葉が流れる） */
+        var n = 11 + (seed % 4);
+        for (var i = 0; i < n; i++) {
+            var t = i / (n - 1);
+            var x = right ? W - 80 - t * (W - 200) : 80 + t * (W - 200);
+            var y = 90 + t * (H - 240) + (rand() - 0.5) * 90;
+            var col = rand() > 0.5 ? '#c9773a' : '#b3543a';
+            momiji(x + (rand() - 0.5) * 70, y, 1.0 + rand() * 1.1, rand() * Math.PI * 2, col, 0.4 + rand() * 0.25);
+        }
     }
-    function drawWinter(ctx, W, H) {
-        /* 雪（結晶と粉雪） */
-        ctx.strokeStyle = 'rgba(148, 168, 186, 0.5)';
-        ctx.lineWidth = 1.5;
-        [[100, 135, 13], [630, 115, 16], [585, 175, 9], [120, 865, 15], [640, 875, 11]].forEach(function (p) {
-            for (var i = 0; i < 3; i++) {
-                var a = i * Math.PI / 3 + 0.3;
+    function drawWinter(ctx, W, H, seed) {
+        var rand = seededRand(seed);
+        var right = seed % 2 === 0;
+        /* 雪輪（大きな輪の一部が欠けた伝統紋様） */
+        var sx = right ? W - 150 : 150, sy = 170;
+        ctx.strokeStyle = 'rgba(130, 152, 176, 0.5)';
+        ctx.lineWidth = 3;
+        for (var arc = 0; arc < 6; arc++) {
+            var a0 = arc * Math.PI / 3 + 0.18, a1 = (arc + 1) * Math.PI / 3 - 0.18;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 105, a0, a1);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(sx + Math.cos((a0 + a1) / 2) * 105, sy + Math.sin((a0 + a1) / 2) * 105, 14, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        /* 結晶と粉雪（散り方が日替わり） */
+        ctx.lineWidth = 1.6;
+        var n = 6 + (seed % 3);
+        for (var i = 0; i < n; i++) {
+            var x = 70 + rand() * (W - 140), y = 90 + rand() * (H - 240), r = 8 + rand() * 10;
+            for (var k = 0; k < 3; k++) {
+                var a = k * Math.PI / 3 + rand();
                 ctx.beginPath();
-                ctx.moveTo(p[0] - Math.cos(a) * p[2], p[1] - Math.sin(a) * p[2]);
-                ctx.lineTo(p[0] + Math.cos(a) * p[2], p[1] + Math.sin(a) * p[2]);
+                ctx.moveTo(x - Math.cos(a) * r, y - Math.sin(a) * r);
+                ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
                 ctx.stroke();
             }
-        });
+        }
         ctx.fillStyle = 'rgba(148, 168, 186, 0.35)';
-        [[160, 110, 3], [600, 145, 2.5], [90, 190, 2], [660, 850, 3], [95, 900, 2.5]].forEach(function (p) {
+        for (var j = 0; j < 12; j++) {
             ctx.beginPath();
-            ctx.arc(p[0], p[1], p[2], 0, Math.PI * 2);
+            ctx.arc(60 + rand() * (W - 120), 80 + rand() * (H - 200), 1.5 + rand() * 2, 0, Math.PI * 2);
             ctx.fill();
-        });
+        }
     }
     /* 月→意匠。特定の月だけ特別な意匠に差し替えたい場合はこの表に追加する */
     var MONTHLY_MOTIFS = {
@@ -641,6 +740,185 @@
         6: drawSummer, 7: drawSummer, 8: drawSummer,
         9: drawAutumn, 10: drawAutumn, 11: drawAutumn, 12: drawWinter
     };
+
+    /* ---- 推し色の紋（10色それぞれの固有シンボル。紙面中央の透かし） ---- */
+    var COLOR_EMBLEMS = {
+        black: function (ctx, r, hex) { /* 三日月 */
+            ctx.fillStyle = hex;
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.arc(r * 0.42, -r * 0.18, r * 0.86, 0, Math.PI * 2, true);
+            ctx.fill('evenodd');
+        },
+        red: function (ctx, r, hex) { /* 椿 */
+            ctx.fillStyle = hex;
+            for (var i = 0; i < 5; i++) {
+                var a = -Math.PI / 2 + i * Math.PI * 2 / 5;
+                ctx.beginPath();
+                ctx.arc(Math.cos(a) * r * 0.52, Math.sin(a) * r * 0.52, r * 0.42, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = '#b8923a';
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.24, 0, Math.PI * 2);
+            ctx.fill();
+        },
+        pink: function (ctx, r, hex) { /* 桜 */
+            for (var i = 0; i < 5; i++) {
+                var a = -Math.PI / 2 + i * Math.PI * 2 / 5;
+                ctx.save();
+                ctx.translate(Math.cos(a) * r * 0.5, Math.sin(a) * r * 0.5);
+                ctx.rotate(a + Math.PI / 2);
+                ctx.scale(r / 24, r / 24);
+                ctx.fillStyle = hex;
+                ctx.beginPath();
+                ctx.moveTo(0, -12);
+                ctx.quadraticCurveTo(10, -2, 3, 10);
+                ctx.lineTo(0, 6);
+                ctx.lineTo(-3, 10);
+                ctx.quadraticCurveTo(-10, -2, 0, -12);
+                ctx.fill();
+                ctx.restore();
+            }
+        },
+        orange: function (ctx, r, hex) { /* 日輪 */
+            ctx.fillStyle = hex;
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.55, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = hex;
+            ctx.lineWidth = r * 0.09;
+            ctx.lineCap = 'round';
+            for (var i = 0; i < 12; i++) {
+                var a = i * Math.PI / 6;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(a) * r * 0.72, Math.sin(a) * r * 0.72);
+                ctx.lineTo(Math.cos(a) * r * (i % 2 ? 0.92 : 1.0), Math.sin(a) * r * (i % 2 ? 0.92 : 1.0));
+                ctx.stroke();
+            }
+        },
+        yellow: function (ctx, r, hex) { /* 銀杏 */
+            ctx.fillStyle = hex;
+            ctx.beginPath();
+            ctx.moveTo(0, r * 0.9);
+            ctx.lineTo(-r * 0.12, r * 0.35);
+            ctx.quadraticCurveTo(-r, -r * 0.1, -r * 0.55, -r * 0.75);
+            ctx.quadraticCurveTo(-r * 0.15, -r * 0.45, 0, -r * 0.5);
+            ctx.quadraticCurveTo(r * 0.15, -r * 0.45, r * 0.55, -r * 0.75);
+            ctx.quadraticCurveTo(r, -r * 0.1, r * 0.12, r * 0.35);
+            ctx.closePath();
+            ctx.fill();
+        },
+        green: function (ctx, r, hex) { /* 笹竹 */
+            ctx.strokeStyle = hex;
+            ctx.lineWidth = r * 0.11;
+            ctx.lineCap = 'round';
+            [-r * 0.3, r * 0.25].forEach(function (dx, k) {
+                ctx.beginPath();
+                ctx.moveTo(dx, -r);
+                ctx.lineTo(dx, r);
+                ctx.stroke();
+                ctx.lineWidth = r * 0.045;
+                [-r * 0.4, r * 0.15].forEach(function (ny) {
+                    ctx.beginPath();
+                    ctx.moveTo(dx - r * 0.12, ny + k * r * 0.2);
+                    ctx.quadraticCurveTo(dx, ny - r * 0.06 + k * r * 0.2, dx + r * 0.12, ny + k * r * 0.2);
+                    ctx.stroke();
+                });
+                ctx.lineWidth = r * 0.11;
+            });
+            ctx.fillStyle = hex;
+            [[-r * 0.05, -r * 0.6], [r * 0.55, 0], [-r * 0.62, r * 0.45]].forEach(function (p) {
+                for (var i = -1; i <= 1; i++) {
+                    ctx.save();
+                    ctx.translate(p[0], p[1]);
+                    ctx.rotate(0.9 + i * 0.5);
+                    ctx.beginPath();
+                    ctx.ellipse(r * 0.24, 0, r * 0.24, r * 0.05, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+        },
+        blue: function (ctx, r, hex) { /* 流水 */
+            ctx.strokeStyle = hex;
+            ctx.lineWidth = r * 0.09;
+            ctx.lineCap = 'round';
+            for (var i = -1; i <= 1; i++) {
+                ctx.beginPath();
+                ctx.moveTo(-r, i * r * 0.42);
+                ctx.bezierCurveTo(-r * 0.4, i * r * 0.42 - r * 0.3, r * 0.4, i * r * 0.42 + r * 0.3, r, i * r * 0.42);
+                ctx.stroke();
+            }
+        },
+        lightblue: function (ctx, r, hex) { /* 風鈴 */
+            ctx.fillStyle = hex;
+            ctx.beginPath();
+            ctx.arc(0, -r * 0.25, r * 0.55, Math.PI * 0.95, Math.PI * 2.05);
+            ctx.quadraticCurveTo(r * 0.3, r * 0.15, 0, r * 0.12);
+            ctx.quadraticCurveTo(-r * 0.3, r * 0.15, -r * 0.55, -r * 0.15);
+            ctx.fill();
+            ctx.strokeStyle = hex;
+            ctx.lineWidth = r * 0.05;
+            ctx.beginPath();
+            ctx.moveTo(0, r * 0.12);
+            ctx.lineTo(0, r * 0.5);
+            ctx.stroke();
+            ctx.fillRect(-r * 0.13, r * 0.5, r * 0.26, r * 0.5);
+        },
+        purple: function (ctx, r, hex) { /* 藤 */
+            ctx.strokeStyle = hex;
+            ctx.lineWidth = r * 0.06;
+            ctx.beginPath();
+            ctx.moveTo(-r, -r * 0.75);
+            ctx.quadraticCurveTo(0, -r * 1.05, r, -r * 0.75);
+            ctx.stroke();
+            ctx.fillStyle = hex;
+            [[-r * 0.55, 1.0], [0, 1.35], [r * 0.55, 0.9]].forEach(function (c) {
+                var n = Math.round(6 * c[1]);
+                for (var i = 0; i < n; i++) {
+                    var t = i / (n - 1);
+                    ctx.beginPath();
+                    ctx.arc(c[0] + Math.sin(t * 5) * r * 0.07, -r * 0.62 + t * r * 1.3 * c[1] * 0.8, r * 0.13 * (1 - t * 0.55), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        },
+        white: function (ctx, r, hex) { /* 白梅 */
+            ctx.strokeStyle = hex;
+            ctx.lineWidth = r * 0.07;
+            for (var i = 0; i < 5; i++) {
+                var a = -Math.PI / 2 + i * Math.PI * 2 / 5;
+                ctx.beginPath();
+                ctx.arc(Math.cos(a) * r * 0.52, Math.sin(a) * r * 0.52, r * 0.4, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.fillStyle = hex;
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            for (var k = 0; k < 5; k++) {
+                var b = -Math.PI / 2 + Math.PI / 5 + k * Math.PI * 2 / 5;
+                ctx.beginPath();
+                ctx.arc(Math.cos(b) * r * 0.3, Math.sin(b) * r * 0.3, r * 0.045, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    };
+
+    /* 紙面中央に推し色の紋を透かしで置く */
+    function drawColorEmblem(ctx, W, H, color, seed) {
+        var draw = COLOR_EMBLEMS[color.id];
+        if (!draw) return;
+        var rand = seededRand(seed + 7);
+        var r = 165 + rand() * 30; /* 大きさも日でわずかに揺れる */
+        ctx.save();
+        ctx.translate(W / 2, H / 2 - 30);
+        ctx.rotate((rand() - 0.5) * 0.1);
+        ctx.globalAlpha = 0.13;
+        draw(ctx, r, color.hex);
+        ctx.restore();
+    }
 
     /* 連続参拝の詣で印（限定の証） */
     function streakTierLabel(streak) {
@@ -717,9 +995,11 @@
             ctx.strokeRect(42, 42, W - 84, H - 84);
         }
 
-        var dateParts0 = (rec.date || todayStr()).split('-');
-        var motif = MONTHLY_MOTIFS[+dateParts0[1]];
-        if (motif) motif(ctx, W, H);
+        var dateStr0 = rec.date || todayStr();
+        var seed = dateSeed(dateStr0);
+        drawColorEmblem(ctx, W, H, color, seed);
+        var motif = MONTHLY_MOTIFS[+dateStr0.split('-')[1]];
+        if (motif) motif(ctx, W, H, seed);
 
         var mincho = '"Shippori Mincho", "Hiragino Mincho ProN", serif';
         ctx.textAlign = 'center';
@@ -731,7 +1011,7 @@
         if (!(opts && opts.noSeal)) {
             ctx.save();
             ctx.translate(W / 2, H / 2 + 160);
-            ctx.rotate(-0.04);
+            ctx.rotate(-0.02 - (seed % 5) * 0.01); /* 押印の傾きも日替わり */
             ctx.fillStyle = VERMILION;
             var r = 75;
             ctx.beginPath();
