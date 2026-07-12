@@ -3,6 +3,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn  = document.getElementById('submit-btn');
     const successMsg = document.getElementById('success-message');
 
+    // ─── スムーススクロール（フォームの有無に関わらず有効） ───
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // 受付終了によりフォーム非掲載の場合、予約関連の処理は行わない
+    if (!form) return;
+
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzXp-D7-ZSp_riRNJmQdF1ApYIJ57JvB1rdcjWuJcDlZmD7QkEpdHUNxXJJhT7Fthk6/exec';
 
     // ─── 残り枠の状態（ページ読み込み時に取得） ───
@@ -111,16 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
             successMsg.classList.remove('hidden');
             window.scrollTo({ top: successMsg.offsetTop - 100, behavior: 'smooth' });
         }, 1000);
-    });
-
-    // ─── スムーススクロール ───────────────────────
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
     });
 
     // ─── 初期化 ──────────────────────────────────
