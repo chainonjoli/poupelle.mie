@@ -1063,3 +1063,9 @@ body[data-mode="ink"] .anniv-card-count { color: var(--oshi); } /* 墨地では�
     .color-swatch:hover .swatch-dot { transform: none; box-shadow: none; }
     .color-swatch:hover .swatch-dot::after { transform: scale(0.42); }
 }
+
+/* スマホでカラー名が途中で折り返さないように */
+@media (max-width: 480px) {
+    .color-grid { gap: 16px 6px; }
+    .swatch-label { font-size: 0.64rem; letter-spacing: 0.02em; white-space: nowrap; }
+}

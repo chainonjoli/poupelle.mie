@@ -499,3 +499,18 @@ select option {
 .count-summary-row.total-row .count-value {
     font-size: 1.15rem;
 }
+
+/* スマホでの見出し折り返し調整 */
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 1.55rem;
+        line-height: 1.45;
+    }
+    .hero-lead {
+        font-size: 1rem;
+    }
+    .section-title {
+        font-size: 1.7rem;
+        margin-bottom: 28px;
+    }
+}
