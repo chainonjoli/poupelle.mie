@@ -308,6 +308,13 @@ button { font-family: inherit; color: inherit; }
   padding: 3px 6px; display: flex; flex-direction: column; align-items: center;
 }
 .hud-next canvas { width: 30px; height: 60px; }
+.hud-hold {
+  background: rgba(20,10,38,.82); border: 1.5px solid var(--line); border-radius: 12px;
+  padding: 3px 6px; display: flex; flex-direction: column; align-items: center; cursor: pointer;
+}
+.hud-hold canvas { width: 30px; height: 30px; margin-top: 2px; }
+.hud-hold.used { opacity: .45; }
+.hud-hold:active { background: var(--bg-card); }
 .btn-pause {
   width: 44px; border-radius: 12px; border: 1.5px solid var(--line);
   background: rgba(20,10,38,.82); font-size: 1.05rem; cursor: pointer;
@@ -383,6 +390,43 @@ button { font-family: inherit; color: inherit; }
 .stage-row .bandchar .charname {
   position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
   font-size: .5rem; color: var(--text-dim); white-space: nowrap; font-weight: 700;
+}
+
+/* 掛け合い吹き出し */
+.callout {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  margin-bottom: 2px; max-width: 92%;
+  background: rgba(253,248,239,.96); color: #2b1a3d; border-radius: 14px;
+  padding: 6px 12px; font-size: .74rem; font-weight: 800; white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0,0,0,.35); z-index: 4; pointer-events: none;
+  animation: calloutIn 2s ease forwards;
+}
+.callout::after {
+  content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px;
+  border: 6px solid transparent; border-top-color: rgba(253,248,239,.96);
+}
+.callout b { margin-right: 6px; }
+@keyframes calloutIn {
+  0% { opacity: 0; transform: translateX(-50%) translateY(8px) scale(.85); }
+  10%, 82% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(.95); }
+}
+.gauge-row { position: relative; }
+
+/* レーザー演出（アリーナ以上） */
+.lasers { position: absolute; inset: 0; pointer-events: none; }
+.lasers .laser {
+  position: absolute; top: -5%; left: 50%; width: 3px; height: 70%;
+  background: linear-gradient(180deg, var(--laser-color, #6bd7ff), transparent);
+  transform-origin: top center; opacity: .55; border-radius: 2px;
+  animation: laserSweep 3.2s ease-in-out infinite;
+}
+.lasers .laser:nth-child(2) { animation-delay: .8s; animation-duration: 4s; }
+.lasers .laser:nth-child(3) { animation-delay: 1.6s; animation-duration: 3.6s; }
+.lasers .laser:nth-child(4) { animation-delay: 2.4s; animation-duration: 4.4s; }
+@keyframes laserSweep {
+  0%, 100% { transform: rotate(-38deg); }
+  50% { transform: rotate(38deg); }
 }
 
 .ctrl-row { display: flex; gap: 6px; }

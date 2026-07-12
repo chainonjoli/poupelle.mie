@@ -173,6 +173,26 @@ console.log('--- 統計とスキル補助 ---');
   ok(g.dangerLevel(), '上段に積むと危険状態');
 }
 
+console.log('--- ホールド ---');
+{
+  const g = new Game({ seed: 20 });
+  g.spawn();
+  const firstCells = g.cur.cells.slice();
+  const next = g.queue[0].slice();
+  ok(g.holdSwap(), '初回ホールド成功');
+  ok(g.holdPiece.join() === firstCells.join(), 'ホールドに元ピースが入る');
+  ok(g.cur.cells.join() === next.join(), '次のピースが繰り出される');
+  ok(!g.canHold, '同じピースでは再ホールド不可');
+  ok(!g.holdSwap(), '2回目のホールドは失敗する');
+  g.hardDrop(); g.lock(); g.spawn();
+  ok(g.canHold, '新しいピースでホールド可能に戻る');
+  const held = g.holdPiece.slice();
+  const cur2 = g.cur.cells.slice();
+  ok(g.holdSwap(), '入れ替えホールド成功');
+  ok(g.cur.cells.join() === held.join(), 'ホールドしていたピースが出てくる');
+  ok(g.holdPiece.join() === cur2.join(), '今のピースがホールドに入る');
+}
+
 console.log('--- 長時間の自動プレイで例外が出ない ---');
 {
   const g = new Game({ seed: 99 });

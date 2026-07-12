@@ -124,6 +124,7 @@
       <div class="howto-card">
         <h3>🕹️ そうさ</h3>
         <p>スワイプ左右：いどう ／ タップ：かいてん<br>下スワイプ：はやおとし ／ つよい下スワイプ：いっきにおとす<br>画面下のボタンでもあそべるよ（PCは矢印キー＋スペース）</p>
+        <p><b>ホールド</b>：右上の「ホールド」わくをタップ（PCはCキー）すると、いまのピースをとっておいて、あとで入れかえられるよ。1ピースにつき1回だけ！</p>
       </div>
     </div>
   </section>
@@ -156,6 +157,10 @@
         <div class="hud-item"><span class="hud-label">Lv</span><b id="hud-level">1</b></div>
       </div>
       <div class="hud-right">
+        <button class="hud-hold" id="btn-hold" aria-label="ホールド">
+          <span class="hud-label">ホールド</span>
+          <canvas id="hold-canvas" width="60" height="60"></canvas>
+        </button>
         <div class="hud-next"><span class="hud-label">つぎ</span><canvas id="next-canvas" width="60" height="120"></canvas></div>
         <button class="btn-pause" id="btn-pause" aria-label="一時停止">⏸</button>
       </div>
@@ -177,6 +182,7 @@
         <div class="live-gauge"><div class="gauge-fill" id="gauge-fill"></div></div>
         <button class="btn-skill" id="btn-skill" disabled>SKILL</button>
       </div>
+      <div class="callout" id="callout" hidden><b id="callout-name"></b><span id="callout-text"></span></div>
       <div class="stage-row" id="stage-row"></div>
       <div class="ctrl-row" id="ctrl-row">
         <button class="btn-ctrl" id="ctrl-left" aria-label="左へ">◀</button>

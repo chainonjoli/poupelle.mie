@@ -203,6 +203,7 @@
   const ctx = canvas.getContext('2d');
   const nextCanvas = $('next-canvas');
   const nctx = nextCanvas.getContext('2d');
+  const hctx = $('hold-canvas').getContext('2d');
   let cell = 24, dpr = 1;
 
   function fitCanvas() {
@@ -244,6 +245,9 @@
     pop.classList.remove('show', 'bandset');
     $('crowd').classList.remove('hype');
     $('skill-cutin').hidden = true;
+    $('callout').hidden = true;
+    calloutLast = 0;
+    game.wasDanger = false;
     show('game');
     fitCanvas();
     updateHUD();
@@ -255,12 +259,15 @@
       updateChallengeTimer();
     }
     $('tutorial-bar').hidden = mode !== 'tutorial';
+    $('btn-hold').style.visibility = mode === 'tutorial' ? 'hidden' : 'visible';
     $('danger-flash').classList.remove('on');
     A.startBGM('play');
 
     if (mode === 'tutorial') {
       $('tutorial-chara').innerHTML = C.charSVG('tyra');
       advanceTutorial();
+    } else {
+      setTimeout(() => { if (!game.over && !game.paused) showCallout('start'); }, 700);
     }
     game.g.spawn();
     game.phase = 'drop';
@@ -281,6 +288,22 @@
       const s = document.createElement('div');
       s.className = 'spot s' + i;
       spots.appendChild(s);
+    }
+    // レーザー（アリーナ以上）
+    const oldLasers = bg.querySelector('.lasers');
+    if (oldLasers) oldLasers.remove();
+    if (v.fx.laser) {
+      const lasers = document.createElement('div');
+      lasers.className = 'lasers';
+      lasers.style.setProperty('--laser-color', v.accent);
+      const n = v.id === 'dome' ? 4 : 2;
+      for (let i = 0; i < n; i++) {
+        const l = document.createElement('div');
+        l.className = 'laser';
+        l.style.left = (20 + i * (60 / Math.max(1, n - 1))) + '%';
+        lasers.appendChild(l);
+      }
+      bg.appendChild(lasers);
     }
     const crowd = $('crowd');
     crowd.innerHTML = '';
@@ -364,10 +387,17 @@
         popCombo('バンドセット!!', true);
         reactBand('superjoy', 900);
         spawnConfetti(26);
-      } else if (game.chain >= 2) {
+        showCallout('bandset', { important: true });
+      } else if (game.chain >= 3) {
         A.sfx('combo', { combo: game.chain });
         popCombo(game.chain + ' コンボ!');
         reactChar(game.chara.id, 'joy');
+        showCallout('bigcombo', { important: true });
+      } else if (game.chain === 2) {
+        A.sfx('combo', { combo: game.chain });
+        popCombo(game.chain + ' コンボ!');
+        reactChar(game.chara.id, 'joy');
+        showCallout('combo');
       } else {
         reactChar(randomCharId(), 'joy');
       }
@@ -401,6 +431,7 @@
         game.g.rockChance = D.LEVELS[lv - 1].rock;
         A.sfx('levelup');
         popCombo('LEVEL ' + lv + '!');
+        showCallout('levelup');
       }
     }
 
@@ -410,7 +441,11 @@
     document.querySelectorAll('#stage-row .bandchar').forEach(el => {
       el.classList.toggle('pinch', danger);
     });
-    if (danger) A.sfx('danger');
+    if (danger) {
+      A.sfx('danger');
+      if (!game.wasDanger) showCallout('danger', { important: true });
+    }
+    game.wasDanger = danger;
 
     updateHUD();
     if (fromSkill && game.g.cur) {
@@ -450,7 +485,10 @@
     document.querySelector('.live-gauge').classList.toggle('full', full);
     const centerEl = document.querySelector(`#stage-row .bandchar[data-chara="${game.chara.id}"]`);
     if (centerEl) centerEl.classList.toggle('skillready', full);
-    if (full && !game.gaugeWasFull) A.sfx('gaugefull');
+    if (full && !game.gaugeWasFull) {
+      A.sfx('gaugefull');
+      if (game.mode !== 'tutorial') showCallout('skillready', { charId: game.chara.id, important: true });
+    }
     game.gaugeWasFull = full;
   }
 
@@ -459,6 +497,7 @@
     $('hud-fans').textContent = fmt(game.fans);
     $('hud-level').textContent = game.level;
     drawNext();
+    updateHoldUI();
   }
 
   function updateChallengeTimer() {
@@ -493,6 +532,57 @@
   }
   function randomCharId() {
     return D.CHARACTERS[Math.floor(Math.random() * D.CHARACTERS.length)].id;
+  }
+
+  /* ---- 4人の掛け合い吹き出し ---- */
+  let calloutLast = 0;
+  function showCallout(event, opts = {}) {
+    const lines = D.CALLOUTS[event];
+    if (!lines) return;
+    const now = performance.now();
+    const cooldown = opts.important ? 1200 : 4000;
+    if (now - calloutLast < cooldown) return;
+    calloutLast = now;
+    let pick;
+    if (opts.charId) {
+      pick = lines.find(l => l[0] === opts.charId) || lines[Math.floor(Math.random() * lines.length)];
+    } else {
+      pick = lines[Math.floor(Math.random() * lines.length)];
+    }
+    const ch = D.CHARACTERS.find(c => c.id === pick[0]);
+    const el = $('callout');
+    $('callout-name').textContent = ch.name;
+    $('callout-name').style.color = ch.theme;
+    $('callout-text').textContent = pick[1];
+    el.hidden = true;
+    void el.offsetWidth;
+    el.hidden = false;
+    reactChar(ch.id, 'joy');
+    clearTimeout(showCallout._t);
+    showCallout._t = setTimeout(() => { el.hidden = true; }, 2000);
+  }
+
+  /* ---- ホールド ---- */
+  function inputHold() {
+    if (game.phase !== 'drop' || game.paused || game.over) return;
+    if (game.mode === 'tutorial') return; // チュートリアルでは混乱を避けるため無効
+    if (game.g.holdSwap()) {
+      A.sfx('hold');
+      updateHoldUI();
+      drawNext();
+      render();
+    }
+  }
+  function updateHoldUI() {
+    const g = game.g;
+    if (!g) return;
+    $('btn-hold').classList.toggle('used', !g.canHold);
+    hctx.setTransform(2, 0, 0, 2, 0, 0);
+    hctx.clearRect(0, 0, 30, 30);
+    if (g.holdPiece) {
+      drawCell(hctx, 1, 1, 13, g.holdPiece[1]);
+      drawCell(hctx, 1, 15, 13, g.holdPiece[0]);
+    }
   }
 
   function spawnConfetti(n) {
@@ -901,6 +991,7 @@
       case 'z': case 'Z': if (game.g && game.phase === 'drop' && game.g.rotate(-1)) { A.sfx('rotate'); render(); } break;
       case 'ArrowDown': e.preventDefault(); game.softDrop = true; break;
       case ' ': e.preventDefault(); inputHardDrop(); break;
+      case 'c': case 'C': inputHold(); break;
       case 's': case 'S': useSkill(); break;
       case 'p': case 'P': case 'Escape': togglePause(); break;
     }
@@ -938,6 +1029,7 @@
   }, 60);
   $('ctrl-drop').addEventListener('click', () => { A.unlock(); inputHardDrop(); });
   $('btn-skill').addEventListener('click', () => { A.unlock(); useSkill(); });
+  $('btn-hold').addEventListener('click', () => { A.unlock(); inputHold(); });
 
   /* ================= 一時停止 ================= */
   function togglePause(force) {

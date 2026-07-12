@@ -40,6 +40,8 @@
       this.sinceNote = 99;      // 音符の最短出現間隔管理
       this.rockChance = 0;      // 化石の出現率（レベルで上げる）
       this.forcedQueue = (opts.forcedQueue || []).slice(); // チュートリアル用固定ピース
+      this.holdPiece = null;    // ホールド中のピース
+      this.canHold = true;      // 1ピースにつき1回だけホールド可
       while (this.queue.length < 2) this.queue.push(this._genPiece());
     }
 
@@ -74,6 +76,35 @@
         return false;
       }
       this.pieces++;
+      this.canHold = true;
+      return true;
+    }
+
+    /* ---- ホールド：落下中ピースを取り置き、次回入れ替えられる ---- */
+    holdSwap() {
+      if (!this.cur || this.over || !this.canHold) return false;
+      const cells = this.cur.cells;
+      if (this.holdPiece) {
+        // 入れ替え。スポーン位置に置けないときは失敗させる
+        const swapped = { x: 3, y: HIDDEN, rot: 0, cells: this.holdPiece };
+        if (!this._fits(swapped.x, swapped.y, swapped.rot)) return false;
+        this.cur = swapped;
+        this.holdPiece = cells;
+      } else {
+        this.holdPiece = cells;
+        const next = this.queue.shift();
+        this.queue.push(this._genPiece());
+        const fresh = { x: 3, y: HIDDEN, rot: 0, cells: next };
+        if (!this._fits(fresh.x, fresh.y, fresh.rot)) {
+          // 置けないなら取り消し
+          this.queue.unshift(next);
+          this.queue.pop();
+          this.holdPiece = null;
+          return false;
+        }
+        this.cur = fresh;
+      }
+      this.canHold = false;
       return true;
     }
 

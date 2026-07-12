@@ -113,6 +113,17 @@
       accent: '#6bd7ff',
       fx: { confetti: true, laser: true, spotlights: 3 },
     },
+    {
+      id: 'dome',
+      name: 'ドーム',
+      desc: '5万人の頂点。ファン40,000人で解放。レーザーと金吹雪の伝説の夜！',
+      unlockFans: 40000,
+      fanRate: 2.5,
+      crowd: 36,
+      sky: ['#03030c', '#1a0f2e', '#3d2a10'],
+      accent: '#ffd76b',
+      fx: { confetti: true, laser: true, spotlights: 4 },
+    },
   ];
 
   /* ---- レベルごとの落下間隔(ms)と化石出現率 ---- */
@@ -143,7 +154,55 @@
       desc: '2分30秒でファン2,000人！コンボが鍵。' },
     { id: 'c3', name: '伝説のアンコール', time: 180, targetFans: 5000, venue: 'arena',
       desc: '3分でファン5,000人！バンドセットを狙え！' },
+    { id: 'c4', name: 'ドームの頂へ', time: 180, targetFans: 12000, venue: 'dome',
+      desc: '3分でファン12,000人！スキルと連鎖を使いこなせ！' },
   ];
+
+  /* ---- 4人の掛け合いコールアウト（ゲーム中の吹き出し） ---- */
+  const CALLOUTS = {
+    start: [
+      ['tyra', '今夜も…私の声に酔いな！'],
+      ['kaji', 'いくぜ、鍵盤ぶっ叩くぞー！'],
+      ['hanako', 'がんばって積むぞ〜！'],
+      ['newmember', '……はじめよっか'],
+    ],
+    combo: [
+      ['tyra', 'フッ…いい流れだ'],
+      ['kaji', 'ノッてきたぜ！！'],
+      ['hanako', 'その調子その調子♪'],
+      ['newmember', '……いいリズム'],
+    ],
+    bigcombo: [
+      ['tyra', '完璧なステージだ！！'],
+      ['kaji', 'うおおお！サイコー！！'],
+      ['hanako', 'すごいすごーい！！'],
+      ['newmember', '……鳥肌、立った'],
+    ],
+    bandset: [
+      ['tyra', 'これがバンドザウルスだ！'],
+      ['kaji', '4人そろえば無敵だぜ！'],
+      ['hanako', 'みんなで演奏、たのしい！'],
+      ['newmember', '……この音、好き'],
+    ],
+    danger: [
+      ['tyra', 'おい…積みすぎだ！'],
+      ['kaji', 'ヤバいヤバい！整理しろ！'],
+      ['hanako', 'わわわ、あぶないよ！'],
+      ['newmember', '……上、見て'],
+    ],
+    skillready: [
+      ['tyra', '私の出番のようだな'],
+      ['kaji', 'いつでもいけるぜ！'],
+      ['hanako', 'スキル、たまったよ！'],
+      ['newmember', '……準備、できてる'],
+    ],
+    levelup: [
+      ['tyra', 'テンポを上げるぞ'],
+      ['kaji', 'まだまだ速くしようぜ！'],
+      ['hanako', 'はやくなってきた〜！'],
+      ['newmember', '……加速する'],
+    ],
+  };
 
   /* ---- チュートリアルの手順 ---- */
   const TUTORIAL_STEPS = [
@@ -174,7 +233,7 @@
 
   global.BSData = {
     PIECES, CHARACTERS, VENUES, LEVELS, PIECES_PER_LEVEL,
-    CHALLENGES, TUTORIAL_STEPS, TUTORIAL_QUEUE,
+    CHALLENGES, TUTORIAL_STEPS, TUTORIAL_QUEUE, CALLOUTS,
     SAVE_KEY: 'bandstack.save.v1',
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = global.BSData;
