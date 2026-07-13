@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ダサザウルス ～まだ見ぬステージへ～</title>
+  <meta name="description" content="バンドザウルスに憧れる無名の恐竜バンド『ダサザウルス』と遊ぶ、しゃべる神経衰弱。カードをめくるたび、恐竜たちが応援してくれる。">
+  <meta name="theme-color" content="#1b2a4a">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦕</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=M+PLUS+1p:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/dasazaurus.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= タイトル ================= -->
+  <section class="screen active" id="screen-title">
+    <div class="title-sky">
+      <i class="tw s1"></i><i class="tw s2"></i><i class="tw s3"></i><i class="tw s4"></i><i class="tw s5"></i>
+    </div>
+    <div class="title-inner">
+      <p class="title-presents">しゃべる神経衰弱</p>
+      <h1 class="game-logo">
+        <span class="logo-dasa">ダサザウルス</span>
+        <span class="logo-sub">〜まだ見ぬステージへ〜</span>
+      </h1>
+      <div class="title-band" id="title-band" aria-hidden="true"></div>
+      <p class="title-story">
+        キラキラ輝くバンドザウルスに憧れる、<br>
+        まだ無名の恐竜バンドがいた。<br>
+        実力はない。ファンもいない。<br>
+        でも、夢だけは 武道館級。
+      </p>
+      <button class="btn-big btn-start" id="btn-title-start">🎸 タップして はじめる</button>
+      <p class="title-copy">DASAZAURUS — MEMORY LIVE</p>
+    </div>
+  </section>
+
+  <!-- ================= ホーム ================= -->
+  <section class="screen" id="screen-home">
+    <header class="home-head">
+      <h2 class="game-logo small"><span class="logo-dasa">ダサザウルス</span></h2>
+      <p class="home-sub">〜まだ見ぬステージへ〜</p>
+    </header>
+
+    <div class="journey" id="journey" aria-label="ステージの道のり"></div>
+    <p class="journey-desc" id="journey-desc"></p>
+
+    <div class="home-band" id="home-band" aria-hidden="true"></div>
+
+    <nav class="home-menu">
+      <p class="menu-label">むずかしさを えらんで ライブ練習！</p>
+      <div class="diff-grid" id="diff-grid"></div>
+      <div class="home-menu-grid">
+        <button class="btn-menu" id="btn-home-members">🦕 メンバー</button>
+        <button class="btn-menu" id="btn-home-howto">📖 あそびかた</button>
+        <button class="btn-menu" id="btn-home-settings">⚙️ せってい</button>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ================= メンバー ================= -->
+  <section class="screen" id="screen-members">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>メンバー</h2></header>
+    <div class="member-list" id="member-list"></div>
+  </section>
+
+  <!-- ================= あそびかた ================= -->
+  <section class="screen" id="screen-howto">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>あそびかた</h2></header>
+    <div class="howto-body">
+      <div class="howto-card">
+        <h3>🃏 ルールは5秒！</h3>
+        <p>カードを<b>2枚</b>めくる。<br>おなじ絵なら<b>せいかい</b>！ ちがったら閉じる。<br>ぜんぶそろえたら <b>ライブ開始</b>！！</p>
+      </div>
+      <div class="howto-card">
+        <h3>🦕 恐竜たちが しゃべる！</h3>
+        <p>カードをめくるたび、ダサザウルスのメンバーが応援したり、ツッコんだり、寝たりします。<br>SHIBAKUZOは カードより 睡眠優先。</p>
+      </div>
+      <div class="howto-card">
+        <h3>🏟️ ステージが進化！</h3>
+        <p>クリアするたびライブ会場がステップアップ。<br>公園 → レストラン → 山 → ライブハウス → <b>幕張メッセ</b>！</p>
+      </div>
+      <div class="howto-card">
+        <h3>💗 ひみつ</h3>
+        <p>とてもまれに、めったに出ない<b>ひみつのなかま</b>がカードにまぎれているらしい……。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= せってい ================= -->
+  <section class="screen" id="screen-settings">
+    <header class="sub-head"><button class="btn-back" data-back="home">◀</button><h2>せってい</h2></header>
+    <div class="settings-body">
+      <label class="setting-row"><span>🔔 こうかおん</span><input type="checkbox" id="set-sfx" checked><i class="toggle"></i></label>
+      <label class="setting-row"><span>🎵 BGM</span><input type="checkbox" id="set-bgm" checked><i class="toggle"></i></label>
+      <div class="setting-records">
+        <h3>プレイきろく</h3>
+        <dl id="records-list"></dl>
+      </div>
+      <button class="btn-menu btn-danger" id="btn-reset">🗑️ きろくを けす</button>
+    </div>
+  </section>
+
+  <!-- ================= ゲーム ================= -->
+  <section class="screen" id="screen-game">
+    <div class="stage-bg" id="stage-bg" aria-hidden="true">
+      <div class="stage-deco" id="stage-deco"></div>
+    </div>
+
+    <header class="game-hud">
+      <button class="btn-back" id="btn-game-quit" aria-label="やめてホームへ">◀</button>
+      <div class="hud-stage" id="hud-stage">🌳 公園</div>
+      <div class="hud-stats">
+        <span class="hud-item">のこり <b id="hud-left">0</b></span>
+        <span class="hud-item">て数 <b id="hud-moves">0</b></span>
+      </div>
+    </header>
+
+    <div class="board-wrap">
+      <div class="board" id="board" role="grid" aria-label="カード"></div>
+      <div class="combo-pop" id="combo-pop" aria-hidden="true"></div>
+    </div>
+
+    <!-- キャラクターのひとこと -->
+    <div class="talk-bar" id="talk-bar">
+      <div class="talk-avatar" id="talk-avatar"></div>
+      <div class="talk-bubble" id="talk-bubble">
+        <b id="talk-name"></b>
+        <span id="talk-text"></span>
+      </div>
+    </div>
+
+    <!-- 隠しキャラカットイン -->
+    <div class="doki-cutin" id="doki-cutin" hidden>
+      <div class="doki-char" id="doki-char"></div>
+      <p class="doki-text">ひみつのなかま <b>DOKIDOKI</b> があらわれた！！</p>
+    </div>
+  </section>
+
+  <!-- ================= ライブ（クリア演出） ================= -->
+  <section class="screen" id="screen-live">
+    <div class="live-bg" id="live-bg">
+      <div class="live-lights"><i class="ll l1"></i><i class="ll l2"></i></div>
+      <div class="live-deco" id="live-deco"></div>
+    </div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+    <div class="live-inner">
+      <p class="live-title" id="live-title">🎤 LIVE START!!</p>
+      <div class="live-stagefloor">
+        <div class="live-band" id="live-band"></div>
+      </div>
+      <div class="live-audience" id="live-audience" aria-label="観客"></div>
+      <p class="live-caption" id="live-caption">お客さんは少ない。でも、みんな最高の笑顔だ。</p>
+    </div>
+
+    <!-- スマホ通知 -->
+    <div class="notify" id="notify" hidden>
+      <div class="notify-card">
+        <div class="notify-head"><span class="notify-app">📱 メッセージ</span><span class="notify-time">たった今</span></div>
+        <p class="notify-body">あなたのライブを見ました。</p>
+        <p class="notify-from">差出人：<b>？？？</b></p>
+      </div>
+    </div>
+
+    <!-- リザルト -->
+    <div class="result-card" id="result-card" hidden>
+      <h2 id="result-title">ステージクリア！</h2>
+      <dl class="result-stats">
+        <div><dt>て数</dt><dd id="res-moves">0</dd></div>
+        <div><dt>タイム</dt><dd id="res-time">0:00</dd></div>
+        <div><dt>さいだいコンボ</dt><dd id="res-combo">0</dd></div>
+      </dl>
+      <p class="result-note" id="result-note"></p>
+      <div class="result-btns">
+        <button class="btn-big btn-primary" id="btn-res-next">🎸 つぎのステージへ！</button>
+        <button class="btn-big" id="btn-res-home">🏠 ホームへ</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="scripts/dasazaurus/cards.js"></script>
+<script src="scripts/dasazaurus/lines.js"></script>
+<script src="scripts/dasazaurus/engine.js"></script>
+<script src="scripts/dasazaurus/characters.js"></script>
+<script src="scripts/dasazaurus/audio.js"></script>
+<script src="scripts/dasazaurus/app.js"></script>
+</body>
+</html>
