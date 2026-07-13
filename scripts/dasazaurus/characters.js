@@ -1,286 +1,304 @@
 /* =========================================================
    ダサザウルス ～まだ見ぬステージへ～
    キャラクターアート（SVG・外部画像不要）
-   バンドザウルスに憧れる、まだ無名の恐竜バンド。
-   ・タケル憧れ : 緑ボディ＋赤ハチマキ＋白バンドタオル（Vo）
-   ・ファンキー無糖 : 青ボディ＋丸メガネ＋無糖コーヒー（Ba）
-   ・大騒テラコ : オレンジのプテラ娘＋メガホン＋大口（応援&Dr）
-   ・SHIBAKUZO : うす紫ボディ＋ナイトキャップ＋居眠り（Gt）
-   ・DOKIDOKI : ピンク＋ハートのツノ（隠しキャラ）
+   公式ビジュアル準拠：恐竜マスクをかぶった普段着のバンド。
+   ・タケル憧れ : 赤ティラノマスク＋白T（ピンクで名前）＋黒短パン
+   ・ファンキー無糖 : 青ティラノマスク＋白T（無糖）＋青パンツ
+   ・大騒テラコ : 橙トリケラマスク＋オレンジのつなぎ＋両手上げ
+   ・SHIBAKUZO : 緑ティラノマスク＋白T（しばくぞ）＋マスタードパンツ
+   ・DOKIDOKI : 赤のつるっとマスク＋全身黒＋両手を頬に（隠しキャラ）
    ・チャーミー : シルエットのみ（姿は最後まで見せない）
    ========================================================= */
 (function (global) {
   'use strict';
 
-  /* 共通：正面向きの恐竜ベース
-     o: {skin, dark, belly, eyes, mouth, extra, armL, armR, spikes} */
-  function dinoBase(o) {
-    const spikes = o.spikes !== false ? `
-      <path d="M38 22 L44 8 L50 21 Z" fill="${o.dark}"/>
-      <path d="M52 18 L60 4 L68 18 Z" fill="${o.dark}"/>
-      <path d="M70 21 L76 8 L82 22 Z" fill="${o.dark}"/>` : '';
+  const SKIN = '#f2c79b';
+  const SKIN_D = '#cf9a66';
+
+  /* ---------- マスク（頭部。y14〜60あたりに描く） ---------- */
+
+  /* ティラノ系ゴムマスク：大きな開いた口＋ギザ歯 */
+  function trexMask(c, d) {
     return `
-      <g class="dz-char">
-        <!-- しっぽ -->
-        <path d="M86 118 Q112 122 108 100 Q106 92 98 96 Q100 104 92 106 Z"
-              fill="${o.skin}" stroke="${o.dark}" stroke-width="2.5"/>
-        <!-- 足 -->
-        <ellipse cx="46" cy="141" rx="12" ry="7" fill="${o.skin}" stroke="${o.dark}" stroke-width="2.5"/>
-        <ellipse cx="74" cy="141" rx="12" ry="7" fill="${o.skin}" stroke="${o.dark}" stroke-width="2.5"/>
-        <!-- 体 -->
-        <ellipse cx="60" cy="112" rx="29" ry="27" fill="${o.skin}" stroke="${o.dark}" stroke-width="2.5"/>
-        <ellipse cx="60" cy="116" rx="19" ry="18" fill="${o.belly}"/>
-        <!-- 腕 -->
-        ${o.armL || `<path class="dz-arm-l" d="M34 104 Q22 108 24 118 Q25 123 31 121 Q35 114 39 109 Z"
-              fill="${o.skin}" stroke="${o.dark}" stroke-width="2.5"/>`}
-        ${o.armR || `<path class="dz-arm-r" d="M86 104 Q98 108 96 118 Q95 123 89 121 Q85 114 81 109 Z"
-              fill="${o.skin}" stroke="${o.dark}" stroke-width="2.5"/>`}
-        <!-- 頭 -->
-        <g class="dz-head">
-          ${spikes}
-          <circle cx="60" cy="52" r="33" fill="${o.skin}" stroke="${o.dark}" stroke-width="2.5"/>
-          <!-- 口まわり -->
-          <ellipse cx="60" cy="66" rx="19" ry="12" fill="${o.belly}"/>
-          <circle cx="53" cy="61" r="1.7" fill="${o.dark}"/>
-          <circle cx="67" cy="61" r="1.7" fill="${o.dark}"/>
-          ${o.mouth}
-          ${o.eyes}
-          ${o.extra || ''}
+      <g class="dz-mask">
+        <path d="M34 50 Q28 18 60 13 Q92 18 86 50 Q86 60 76 60 L44 60 Q34 60 34 50 Z"
+              fill="${c}" stroke="${d}" stroke-width="2.5"/>
+        <!-- 開いた口 -->
+        <path d="M40 37 Q60 31 80 37 L78 55 Q60 61 42 55 Z" fill="#5a2026"/>
+        <!-- 上の歯 -->
+        <path d="M42 35 L78 35 L78 38 L75 45 L72 38 L69 45 L66 38 L63 45 L60 38 L57 45 L54 38 L51 45 L48 38 L45 45 L42 38 Z" fill="#fff"/>
+        <!-- 下の歯 -->
+        <path d="M44 56 L76 56 L76 54 L73 48 L70 54 L67 48 L64 54 L61 48 L58 54 L55 48 L52 54 L49 48 L46 54 L44 54 Z" fill="#fff"/>
+        <!-- 目 -->
+        <circle cx="46" cy="25" r="5" fill="#fff"/><circle cx="46.6" cy="25.6" r="2.3" fill="#26221e"/>
+        <circle cx="74" cy="25" r="5" fill="#fff"/><circle cx="73.4" cy="25.6" r="2.3" fill="#26221e"/>
+        <!-- 鼻の穴・ゴムのしわ -->
+        <circle cx="55" cy="17" r="1.5" fill="${d}"/><circle cx="65" cy="17" r="1.5" fill="${d}"/>
+        <path d="M38 30 Q36 26 38 22 M82 30 Q84 26 82 22" fill="none" stroke="${d}" stroke-width="1.6" opacity=".7"/>
+      </g>`;
+  }
+
+  /* トリケラトプスマスク：フリル＋3本ツノ＋くちばし */
+  function triceraMask(c, d) {
+    return `
+      <g class="dz-mask">
+        <!-- フリル -->
+        <path d="M60 8 Q92 8 94 36 Q94 52 78 54 L42 54 Q26 52 26 36 Q28 8 60 8 Z"
+              fill="${d}" stroke="${d}" stroke-width="2"/>
+        <path d="M60 12 Q88 12 90 36 Q90 48 76 50 L44 50 Q30 48 30 36 Q32 12 60 12 Z" fill="${c}"/>
+        <!-- 顔 -->
+        <path d="M40 46 Q38 24 60 22 Q82 24 80 46 Q80 58 60 58 Q40 58 40 46 Z"
+              fill="${c}" stroke="${d}" stroke-width="2.5"/>
+        <!-- ツノ（眉2本＋鼻1本） -->
+        <path d="M45 26 Q41 14 47 10 Q51 18 51 26 Z" fill="#f5ead0" stroke="#c9b98a" stroke-width="1.6"/>
+        <path d="M75 26 Q79 14 73 10 Q69 18 69 26 Z" fill="#f5ead0" stroke="#c9b98a" stroke-width="1.6"/>
+        <path d="M57 47 Q60 40 63 47 Q63 52 60 52 Q57 52 57 47 Z" fill="#f5ead0" stroke="#c9b98a" stroke-width="1.4"/>
+        <!-- 目 -->
+        <circle cx="49" cy="36" r="4.6" fill="#fff"/><circle cx="49.6" cy="36.6" r="2.1" fill="#26221e"/>
+        <circle cx="71" cy="36" r="4.6" fill="#fff"/><circle cx="70.4" cy="36.6" r="2.1" fill="#26221e"/>
+        <!-- くちばし -->
+        <path d="M52 54 Q60 60 68 54" fill="none" stroke="${d}" stroke-width="2.4" stroke-linecap="round"/>
+      </g>`;
+  }
+
+  /* つるっとした赤マスク（DOKIDOKI）：目穴＋おでこにハート */
+  function roundMask(c, d) {
+    return `
+      <g class="dz-mask">
+        <path d="M34 42 Q34 14 60 14 Q86 14 86 42 Q86 60 60 60 Q34 60 34 42 Z"
+              fill="${c}" stroke="${d}" stroke-width="2.5"/>
+        <ellipse cx="48" cy="38" rx="5" ry="6" fill="#3a1114"/>
+        <ellipse cx="72" cy="38" rx="5" ry="6" fill="#3a1114"/>
+        <circle cx="49.5" cy="36.5" r="1.6" fill="#fff" opacity=".85"/>
+        <circle cx="73.5" cy="36.5" r="1.6" fill="#fff" opacity=".85"/>
+        <ellipse cx="60" cy="52" rx="4" ry="2.6" fill="#3a1114"/>
+        <path d="M60 20.5 c1.7 -2.6 5.5 -1 5.5 1.7 0 2.3 -3.3 4.5 -5.5 5.8 -2.2 -1.3 -5.5 -3.5 -5.5 -5.8 0 -2.7 3.8 -4.3 5.5 -1.7 Z"
+              fill="#fff" opacity=".9"/>
+        <path d="M40 24 Q48 18 60 17" fill="none" stroke="#fff" stroke-width="2" opacity=".35"/>
+      </g>`;
+  }
+
+  /* ---------- 体（普段着の人間） ----------
+     o: {shirt, shirtD, print, sleeve, pants, pantsD, shorts, legs, shoes, shoesD,
+         pose: 'down'|'up'|'cheeks', overall} */
+  function body(o) {
+    const pose = o.pose || 'down';
+    const sleeve = o.sleeve || o.shirt;
+
+    /* 腕 */
+    let arms = '';
+    if (pose === 'up') {
+      arms = `
+        <g class="dz-arm-l"><path d="M44 70 L28 44 Q26 40 30 38 Q34 36 36 40 L50 66 Z"
+          fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/>
+          <circle cx="31" cy="41" r="5.5" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/>
+          <path d="M44 70 L38 60 L48 54 L52 64 Z" fill="${sleeve}" stroke="${o.shirtD}" stroke-width="2"/></g>
+        <g class="dz-arm-r"><path d="M76 70 L92 44 Q94 40 90 38 Q86 36 84 40 L70 66 Z"
+          fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/>
+          <circle cx="89" cy="41" r="5.5" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/>
+          <path d="M76 70 L82 60 L72 54 L68 64 Z" fill="${sleeve}" stroke="${o.shirtD}" stroke-width="2"/></g>`;
+    } else if (pose === 'cheeks') {
+      arms = `
+        <g class="dz-arm-l"><path d="M42 72 Q30 72 30 60 L32 50 Q33 46 37 47 Q40 48 39 52 L38 60 Q40 66 48 66 Z"
+          fill="${o.shirt}" stroke="${o.shirtD}" stroke-width="2"/>
+          <circle cx="36" cy="50" r="5.5" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/></g>
+        <g class="dz-arm-r"><path d="M78 72 Q90 72 90 60 L88 50 Q87 46 83 47 Q80 48 81 52 L82 60 Q80 66 72 66 Z"
+          fill="${o.shirt}" stroke="${o.shirtD}" stroke-width="2"/>
+          <circle cx="84" cy="50" r="5.5" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/></g>`;
+    } else {
+      arms = `
+        <g class="dz-arm-l">
+          <path d="M42 68 Q34 70 33 80 L32 96 Q32 101 36.5 101 Q41 101 41 96 L43 80 Z"
+            fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/>
+          <path d="M42 67 Q35 69 34 78 L45 80 L46 70 Z" fill="${sleeve}" stroke="${o.shirtD}" stroke-width="2"/>
         </g>
-      </g>`;
+        <g class="dz-arm-r">
+          <path d="M78 68 Q86 70 87 80 L88 96 Q88 101 83.5 101 Q79 101 79 96 L77 80 Z"
+            fill="${SKIN}" stroke="${SKIN_D}" stroke-width="2"/>
+          <path d="M78 67 Q85 69 86 78 L75 80 L74 70 Z" fill="${sleeve}" stroke="${o.shirtD}" stroke-width="2"/>
+        </g>`;
+    }
+
+    /* 脚：ズボン or 短パン＋生足 */
+    let legs;
+    if (o.shorts) {
+      legs = `
+        <path d="M46 100 L46 120 Q46 123 49.5 123 L56 123 L58 102 Z" fill="${o.pants}" stroke="${o.pantsD}" stroke-width="2"/>
+        <path d="M74 100 L74 120 Q74 123 70.5 123 L64 123 L62 102 Z" fill="${o.pants}" stroke="${o.pantsD}" stroke-width="2"/>
+        <rect x="48.5" y="121" width="7" height="16" rx="3.4" fill="${o.legs || SKIN}" stroke="${SKIN_D}" stroke-width="1.6"/>
+        <rect x="64.5" y="121" width="7" height="16" rx="3.4" fill="${o.legs || SKIN}" stroke="${SKIN_D}" stroke-width="1.6"/>`;
+    } else {
+      legs = `
+        <path d="M46 100 L46 134 Q46 137 49.5 137 L56 137 L58 102 Z" fill="${o.pants}" stroke="${o.pantsD}" stroke-width="2"/>
+        <path d="M74 100 L74 134 Q74 137 70.5 137 L64 137 L62 102 Z" fill="${o.pants}" stroke="${o.pantsD}" stroke-width="2"/>`;
+    }
+
+    const shoes = `
+      <path d="M45 137 Q44 143 49 143.5 L58 143.5 Q60 143.5 60 140.5 L59 137 Z" fill="${o.shoes}" stroke="${o.shoesD}" stroke-width="1.8"/>
+      <path d="M75 137 Q76 143 71 143.5 L62 143.5 Q60 143.5 60 140.5 L61 137 Z" fill="${o.shoes}" stroke="${o.shoesD}" stroke-width="1.8"/>`;
+
+    /* 胴（Tシャツ or つなぎ上半身） */
+    const torso = `
+      <rect x="53" y="54" width="14" height="12" fill="${SKIN}"/>
+      <path d="M44 66 Q60 62 76 66 L78 100 Q60 105 42 100 Z"
+            fill="${o.shirt}" stroke="${o.shirtD}" stroke-width="2.5"/>
+      ${o.print || ''}`;
+
+    return legs + shoes + arms + torso;
   }
 
-  /* 目のバリエーション */
-  function eyesSparkle() {
-    return `
-      <g class="dz-eyes">
-        <circle cx="46" cy="46" r="8" fill="#fff"/><circle cx="74" cy="46" r="8" fill="#fff"/>
-        <circle cx="47" cy="47" r="4.5" fill="#26221e"/><circle cx="73" cy="47" r="4.5" fill="#26221e"/>
-        <circle cx="48.6" cy="45" r="1.6" fill="#fff"/><circle cx="74.6" cy="45" r="1.6" fill="#fff"/>
-        <path d="M42 44 l1.2 -2.6 1.2 2.6 2.6 1.2 -2.6 1.2 -1.2 2.6 -1.2 -2.6 -2.6 -1.2 Z" fill="#fff" opacity=".9"/>
-      </g>`;
-  }
-  function eyesCalm(dark) {
-    return `
-      <g class="dz-eyes">
-        <circle cx="46" cy="47" r="7.5" fill="#fff"/><circle cx="74" cy="47" r="7.5" fill="#fff"/>
-        <circle cx="46" cy="48.5" r="4" fill="#26221e"/><circle cx="74" cy="48.5" r="4" fill="#26221e"/>
-        <path d="M38.5 43 A 8 8 0 0 1 53.5 43" fill="${dark}"/>
-        <path d="M66.5 43 A 8 8 0 0 1 81.5 43" fill="${dark}"/>
-        <line x1="39" y1="43.5" x2="53" y2="43.5" stroke="#26221e" stroke-width="2"/>
-        <line x1="67" y1="43.5" x2="81" y2="43.5" stroke="#26221e" stroke-width="2"/>
-      </g>`;
-  }
-  function eyesShout() {
-    return `
-      <g class="dz-eyes">
-        <path d="M39 46 A 7.5 7.5 0 0 1 53 44" fill="none" stroke="#26221e" stroke-width="3" stroke-linecap="round"/>
-        <path d="M67 44 A 7.5 7.5 0 0 1 81 46" fill="none" stroke="#26221e" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="40" cy="56" r="4" fill="#ff9d9d" opacity=".75"/>
-        <circle cx="80" cy="56" r="4" fill="#ff9d9d" opacity=".75"/>
-      </g>`;
-  }
-  function eyesSleepy() {
-    return `
-      <g class="dz-eyes">
-        <path d="M39 49 Q46 53 53 49" fill="none" stroke="#26221e" stroke-width="2.8" stroke-linecap="round"/>
-        <path d="M67 49 Q74 53 81 49" fill="none" stroke="#26221e" stroke-width="2.8" stroke-linecap="round"/>
-      </g>`;
-  }
-  function eyesHeart() {
-    return `
-      <g class="dz-eyes">
-        <circle cx="46" cy="46" r="8" fill="#fff"/><circle cx="74" cy="46" r="8" fill="#fff"/>
-        <circle cx="46" cy="47" r="4.6" fill="#26221e"/><circle cx="74" cy="47" r="4.6" fill="#26221e"/>
-        <path d="M46 44.2 c1 -1.6 3.4 -0.6 3.4 1 0 1.4 -2 2.8 -3.4 3.6 -1.4 -0.8 -3.4 -2.2 -3.4 -3.6 0 -1.6 2.4 -2.6 3.4 -1 Z" fill="#ff5f8f"/>
-        <path d="M74 44.2 c1 -1.6 3.4 -0.6 3.4 1 0 1.4 -2 2.8 -3.4 3.6 -1.4 -0.8 -3.4 -2.2 -3.4 -3.6 0 -1.6 2.4 -2.6 3.4 -1 Z" fill="#ff5f8f"/>
-      </g>`;
-  }
-
-  /* 口のバリエーション */
-  function mouthGrin(dark) {
-    return `
-      <path d="M46 64 Q60 76 74 64 Q68 72 60 72 Q52 72 46 64 Z" fill="#8f3b45"/>
-      <path d="M50 66 l3 4 3 -4 Z" fill="#fff"/><path d="M64 66 l3 4 3 -4 Z" fill="#fff"/>
-      <path d="M46 64 Q60 76 74 64" fill="none" stroke="${dark}" stroke-width="2"/>`;
-  }
-  function mouthFlat(dark) {
-    return `<path d="M52 67 Q60 70 68 67" fill="none" stroke="${dark}" stroke-width="2.6" stroke-linecap="round"/>`;
-  }
-  function mouthShout(dark) {
-    return `
-      <ellipse cx="60" cy="68" rx="11" ry="8.5" fill="#8f3b45" stroke="${dark}" stroke-width="2"/>
-      <ellipse cx="60" cy="72" rx="6" ry="3.4" fill="#e0567a"/>
-      <path d="M52 62.5 l3 3.6 3 -3.6 Z" fill="#fff"/><path d="M62 62.5 l3 3.6 3 -3.6 Z" fill="#fff"/>`;
-  }
-  function mouthSleep(dark) {
-    return `
-      <path d="M54 67 Q60 71 66 67" fill="none" stroke="${dark}" stroke-width="2.4" stroke-linecap="round"/>
-      <path class="dz-drool" d="M66 68 q3 4 1 8 q-1 2 -2.4 0.6 q-1 -3 1.4 -8.6" fill="#bfe6ff" opacity=".9"/>`;
+  /* Tシャツの縦書きネーム */
+  function shirtText(chars, color, x, y0, size) {
+    const s = size || 7.5;
+    return `<text x="${x}" y="${y0}" font-size="${s}" text-anchor="middle" fill="${color}"
+      font-family="sans-serif" font-weight="bold">` +
+      chars.split('').map((ch, i) => `<tspan x="${x}" dy="${i === 0 ? 0 : s + 0.8}">${ch}</tspan>`).join('') +
+      '</text>';
   }
 
   const ART = {
-    /* タケル憧れ：前向きなボーカル。赤ハチマキ＋白バンドタオル */
+    /* タケル憧れ：赤ティラノマスク＋白T（ピンクで「タケル憧れ」）＋黒短パン＋赤ソックス */
     takeru() {
-      const hachimaki = `
-        <g>
-          <path d="M28 36 Q60 26 92 36 L92 44 Q60 34 28 44 Z" fill="#e0453a" stroke="#a82c23" stroke-width="2"/>
-          <circle cx="60" cy="34" r="3.2" fill="#fff"/>
-          <path d="M90 38 q10 -2 12 6 q-6 0 -9 3 Z" fill="#e0453a" stroke="#a82c23" stroke-width="1.5"/>
-          <path d="M92 42 q8 4 6 12 q-5 -3 -8 -4 Z" fill="#e0453a" stroke="#a82c23" stroke-width="1.5"/>
-        </g>`;
-      const towel = `
-        <g>
-          <path d="M38 88 Q60 80 82 88 L82 97 Q60 89 38 97 Z" fill="#f7f4ec" stroke="#c9c2b2" stroke-width="2"/>
-          <path d="M42 89.5 L42 95.5 M50 87.5 L50 93.5 M70 87.5 L70 93.5 M78 89.5 L78 95.5"
-                stroke="#e0453a" stroke-width="2.4"/>
-          <rect x="72" y="93" width="9" height="14" rx="2" fill="#f7f4ec" stroke="#c9c2b2" stroke-width="2"/>
-          <path d="M73.5 104 l2 3 M77 104 l2 3" stroke="#e0453a" stroke-width="1.6"/>
-        </g>`;
-      const armR = `
-        <g class="dz-arm-r">
-          <path d="M86 102 Q100 96 100 84 Q100 78 94 80 Q88 90 82 100 Z"
-                fill="#58b368" stroke="#3a8a4d" stroke-width="2.5"/>
-          <circle cx="97" cy="81" r="6" fill="#58b368" stroke="#3a8a4d" stroke-width="2.5"/>
-        </g>`;
       return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
-        ${dinoBase({ skin: '#58b368', dark: '#3a8a4d', belly: '#dcf2c5',
-          eyes: eyesSparkle(), mouth: mouthGrin('#3a8a4d'),
-          extra: hachimaki, armR })}
-        ${towel}
+        <g class="dz-char">
+          ${body({
+            shirt: '#f7f4ec', shirtD: '#c9c2b2',
+            print: shirtText('タケル憧れ', '#f0799e', 60, 74, 6.6),
+            pants: '#3a3a40', pantsD: '#222226', shorts: true,
+            legs: SKIN,
+            shoes: '#2c2c30', shoesD: '#111114',
+          })}
+          <!-- 赤ソックス -->
+          <rect x="48" y="130" width="8" height="8" fill="#e0453a"/>
+          <rect x="64" y="130" width="8" height="8" fill="#e0453a"/>
+          <g class="dz-head">${trexMask('#d93a30', '#9c231c')}</g>
+        </g>
       </svg>`;
     },
 
-    /* ファンキー無糖：冷静なベース。丸メガネ＋無糖ブラック缶 */
+    /* ファンキー無糖：青ティラノマスク＋白T（無糖）＋青パンツ＋無糖ブラック缶 */
     funky() {
-      const glasses = `
-        <g fill="none" stroke="#3d3a34" stroke-width="2.6">
-          <circle cx="46" cy="47" r="10.5"/>
-          <circle cx="74" cy="47" r="10.5"/>
-          <path d="M56.5 47 Q60 44.5 63.5 47"/>
-          <path d="M35.5 45 L29 42 M84.5 45 L91 42"/>
-        </g>`;
       const can = `
         <g class="dz-can">
-          <rect x="93" y="105" width="12" height="17" rx="2.5" fill="#2b2b30" stroke="#111" stroke-width="1.6"/>
-          <rect x="93" y="109" width="12" height="6" fill="#f2f2f2"/>
-          <text x="99" y="114" font-size="4.6" text-anchor="middle" fill="#2b2b30"
+          <rect x="83" y="92" width="11" height="16" rx="2.5" fill="#2b2b30" stroke="#111" stroke-width="1.6"/>
+          <rect x="83" y="96" width="11" height="5.6" fill="#f2f2f2"/>
+          <text x="88.5" y="100.6" font-size="4.4" text-anchor="middle" fill="#2b2b30"
                 font-family="sans-serif" font-weight="bold">無糖</text>
-          <ellipse cx="99" cy="105" rx="6" ry="2" fill="#9aa0a8"/>
-        </g>`;
-      const armR = `
-        <g class="dz-arm-r">
-          <path d="M86 104 Q100 104 99 116 Q98 121 92 120 Q87 113 82 108 Z"
-                fill="#6f7fb8" stroke="#4c5a8e" stroke-width="2.5"/>
+          <ellipse cx="88.5" cy="92" rx="5.5" ry="1.8" fill="#9aa0a8"/>
         </g>`;
       return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
-        ${dinoBase({ skin: '#6f7fb8', dark: '#4c5a8e', belly: '#e2e6f5',
-          eyes: eyesCalm('#6f7fb8'), mouth: mouthFlat('#4c5a8e'),
-          extra: glasses, armR })}
-        ${can}
+        <g class="dz-char">
+          ${body({
+            shirt: '#f7f4ec', shirtD: '#c9c2b2',
+            print: `<text x="60" y="80" font-size="7" text-anchor="middle" fill="#3a5fa8"
+              font-family="sans-serif" font-weight="bold">無糖</text>`,
+            pants: '#4a7fd0', pantsD: '#2f5a96',
+            shoes: '#f2f2f2', shoesD: '#b9b9bd',
+          })}
+          <!-- リストバンド -->
+          <rect x="31.5" y="92" width="10" height="5" rx="2.5" fill="#2f5a96"/>
+          ${can}
+          <g class="dz-head">${trexMask('#2f6fd6', '#1c4a99')}</g>
+        </g>
       </svg>`;
     },
 
-    /* 大騒テラコ：応援団長のプテラ娘。大口＋メガホン＋トサカ */
+    /* 大騒テラコ：橙トリケラマスク＋オレンジのつなぎ＋両手を上げて大騒ぎ */
     terako() {
-      const crest = `
-        <g>
-          <path d="M74 26 Q94 10 102 20 Q96 30 82 34 Z" fill="#e8623a" stroke="#b34423" stroke-width="2"/>
-          <path d="M46 22 Q40 12 30 14 Q34 22 42 27 Z" fill="#e8623a" stroke="#b34423" stroke-width="2"/>
-          <circle cx="40" cy="30" r="4.5" fill="#ffd23f" stroke="#c99a13" stroke-width="1.5"/>
-        </g>`;
-      const sash = `
-        <g>
-          <path d="M40 92 L84 128 L76 134 L34 100 Z" fill="#e0453a" opacity=".92"/>
-          <text x="57" y="115" font-size="8.4" fill="#fff" font-family="sans-serif" font-weight="bold"
-                transform="rotate(38 57 115)">応援団長</text>
-        </g>`;
-      const megaphone = `
-        <g class="dz-mega">
-          <path d="M96 92 L112 84 L112 106 L96 98 Z" fill="#ffd23f" stroke="#c99a13" stroke-width="2"/>
-          <rect x="90" y="90.5" width="7" height="9" rx="2" fill="#e8623a" stroke="#b34423" stroke-width="1.6"/>
-          <path d="M114 88 l4 -3 M115 95 l5 0 M114 102 l4 3" stroke="#c99a13" stroke-width="2" stroke-linecap="round"/>
-        </g>`;
-      const armR = `
-        <g class="dz-arm-r">
-          <path d="M86 102 Q96 96 94 88 Q93 83 88 85 Q84 93 80 102 Z"
-                fill="#f2984a" stroke="#c96f24" stroke-width="2.5"/>
-        </g>`;
+      const nametag = `
+        <rect x="52" y="72" width="16" height="9" rx="2" fill="#fff" stroke="#c9c2b2" stroke-width="1.4"/>
+        <text x="60" y="78.6" font-size="5" text-anchor="middle" fill="#c96f24"
+              font-family="sans-serif" font-weight="bold">テラコ</text>`;
       return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
-        ${dinoBase({ skin: '#f2984a', dark: '#c96f24', belly: '#ffe3bd', spikes: false,
-          eyes: eyesShout(), mouth: mouthShout('#c96f24'),
-          extra: crest, armR })}
-        ${sash}
-        ${megaphone}
+        <g class="dz-char">
+          ${body({
+            shirt: '#ee6f1e', shirtD: '#bf4f0e',
+            print: nametag + `<path d="M52 66 L52 100 M68 66 L68 100" stroke="#bf4f0e" stroke-width="1.6" opacity=".5"/>`,
+            pants: '#ee6f1e', pantsD: '#bf4f0e',
+            shoes: '#e0453a', shoesD: '#9c231c',
+            pose: 'up',
+          })}
+          <g class="dz-head">${triceraMask('#f07a2e', '#b34e13')}</g>
+        </g>
       </svg>`;
     },
 
-    /* SHIBAKUZO：いつも眠いギター。ナイトキャップ＋よだれ＋zzz */
+    /* SHIBAKUZO：緑ティラノマスク＋白T（しばくぞ）＋マスタードパンツ＋サンダル＋zzz */
     shibakuzo(opt) {
-      const sleeping = opt && opt.sleeping;
-      const cap = `
-        <g>
-          <path d="M30 34 Q40 8 74 12 Q94 15 92 34 Q60 24 30 34 Z"
-                fill="#43466e" stroke="#2c2e4d" stroke-width="2"/>
-          <path d="M74 12 Q96 4 100 18 Q101 24 94 24 Q90 16 74 12 Z"
-                fill="#43466e" stroke="#2c2e4d" stroke-width="2"/>
-          <circle cx="100" cy="21" r="5" fill="#f7f4ec" stroke="#c9c2b2" stroke-width="1.6"/>
-          <path d="M34 32 Q60 22 90 31" stroke="#f7f4ec" stroke-width="3" fill="none"/>
-        </g>`;
+      const sleeping = !opt || opt.sleeping !== false;
       const zzz = `
         <g class="dz-zzz" font-family="sans-serif" font-weight="bold" fill="#8fb8e8">
-          <text x="96" y="40" font-size="13">z</text>
-          <text x="104" y="30" font-size="10">z</text>
-          <text x="110" y="22" font-size="7">z</text>
-        </g>`;
-      const guitar = `
-        <g transform="rotate(-18 30 118)">
-          <rect x="26" y="86" width="4.6" height="26" rx="2" fill="#8a5a2b"/>
-          <ellipse cx="28.5" cy="118" rx="11" ry="13" fill="#c98a3d" stroke="#8a5a2b" stroke-width="2"/>
-          <circle cx="28.5" cy="116" r="4" fill="#7a4a1e"/>
-          <rect x="24.5" y="84" width="8" height="5" rx="1.5" fill="#5c3a17"/>
+          <text x="92" y="26" font-size="13">z</text>
+          <text x="100" y="17" font-size="10">z</text>
+          <text x="107" y="10" font-size="7">z</text>
         </g>`;
       return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
-        ${guitar}
-        ${dinoBase({ skin: '#a99bc4', dark: '#7d6fa0', belly: '#e9e3f4', spikes: false,
-          eyes: eyesSleepy(), mouth: mouthSleep('#7d6fa0'),
-          extra: cap + (sleeping !== false ? zzz : '') })}
+        <g class="dz-char">
+          ${body({
+            shirt: '#f7f4ec', shirtD: '#c9c2b2',
+            print: shirtText('しばくぞ', '#3f9b45', 60, 75, 7.2),
+            pants: '#c8963e', pantsD: '#96692a',
+            shoes: '#8a5a2b', shoesD: '#5c3a17',
+          })}
+          <!-- サンダルの鼻緒 -->
+          <path d="M50 139 l4 3 M70 139 l-4 3" stroke="#5c3a17" stroke-width="1.6"/>
+          <g class="dz-head">
+            ${trexMask('#3f9b45', '#276b2c')}
+            <!-- 眠そうな半目まぶた -->
+            <path d="M40.5 24 A 5.5 5.5 0 0 1 51.5 24" fill="#3f9b45"/>
+            <path d="M68.5 24 A 5.5 5.5 0 0 1 79.5 24" fill="#3f9b45"/>
+            <line x1="41" y1="24.5" x2="51" y2="24.5" stroke="#26221e" stroke-width="1.8"/>
+            <line x1="69" y1="24.5" x2="79" y2="24.5" stroke="#26221e" stroke-width="1.8"/>
+            ${sleeping ? zzz : ''}
+          </g>
+        </g>
       </svg>`;
     },
 
-    /* DOKIDOKI：隠しキャラ。ピンク＋ハートのツノ＋ときめき */
+    /* DOKIDOKI：赤のつるっとマスク＋全身黒＋両手を頬に当てるドキドキポーズ */
     dokidoki() {
-      const heartHorn = `
-        <path d="M60 22 c3 -5 10.5 -2 10.5 3.4 0 4.6 -6.4 8.6 -10.5 11 -4.1 -2.4 -10.5 -6.4 -10.5 -11 0 -5.4 7.5 -8.4 10.5 -3.4 Z"
-              fill="#ff5f8f" stroke="#d13a6c" stroke-width="2"/>`;
       const sparkles = `
         <g fill="#ffd23f">
-          <path d="M24 34 l2 -4.5 2 4.5 4.5 2 -4.5 2 -2 4.5 -2 -4.5 -4.5 -2 Z"/>
-          <path d="M94 30 l1.6 -3.6 1.6 3.6 3.6 1.6 -3.6 1.6 -1.6 3.6 -1.6 -3.6 -3.6 -1.6 Z"/>
-          <circle cx="30" cy="70" r="2"/>
-          <circle cx="92" cy="66" r="2"/>
+          <path d="M22 30 l2 -4.5 2 4.5 4.5 2 -4.5 2 -2 4.5 -2 -4.5 -4.5 -2 Z"/>
+          <path d="M92 24 l1.6 -3.6 1.6 3.6 3.6 1.6 -3.6 1.6 -1.6 3.6 -1.6 -3.6 -3.6 -1.6 Z"/>
+          <circle cx="26" cy="66" r="2"/>
+          <circle cx="96" cy="60" r="2"/>
+        </g>
+        <g fill="#ff5f8f">
+          <path d="M18 48 c1.4 -2.2 4.6 -0.8 4.6 1.4 0 1.9 -2.8 3.8 -4.6 4.9 -1.8 -1.1 -4.6 -3 -4.6 -4.9 0 -2.2 3.2 -3.6 4.6 -1.4 Z"/>
+          <path d="M100 42 c1.2 -1.9 4 -0.7 4 1.2 0 1.6 -2.4 3.3 -4 4.2 -1.6 -0.9 -4 -2.6 -4 -4.2 0 -1.9 2.8 -3.1 4 -1.2 Z"/>
         </g>`;
       return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
-        ${dinoBase({ skin: '#ff86b0', dark: '#d15687', belly: '#ffe0ec', spikes: false,
-          eyes: eyesHeart(), mouth: mouthGrin('#d15687'),
-          extra: heartHorn + sparkles })}
+        <g class="dz-char">
+          ${body({
+            shirt: '#2b2b30', shirtD: '#141417',
+            print: `<path d="M60 80 c1.4 -2.2 4.6 -0.8 4.6 1.4 0 1.9 -2.8 3.8 -4.6 4.9 -1.8 -1.1 -4.6 -3 -4.6 -4.9 0 -2.2 3.2 -3.6 4.6 -1.4 Z" fill="#ff5f8f"/>`,
+            pants: '#2b2b30', pantsD: '#141417',
+            shoes: '#3a3a40', shoesD: '#1c1c20',
+            pose: 'cheeks',
+          })}
+          <g class="dz-head">${roundMask('#d5352f', '#951b16')}</g>
+          ${sparkles}
+        </g>
       </svg>`;
     },
 
-    /* チャーミー：最後までシルエットのみ。エレガントな影 */
+    /* チャーミー：最後までシルエットのみ。ローブ姿の誰か */
     charmy() {
       return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
         <g fill="#221a3d">
-          <path d="M60 132 Q30 132 30 104 Q30 84 44 76 Q38 66 42 48 Q45 30 60 26 Q66 24 70 28
-                   Q86 22 92 34 Q96 44 88 50 Q94 60 90 74 Q102 84 100 104 Q98 130 60 132 Z"/>
-          <path d="M70 24 Q76 10 90 12 Q86 22 78 26 Z"/>
-          <ellipse cx="46" cy="140" rx="10" ry="5"/>
-          <ellipse cx="76" cy="140" rx="10" ry="5"/>
+          <!-- とんがりマスクの影 -->
+          <path d="M42 44 Q40 18 60 14 Q74 12 84 22 Q94 30 88 42 Q86 52 74 54 L48 54 Q42 52 42 44 Z"/>
+          <!-- ローブ -->
+          <path d="M44 54 Q60 48 76 54 L86 130 Q88 140 78 140 L42 140 Q32 140 34 130 Z"/>
+          <path d="M40 66 Q28 76 30 92 L40 90 Z M80 66 Q92 76 90 92 L80 90 Z"/>
+          <ellipse cx="52" cy="143" rx="9" ry="4"/>
+          <ellipse cx="70" cy="143" rx="9" ry="4"/>
         </g>
         <g fill="#ffd23f" opacity=".9">
-          <path d="M96 24 l2 -4.5 2 4.5 4.5 2 -4.5 2 -2 4.5 -2 -4.5 -4.5 -2 Z"/>
-          <circle cx="26" cy="44" r="2"/>
-          <circle cx="102" cy="70" r="1.6"/>
+          <path d="M94 20 l2 -4.5 2 4.5 4.5 2 -4.5 2 -2 4.5 -2 -4.5 -4.5 -2 Z"/>
+          <circle cx="24" cy="40" r="2"/>
+          <circle cx="100" cy="66" r="1.6"/>
         </g>
       </svg>`;
     },
