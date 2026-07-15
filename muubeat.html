@@ -398,9 +398,15 @@ body{
    ===================================================== */
 const $ = s => document.querySelector(s);
 
+/* 埋め込み環境などでlocalStorageが使えなくても動くようにする */
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+};
+
 /* ---------------- オーディオ ---------------- */
 let actx = null, master = null;
-let muted = localStorage.getItem('muubeat.muted') === '1';
+let muted = store.get('muubeat.muted') === '1';
 
 function audio(){
   if(!actx){
@@ -643,11 +649,11 @@ function buildLastEncore(){
 const SONGS = [buildMoonlight(), buildBlackKey(), buildLastEncore()];
 
 /* ---------------- ハイスコア ---------------- */
-function loadScores(){ try{ return JSON.parse(localStorage.getItem('muubeat.scores') || '{}'); }catch(e){ return {}; } }
+function loadScores(){ try{ return JSON.parse(store.get('muubeat.scores') || '{}'); }catch(e){ return {}; } }
 function saveScore(id, rec){
   const s = loadScores();
   if(!s[id] || rec.score > s[id].score) s[id] = rec;
-  localStorage.setItem('muubeat.scores', JSON.stringify(s));
+  store.set('muubeat.scores', JSON.stringify(s));
 }
 
 /* ---------------- むうちゃん SVG ----------------
@@ -816,7 +822,7 @@ function refreshSoundBtn(){
 }
 $('#btn-sound').addEventListener('click', () => {
   muted = !muted;
-  localStorage.setItem('muubeat.muted', muted ? '1' : '0');
+  store.set('muubeat.muted', muted ? '1' : '0');
   if(master) master.gain.value = muted ? 0 : 1;
   refreshSoundBtn();
 });
