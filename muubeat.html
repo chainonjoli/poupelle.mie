@@ -265,8 +265,10 @@ body{
 #scr-chara{padding:calc(60px + env(safe-area-inset-top)) 22px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;text-align:center}
 #chara-spot{position:absolute;top:0;left:50%;transform:translateX(-50%);width:80%;height:50%;
   background:radial-gradient(50% 80% at 50% 0%,rgba(232,179,106,.16),transparent 70%);pointer-events:none}
-#chara-figure{width:min(62%,240px);margin:6px auto 0;cursor:pointer}
+#chara-figure{width:min(62%,240px);margin:6px auto 0;cursor:pointer;position:relative;
+  background:radial-gradient(52% 46% at 50% 58%,rgba(232,179,106,.14),transparent 72%)}
 #chara-figure svg{width:100%;height:auto}
+#chara-figure .chara-cat{position:absolute;right:-20%;bottom:2px;width:32%}
 #chara-tap-hint{font-size:10px;color:#77694f;letter-spacing:.2em;margin-top:6px}
 #chara-name{font-family:var(--serif);font-size:30px;letter-spacing:.2em;margin-top:10px;font-weight:normal}
 #chara-role{font-size:11px;letter-spacing:.5em;color:var(--gold);margin-top:2px}
@@ -379,11 +381,13 @@ body{
     <p id="chara-quote">「夜のステージが、いちばん落ち着くんだ。<br>きみのリズムで、続きを聴かせて」</p>
     <div id="chara-profile">
       <dl>
-        <dt>職業</dt><dd>ピアニスト。夜のライブハウスを中心に活動中。</dd>
-        <dt>見た目</dt><dd>明るい金髪に長めの前髪。黒いTシャツと黒いパンツがいつもの衣装。</dd>
-        <dt>性格</dt><dd>少しクールに見えるけれど、笑うとやわらかい。演奏が乗ってくると前のめりになる癖がある。</dd>
-        <dt>好きなもの</dt><dd>夜の散歩、ブラックコーヒー、本番前の静けさ。</dd>
-        <dt>特技</dt><dd>グランドピアノの即興演奏。観客のペンライトの揺れでテンポを合わせられる。</dd>
+        <dt>職業</dt><dd>ピアニスト。夜のライブハウスを中心に活動中。ピアノは5歳から。</dd>
+        <dt>誕生日</dt><dd>2月16日（A型）</dd>
+        <dt>出身地</dt><dd>三重県伊勢市</dd>
+        <dt>見た目</dt><dd>淡い明るめの金髪に、眉にかかる長めの前髪。「ROCK STAR」プリントの黒Tシャツと黒いパンツがいつもの衣装。</dd>
+        <dt>性格</dt><dd>真面目で優しくて、音楽にまっすぐ。ちょっとお茶目で、じつは照れ屋さん。演奏が乗ってくると前のめりになる癖がある。</dd>
+        <dt>好きなもの</dt><dd>ピアノ、音楽、猫、コーヒー。そしてファンのことが大好き！</dd>
+        <dt>座右の銘</dt><dd>「音楽は、心の声を形にするもの。」</dd>
       </dl>
     </div>
   </section>
@@ -659,35 +663,38 @@ function saveScore(id, rec){
 /* ---------------- むうちゃん SVG ----------------
    全画面共通のパーツ関数で顔・髪・服を統一する。 */
 const SKIN = '#f4dfc9', SKIN_SH = '#e3c3a3';
-const HAIR = '#e7c465', HAIR_SH = '#c9a04b', HAIR_HI = '#f7e4a4';
+/* クリーム色の淡い金髪（キャラクターシートのミニキャラ準拠） */
+const HAIR = '#f0e4bc', HAIR_SH = '#d8c48e', HAIR_HI = '#fcf6e2', BROW = '#b3945e';
 const SHIRT = '#191410';
 
 function facialParts(exp){
-  /* バスト絵の座標系（目の中心 y≈88、左目 x≈88 / 右目 x≈112） */
+  /* ミニキャラの顔（目の中心 y≈90、左目 x≈88 / 右目 x≈112）。大きな瞳＋小さな口 */
   const ink = '#3a2d20';
-  const browL = "<path d='M79,77 q9,-4 17,-1' stroke='" + HAIR_SH + "' stroke-width='2' fill='none' stroke-linecap='round'/>";
-  const browR = "<path d='M104,76 q9,-3 17,1' stroke='" + HAIR_SH + "' stroke-width='2' fill='none' stroke-linecap='round'/>";
-  const browFocusL = "<path d='M79,79 q9,-1 17,2' stroke='" + HAIR_SH + "' stroke-width='2.4' fill='none' stroke-linecap='round'/>";
-  const browFocusR = "<path d='M104,81 q9,-3 17,-2' stroke='" + HAIR_SH + "' stroke-width='2.4' fill='none' stroke-linecap='round'/>";
+  const browL = "<path d='M81,75 q8,-3 15,-1' stroke='" + BROW + "' stroke-width='2' fill='none' stroke-linecap='round'/>";
+  const browR = "<path d='M104,74 q8,-2 15,1' stroke='" + BROW + "' stroke-width='2' fill='none' stroke-linecap='round'/>";
+  const browFocusL = "<path d='M81,78 q8,-1 15,2' stroke='" + BROW + "' stroke-width='2.4' fill='none' stroke-linecap='round'/>";
+  const browFocusR = "<path d='M104,80 q8,-3 15,-2' stroke='" + BROW + "' stroke-width='2.4' fill='none' stroke-linecap='round'/>";
   const eyeOpen = (x) =>
-    "<path d='M" + (x-8) + ",87 q8,-6 16,-1' stroke='" + ink + "' stroke-width='2.6' fill='none' stroke-linecap='round'/>" +
-    "<circle cx='" + x + "' cy='89.5' r='3.1' fill='" + ink + "'/>";
+    "<ellipse cx='" + x + "' cy='92' rx='6' ry='7.4' fill='#2b2015'/>" +
+    "<ellipse cx='" + x + "' cy='94.5' rx='3.4' ry='3.6' fill='#7a5733'/>" +
+    "<circle cx='" + (x-2.2) + "' cy='88.8' r='2.3' fill='#fff' opacity='.95'/>" +
+    "<circle cx='" + (x+2.4) + "' cy='95.5' r='1' fill='#fff' opacity='.7'/>";
   const eyeHalf = (x) =>
-    "<path d='M" + (x-8) + ",87 q8,-4 16,0' stroke='" + ink + "' stroke-width='2.6' fill='none' stroke-linecap='round'/>" +
-    "<path d='M" + (x-6) + ",90 q6,2.5 12,0' stroke='" + ink + "' stroke-width='2' fill='none' stroke-linecap='round'/>";
+    "<ellipse cx='" + x + "' cy='93.5' rx='5.4' ry='5' fill='#2b2015'/>" +
+    "<circle cx='" + (x-1.8) + "' cy='91.5' r='1.7' fill='#fff' opacity='.9'/>" +
+    "<path d='M" + (x-7) + ",88 q7,-2 14,0' stroke='#2b2015' stroke-width='2.6' fill='none' stroke-linecap='round'/>";
   const eyeClosed = (x) =>
-    "<path d='M" + (x-8) + ",88 q8,4.5 16,0' stroke='" + ink + "' stroke-width='2.6' fill='none' stroke-linecap='round'/>";
+    "<path d='M" + (x-7) + ",90 q7,6 14,0' stroke='#2b2015' stroke-width='3' fill='none' stroke-linecap='round'/>";
   const eyeJoy = (x) =>
-    "<path d='M" + (x-8) + ",90 q8,-7 16,0' stroke='" + ink + "' stroke-width='2.8' fill='none' stroke-linecap='round'/>";
-  const mouthLine  = "<path d='M95,110 q5,1.5 10,0' stroke='#a5674f' stroke-width='2.2' fill='none' stroke-linecap='round'/>";
-  const mouthSoft  = "<path d='M94,109 q6,4 12,0' stroke='#a5674f' stroke-width='2.2' fill='none' stroke-linecap='round'/>";
-  const mouthSmile = "<path d='M92,108 q8,6 16,0' stroke='#a5674f' stroke-width='2.4' fill='none' stroke-linecap='round'/>";
-  const mouthOpen  = "<path d='M93,107 q7,9 14,0 q-7,3 -14,0 Z' fill='#8a4a3a'/>";
-  const blush = "<ellipse cx='79' cy='100' rx='5' ry='2.6' fill='#e8a98d' opacity='.4'/><ellipse cx='121' cy='100' rx='5' ry='2.6' fill='#e8a98d' opacity='.4'/>";
+    "<path d='M" + (x-7) + ",93 q7,-9.5 14,0' stroke='#2b2015' stroke-width='3.2' fill='none' stroke-linecap='round'/>";
+  const mouthLine  = "<path d='M96,109 q4,1.5 8,0' stroke='#a5674f' stroke-width='2' fill='none' stroke-linecap='round'/>";
+  const mouthSoft  = "<path d='M94,108 q6,4 12,0' stroke='#a5674f' stroke-width='2.2' fill='none' stroke-linecap='round'/>";
+  const mouthOpen  = "<path d='M91,104 q9,12 18,0 q-9,4.5 -18,0 Z' fill='#7c4437'/>";
+  const blush = "<ellipse cx='75' cy='103' rx='7' ry='3.6' fill='#f2a58a' opacity='.55'/><ellipse cx='125' cy='103' rx='7' ry='3.6' fill='#f2a58a' opacity='.55'/>";
   switch(exp){
     case 'smile':  return browL + browR + eyeOpen(88) + eyeOpen(112) + mouthSoft + blush;
     case 'focus':  return browFocusL + browFocusR + eyeHalf(88) + eyeHalf(112) + mouthLine;
-    case 'closed': return browL + browR + eyeClosed(88) + eyeClosed(112) + mouthSoft;
+    case 'closed': return browL + browR + eyeClosed(88) + eyeClosed(112) + mouthSoft + blush;
     case 'joy':    return browL + browR + eyeJoy(88) + eyeJoy(112) + mouthOpen + blush;
     case 'gentle': return browL + browR + eyeHalf(88) + eyeHalf(112) + mouthSoft + blush;
     case 'cheer':  return browL + browR + eyeOpen(88) + eyeJoy(112) + mouthOpen + blush;
@@ -696,43 +703,84 @@ function facialParts(exp){
 }
 
 function muuHead(){
-  /* 頭部（髪・顔ベース）。表情は {EXPR} を差し込む */
+  /* ミニキャラの頭部（髪・顔ベース）。表情は {EXPR} を差し込む。
+     イラスト準拠：もこもこと毛束の立つ大きなクリーム色の髪、顔は頭の下半分 */
   return "" +
-    /* 後ろ髪 */
-    "<path d='M64,90 C60,46 82,30 100,30 C120,30 140,46 136,90 C139,106 135,120 130,127 L70,127 C65,120 61,106 64,90 Z' fill='" + HAIR_SH + "'/>" +
-    /* 耳 */
-    "<ellipse cx='69' cy='92' rx='5' ry='7.5' fill='" + SKIN + "'/>" +
-    "<ellipse cx='131' cy='92' rx='5' ry='7.5' fill='" + SKIN + "'/>" +
-    /* 顔 */
-    "<path d='M69,86 C69,58 82,48 100,48 C118,48 131,58 131,86 C131,106 117,122 100,122 C83,122 69,106 69,86 Z' fill='" + SKIN + "'/>" +
-    "<path d='M84,118 q16,7 32,0 q-8,7 -16,7 q-8,0 -16,-7 Z' fill='" + SKIN_SH + "' opacity='.5'/>" +
+    /* 後ろ髪（影になるベース層） */
+    "<path d='M54,88 C50,32 78,14 100,14 C122,14 150,32 146,88 C148,100 142,108 135,107 L65,107 C58,108 52,100 54,88 Z' fill='" + HAIR_SH + "'/>" +
+    /* 顔（ほっぺの丸い輪郭） */
+    "<path d='M66,86 C66,56 80,44 100,44 C120,44 134,56 134,86 C134,110 119,128 100,128 C81,128 66,110 66,86 Z' fill='" + SKIN + "'/>" +
+    "<path d='M86,123 q14,6 28,0 q-7,6 -14,6 q-7,0 -14,-6 Z' fill='" + SKIN_SH + "' opacity='.4'/>" +
     "{EXPR}" +
-    /* 前髪：長めの前髪が右目側に流れる */
-    "<path d='M66,88 C62,44 82,28 100,28 C120,28 138,44 135,86 C130,72 126,64 121,57 C117,66 113,71 108,75 C101,66 95,59 92,53 C86,61 78,72 74,84 C71,78 68,82 66,88 Z' fill='" + HAIR + "'/>" +
-    "<path d='M121,57 C131,66 135,84 131,103 C126,95 120,84 117,70 Z' fill='" + HAIR + "'/>" +
-    "<path d='M74,84 C72,72 78,60 84,54 C80,64 77,74 76,84 Z' fill='" + HAIR_HI + "' opacity='.55'/>" +
-    "<path d='M92,40 C98,37 106,37 112,40' stroke='" + HAIR_HI + "' stroke-width='2.4' fill='none' stroke-linecap='round' opacity='.8'/>";
+    /* 髪本体：なめらかな丸いシルエット、前髪はギザギザで目の上まで */
+    "<path d='M57,94 C50,42 72,16 100,16 C128,16 150,42 143,94 C140,86 137,80 132,74 L125,90 L119,64 L111,86 L103,58 L95,84 L87,62 L80,88 L73,68 Q66,78 63,90 Q60,94 57,94 Z' fill='" + HAIR + "'/>" +
+    /* ところどころツンとはねた小さな毛先 */
+    "<path d='M55,66 L47,60 L56,56 Z' fill='" + HAIR + "'/>" +
+    "<path d='M69,26 L64,17 L76,21 Z' fill='" + HAIR + "'/>" +
+    "<path d='M110,17 L116,9 L120,19 Z' fill='" + HAIR + "'/>" +
+    "<path d='M137,40 L145,35 L142,46 Z' fill='" + HAIR + "'/>" +
+    /* はねた毛（アホ毛・おくれ毛） */
+    "<path d='M46,70 Q39,64 42,55' stroke='" + HAIR_SH + "' stroke-width='1.8' fill='none' stroke-linecap='round' opacity='.85'/>" +
+    "<path d='M146,42 Q153,38 153,29' stroke='" + HAIR_SH + "' stroke-width='1.8' fill='none' stroke-linecap='round' opacity='.85'/>" +
+    "<path d='M96,10 Q100,4 108,5' stroke='" + HAIR_SH + "' stroke-width='1.8' fill='none' stroke-linecap='round' opacity='.85'/>" +
+    /* ハイライト（毛束の流れ） */
+    "<path d='M74,34 C80,26 90,21 100,21' stroke='" + HAIR_HI + "' stroke-width='3' fill='none' stroke-linecap='round' opacity='.9'/>" +
+    "<path d='M110,24 C118,27 126,33 130,41' stroke='" + HAIR_HI + "' stroke-width='2.4' fill='none' stroke-linecap='round' opacity='.7'/>" +
+    "<path d='M60,58 C62,48 67,40 74,34' stroke='" + HAIR_HI + "' stroke-width='2' fill='none' stroke-linecap='round' opacity='.55'/>" +
+    "<path d='M88,30 Q96,26 104,28' stroke='" + HAIR_SH + "' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='.5'/>";
 }
 
-function muuBust(exp, opt){
+function muuChibi(exp, opt){
+  /* 全身ミニキャラ（2頭身）。頭：体 ≒ 1:1、頭の幅は体の約2倍。
+     opt.hands で両手を上げて喜ぶポーズ（頭が大きいので手は頭の前に描く） */
   opt = opt || {};
-  const hands = opt.hands ?
-    "<g class='muu-hand h1'><ellipse cx='72' cy='176' rx='9' ry='12' fill='" + SKIN + "' transform='rotate(-14 72 176)'/></g>" +
-    "<g class='muu-hand h2'><ellipse cx='128' cy='176' rx='9' ry='12' fill='" + SKIN + "' transform='rotate(14 128 176)'/></g>" : '';
-  return "<svg viewBox='0 0 200 208' xmlns='http://www.w3.org/2000/svg'>" +
+  const armsDown =
+    "<path d='M74,154 C64,158 60,168 61,180 L70,182 C70,172 73,163 80,157 Z' fill='" + SHIRT + "'/>" +
+    "<circle cx='65' cy='186' r='5.5' fill='" + SKIN + "'/>" +
+    "<path d='M126,154 C136,158 140,168 139,180 L130,182 C130,172 127,163 120,157 Z' fill='" + SHIRT + "'/>" +
+    "<circle cx='135' cy='186' r='5.5' fill='" + SKIN + "'/>";
+  const armsUp =
+    "<g class='muu-hand h1'>" +
+      "<path d='M78,156 C68,152 60,144 56,133 L65,128 C68,138 73,146 82,151 Z' fill='" + SHIRT + "'/>" +
+      "<circle cx='59' cy='125' r='6.5' fill='" + SKIN + "'/>" +
+    "</g>" +
+    "<g class='muu-hand h2'>" +
+      "<path d='M122,156 C132,152 140,144 144,133 L135,128 C132,138 127,146 118,151 Z' fill='" + SHIRT + "'/>" +
+      "<circle cx='141' cy='125' r='6.5' fill='" + SKIN + "'/>" +
+    "</g>";
+  return "<svg viewBox='0 0 200 240' xmlns='http://www.w3.org/2000/svg'>" +
     "<g class='muu-body'>" +
-      /* 首 */
-      "<path d='M92,114 h16 v20 h-16 z' fill='" + SKIN + "'/>" +
-      "<path d='M92,116 q8,7 16,0 v8 h-16 z' fill='" + SKIN_SH + "'/>" +
-      /* 黒Tシャツ（細身） */
-      "<path d='M46,208 C46,160 70,138 100,138 C130,138 154,160 154,208 Z' fill='" + SHIRT + "'/>" +
-      "<path d='M87,139 q13,11 26,0' stroke='#2e261c' stroke-width='2' fill='none'/>" +
-      "<path d='M60,208 C60,176 66,160 74,152' stroke='#241d15' stroke-width='2' fill='none' opacity='.7'/>" +
-      "<path d='M140,208 C140,176 134,160 126,152' stroke='#241d15' stroke-width='2' fill='none' opacity='.7'/>" +
-      hands +
-      "<g class='muu-head'>" + muuHead().replace('{EXPR}', facialParts(exp)) + "</g>" +
+      /* 脚（黒パンツ）＋くつ：短くてちょこんと */
+      "<rect x='82' y='192' width='13' height='31' rx='6' fill='#14100e'/>" +
+      "<rect x='105' y='192' width='13' height='31' rx='6' fill='#14100e'/>" +
+      "<ellipse cx='88' cy='226' rx='9' ry='4' fill='#0a0908'/>" +
+      "<ellipse cx='112' cy='226' rx='9' ry='4' fill='#0a0908'/>" +
+      /* 黒Tシャツ（頭よりずっと細い、ちいさな体） */
+      "<path d='M70,198 C68,158 80,144 100,144 C120,144 132,158 130,198 Z' fill='" + SHIRT + "'/>" +
+      /* いつもの「ROCK STAR」プリントT */
+      "<text x='100' y='172' text-anchor='middle' font-family='Georgia,serif' font-size='9.5' letter-spacing='1.2' fill='#5d5642' opacity='.95'>ROCK</text>" +
+      "<text x='100' y='184' text-anchor='middle' font-family='Georgia,serif' font-size='9.5' letter-spacing='1.2' fill='#5d5642' opacity='.95'>STAR</text>" +
+      (opt.hands ? '' : armsDown) +
+      /* 大きな頭（1.35倍に拡大して体にちょこんと乗せる） */
+      "<g transform='translate(100,90) scale(1.35) translate(-100,-85)'>" +
+        "<g class='muu-head'>" + muuHead().replace('{EXPR}', facialParts(exp)) + "</g>" +
+      "</g>" +
+      (opt.hands ? armsUp : '') +
     "</g>" +
   "</svg>";
+}
+
+/* 相棒の黒猫（ちょこんと座ってライブを聴いている） */
+function blackCat(){
+  return "<g>" +
+    "<path d='M27,32 C36,29 37,19 31,15' stroke='#12100d' stroke-width='4' fill='none' stroke-linecap='round'/>" +
+    "<ellipse cx='16' cy='28' rx='13' ry='11' fill='#12100d'/>" +
+    "<path d='M9,8 L7,-2 L15,4 Z' fill='#12100d'/>" +
+    "<path d='M23,8 L25,-2 L17,4 Z' fill='#12100d'/>" +
+    "<circle cx='16' cy='12' r='9.5' fill='#12100d'/>" +
+    "<ellipse cx='12.5' cy='12' rx='1.5' ry='2.2' fill='#c9a86a'/>" +
+    "<ellipse cx='19.5' cy='12' rx='1.5' ry='2.2' fill='#c9a86a'/>" +
+  "</g>";
 }
 
 /* ステージ上のむうちゃん＋グランドピアノ（横からの構図・鍵盤は左） */
@@ -770,31 +818,33 @@ function muuPianoScene(exp){
       "<path d='M204,160 l6,0 0,30 12,0 0,8 -22,0 0,-8 4,0 Z' fill='#0d0b09'/>" +
       "<rect x='196' y='196' width='30' height='5' rx='2' fill='#8a744c'/>" +
     "</g>" +
+    /* ピアノの下で聴いている黒猫 */
+    "<g transform='translate(272,180) scale(0.9)'>" + blackCat() + "</g>" +
     /* イス */
     "<rect x='30' y='166' width='58' height='9' rx='3' fill='#171310'/>" +
     "<rect x='36' y='175' width='6' height='38' fill='#171310'/>" +
     "<rect x='76' y='175' width='6' height='38' fill='#171310'/>" +
-    /* むうちゃん（前傾姿勢で演奏） */
+    /* むうちゃん（ミニキャラが前傾姿勢で演奏） */
     "<g class='muu-body'>" +
-      /* 脚（黒パンツ） */
-      "<path d='M58,168 C70,168 84,172 92,182 L98,206 L88,208 L80,188 C72,182 62,180 56,180 Z' fill='#14100e'/>" +
-      "<path d='M86,206 l14,-2 3,6 -16,3 Z' fill='#241d15'/>" +
-      /* 胴体（前傾）。背中側にうっすら暖色のリムライト */
-      "<path d='M46,172 C44,140 58,116 78,108 L94,116 C84,134 76,152 74,172 Z' fill='" + SHIRT + "'/>" +
-      "<path d='M47,168 C46,140 59,118 77,110' stroke='#8a744c' stroke-width='1.6' fill='none' opacity='.6'/>" +
-      /* 奥の腕 */
+      /* 脚（ちいさな黒パンツの脚がベンチからちょこん） */
+      "<path d='M58,170 C68,172 76,178 80,186 L82,202 L74,204 L70,190 C64,184 58,180 54,178 Z' fill='#14100e'/>" +
+      "<path d='M72,200 l12,-2 2,6 -14,2 Z' fill='#241d15'/>" +
+      /* 胴体（小さめ・前傾）。背中側にうっすら暖色のリムライト */
+      "<path d='M52,172 C50,148 60,130 74,124 L90,132 C80,146 72,158 70,172 Z' fill='" + SHIRT + "'/>" +
+      "<path d='M53,168 C52,148 62,132 74,126' stroke='#8a744c' stroke-width='1.6' fill='none' opacity='.6'/>" +
+      /* 奥の腕（短くてちいさい） */
       "<g class='muu-arm a2'>" +
-        "<path d='M84,116 C98,116 108,118 118,121 L117,127 C106,125 96,124 84,126 Z' fill='#221b13'/>" +
-        "<ellipse cx='120' cy='124' rx='6' ry='4.5' fill='" + SKIN_SH + "'/>" +
+        "<path d='M82,124 C94,124 104,120 116,121 L115,127 C104,126 94,127 84,130 Z' fill='#221b13'/>" +
+        "<ellipse cx='118' cy='124' rx='5.5' ry='4.5' fill='" + SKIN_SH + "'/>" +
       "</g>" +
       /* 手前の腕 */
       "<g class='muu-arm'>" +
-        "<path d='M74,120 C90,122 102,124 132,126 L131,133 C102,132 88,130 72,128 Z' fill='" + SHIRT + "'/>" +
-        "<ellipse cx='134' cy='128' rx='6.5' ry='5' fill='" + SKIN + "'/>" +
+        "<path d='M72,130 C88,131 102,128 122,126 L122,133 C102,134 88,136 72,138 Z' fill='" + SHIRT + "'/>" +
+        "<ellipse cx='124' cy='129' rx='6' ry='4.8' fill='" + SKIN + "'/>" +
       "</g>" +
-      /* 頭（バスト絵と同じ頭部を縮小・前傾）。CSSアニメ用の.muu-headは
+      /* 大きな頭（全画面共通の頭部を前傾で配置）。CSSアニメ用の.muu-headは
          transform-originの干渉を避けるため配置用グループの内側に置く */
-      "<g transform='translate(88,100) rotate(10) scale(0.42) translate(-100,-88)'>" +
+      "<g transform='translate(82,102) rotate(8) scale(0.58) translate(-100,-84)'>" +
         "<g class='muu-head'>" + muuHead().replace('{EXPR}', small) + "</g>" +
       "</g>" +
     "</g>" +
@@ -1283,7 +1333,7 @@ function showResult(){
   const rm = RANK_MUU[rank];
   const muuEl = $('#result-muu');
   muuEl.className = rm.cls;
-  muuEl.innerHTML = muuBust(rm.exp, {hands:rm.hands});
+  muuEl.innerHTML = muuChibi(rm.exp, {hands:rm.hands});
   $('#result-bubble').textContent = rm.bubble;
   show('result');
   if(fc) confettiBurst();
@@ -1298,7 +1348,8 @@ $('#btn-to-select').addEventListener('click', () => { renderSelect(); show('sele
 const CHARA_EXPRS = ['cool','smile','gentle','closed','joy'];
 let charaExpr = 0;
 function renderChara(){
-  $('#chara-figure').innerHTML = muuBust(CHARA_EXPRS[charaExpr]);
+  $('#chara-figure').innerHTML = muuChibi(CHARA_EXPRS[charaExpr]) +
+    "<svg class='chara-cat' viewBox='-4 -6 44 48' xmlns='http://www.w3.org/2000/svg'>" + blackCat() + "</svg>";
 }
 $('#chara-figure').addEventListener('click', () => {
   charaExpr = (charaExpr + 1) % CHARA_EXPRS.length;
