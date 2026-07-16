@@ -664,11 +664,13 @@ function saveScore(id, rec){
    全画面共通のスプライト関数で顔・髪・服を統一する。
    粗いグリッドに図形を落とし、行ごとにラン圧縮したrectで描く。 */
 const PAL = {
-  h:'#f0e4bc', H:'#fcf6e2', d:'#d8c48e',           /* 髪：本体/ハイライト/影 */
+  h:'#d9cf9f', H:'#f2edd2', d:'#b7ab77',           /* 髪：くすんだカーキベージュ */
   s:'#f6e3cd', S:'#e3c3a3',                        /* 肌 */
   e:'#2b2015', w:'#ffffff', b:'#f2a58a',           /* 目・ハイライト・ほっぺ */
   m:'#a5674f', M:'#7c4437',                        /* 口 */
-  k:'#1d1712', K:'#0d0a08', p:'#171310',           /* 服・ピアノ・パンツ */
+  c:'#4a4438', C:'#312d25',                        /* Tシャツ・ショートパンツ */
+  r:'#a8433e',                                     /* 赤い靴下 */
+  k:'#1d1712', K:'#0d0a08', p:'#171310',           /* ピアノ・ベンチ */
   o:'#6b6353', g:'#c9a86a', i:'#efe6d2',           /* プリント・金・鍵盤 */
   x:'#3a2f24'                                      /* 暗所で見える輪郭 */
 };
@@ -746,7 +748,7 @@ function drawHead(g, cx, top, exp){
       R(g, cx-4, ey, 2, 2, 'e'); P(g, cx-4, ey, 'w');
       P(g, cx+2, ey+1, 'e'); P(g, cx+3, ey, 'e'); P(g, cx+4, ey, 'e'); P(g, cx+5, ey+1, 'e');
       mouthOpen(); blush(); break;
-    default: eyesOpen(); mouthLine(); /* cool */
+    default: eyesOpen(); mouthLine(); blush(); /* cool（スタンプ準拠で常にほっぺ） */
   }
 }
 
@@ -756,23 +758,26 @@ function muuChibi(exp, opt){
   const W = 28, H = 34, cx = 13, top = 3;
   const body = newGrid(W, H), head = newGrid(W, H);
   drawHead(head, cx, top, exp);
-  /* 黒Tシャツ（ROCK STARプリントのドット表現） */
-  R(body, 8, 21, 12, 8, 'k');
+  /* チャコールのTシャツ（白い Rock STAR プリント） */
+  R(body, 8, 21, 12, 8, 'c');
   body[21][8] = null; body[21][19] = null;
-  R(body, 11, 23, 6, 1, 'o'); R(body, 12, 25, 4, 1, 'o');
-  /* 黒パンツ＋くつ */
-  R(body, 10, 29, 3, 4, 'p'); R(body, 15, 29, 3, 4, 'p');
+  R(body, 8, 28, 12, 1, 'C');
+  R(body, 11, 23, 6, 1, 'i'); R(body, 12, 25, 4, 1, 'i');
+  /* 黒のショートパンツ＋素足＋赤い靴下＋くつ */
+  R(body, 9, 29, 4, 2, 'C'); R(body, 15, 29, 4, 2, 'C');
+  R(body, 10, 31, 2, 1, 's'); R(body, 16, 31, 2, 1, 's');
+  R(body, 10, 32, 2, 1, 'r'); R(body, 16, 32, 2, 1, 'r');
   R(body, 9, 33, 4, 1, 'K'); R(body, 15, 33, 4, 1, 'K');
   let hands = '';
   if(opt.hands){
     const h1 = newGrid(W, H), h2 = newGrid(W, H);
-    for(let i = 0; i < 4; i++){ R(h1, 7 - i, 20 - i, 2, 1, 'k'); R(h2, 19 + i, 20 - i, 2, 1, 'k'); }
-    P(h1, 3, 16, 'k'); P(h2, 24, 16, 'k');
+    for(let i = 0; i < 4; i++){ R(h1, 7 - i, 20 - i, 2, 1, 'c'); R(h2, 19 + i, 20 - i, 2, 1, 'c'); }
+    P(h1, 3, 16, 'c'); P(h2, 24, 16, 'c');
     R(h1, 2, 14, 2, 2, 's'); R(h2, 24, 14, 2, 2, 's');
     hands = "<g class='muu-hand h1'>" + gridRects(h1) + "</g><g class='muu-hand h2'>" + gridRects(h2) + "</g>";
   }else{
-    R(body, 6, 22, 2, 4, 'k'); R(body, 20, 22, 2, 4, 'k');
-    R(body, 6, 26, 2, 3, 'k'); R(body, 20, 26, 2, 3, 'k');
+    R(body, 6, 22, 2, 4, 'c'); R(body, 20, 22, 2, 4, 'c');
+    R(body, 6, 26, 2, 3, 'c'); R(body, 20, 26, 2, 3, 'c');
     R(body, 6, 29, 2, 2, 's'); R(body, 20, 29, 2, 2, 's');
   }
   return "<svg viewBox='0 0 " + W + " " + H + "' shape-rendering='crispEdges' xmlns='http://www.w3.org/2000/svg'>" +
@@ -831,11 +836,12 @@ function muuPianoScene(exp){
   P(cat, 47, 30, 'g'); P(cat, 50, 30, 'g');
   R(cat, 45, 32, 8, 3, 'K');
   P(cat, 53, 31, 'K'); P(cat, 54, 30, 'K'); P(cat, 54, 29, 'K');
-  /* むうちゃん（小さな体で前傾して演奏） */
-  for(let j = 0; j < 7; j++) R(body, 6 + Math.round((6 - j) * 0.5), 20 + j, 6, 1, 'k');
-  R(body, 9, 26, 4, 2, 'p'); R(body, 12, 28, 2, 6, 'p'); R(body, 12, 34, 4, 2, 'K');
-  R(armB, 13, 21, 4, 1, 'k'); R(armB, 17, 21, 2, 1, 'S');
-  R(armF, 12, 22, 5, 1, 'k'); R(armF, 17, 22, 2, 1, 's');
+  /* むうちゃん（小さな体で前傾して演奏）：チャコールT＋短パン＋赤ソックス */
+  for(let j = 0; j < 7; j++) R(body, 6 + Math.round((6 - j) * 0.5), 20 + j, 6, 1, 'c');
+  R(body, 9, 26, 4, 2, 'C');
+  R(body, 12, 28, 2, 4, 's'); R(body, 12, 32, 2, 2, 'r'); R(body, 12, 34, 4, 2, 'K');
+  R(armB, 13, 21, 4, 1, 'C'); R(armB, 17, 21, 2, 1, 'S');
+  R(armF, 12, 22, 5, 1, 'c'); R(armF, 17, 22, 2, 1, 's');
   drawHead(head, 10, 2, exp);
   return "<svg viewBox='0 0 " + W + " " + H + "' shape-rendering='crispEdges' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMax meet'>" +
     "<rect x='2' y='36' width='64' height='1.4' fill='#000' opacity='.4'/>" +
