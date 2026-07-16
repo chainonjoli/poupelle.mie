@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Muu RHYTHM — むぅちゃんと奏でる夜</title>
+<meta name="description" content="ピアニスト・むぅちゃんと一緒に最高のライブを完成させる16bit風リズムゲーム『Muu RHYTHM』。">
+<meta name="theme-color" content="#0b0908">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎹</text></svg>">
+<style>
+:root{
+  --black:#0b0908;
+  --ink:#141008;
+  --ivory:#f2ead8;
+  --ivory-dim:#c9c0ad;
+  --gold:#c9a86a;
+  --gold-dim:#8a744c;
+  --warm:#e8b36a;
+  --wood1:#2a1c10;
+  --wood2:#20140a;
+  --serif:'Georgia','Times New Roman','Hiragino Mincho ProN','Yu Mincho','YuMincho',serif;
+  --sans:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--black);
+  color:var(--ivory);
+  font-family:var(--sans);
+  overflow:hidden;
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+}
+#app{
+  position:relative;
+  margin:0 auto;
+  max-width:520px;
+  height:100dvh;
+  height:100vh;
+  overflow:hidden;
+  background:
+    radial-gradient(120% 70% at 50% -10%, #241a10 0%, rgba(20,14,8,0) 55%),
+    radial-gradient(140% 100% at 50% 115%, #171009 0%, rgba(11,9,8,0) 60%),
+    var(--black);
+  box-shadow:0 0 80px rgba(0,0,0,.9);
+}
+body.bg-moon #app{
+  background:
+    radial-gradient(120% 70% at 50% -10%, #1a1c24 0%, rgba(14,16,20,0) 55%),
+    radial-gradient(140% 100% at 50% 115%, #10121a 0%, rgba(11,9,8,0) 60%),
+    #0a0b10;
+}
+body.bg-sunset #app{
+  background:
+    radial-gradient(120% 70% at 50% -10%, #33200e 0%, rgba(30,16,8,0) 55%),
+    radial-gradient(140% 100% at 50% 115%, #201008 0%, rgba(11,9,8,0) 60%),
+    #120a06;
+}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* ---------- 共通UI（黒×アイボリー×金＋木目とガラス） ---------- */
+.btn{
+  font-family:var(--serif);
+  letter-spacing:.18em;
+  color:var(--ivory);
+  background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(201,168,106,.05) 40%,rgba(0,0,0,.15));
+  border:1px solid rgba(201,168,106,.55);
+  border-radius:999px;
+  padding:14px 42px;
+  font-size:17px;
+  cursor:pointer;
+  transition:transform .12s ease, background .2s;
+}
+.btn:active{transform:scale(.96);background:rgba(201,168,106,.22)}
+.btn.small{padding:10px 24px;font-size:14px}
+.btn.gold{background:linear-gradient(180deg,#e9d3a0,#d9b878 30%,#a5824a);color:#191204;border-color:#e8cf96;font-weight:bold}
+#btn-sound{
+  position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:60;
+  width:42px;height:42px;border-radius:50%;
+  border:1px solid rgba(201,168,106,.45);
+  background:rgba(11,9,8,.6);color:var(--gold);
+  font-size:17px;cursor:pointer;backdrop-filter:blur(3px);
+}
+#btn-sound.off{color:#5c5344;border-color:rgba(120,105,80,.4)}
+.back-link{
+  position:absolute;top:calc(14px + env(safe-area-inset-top));left:14px;z-index:55;
+  color:var(--ivory-dim);font-size:13px;letter-spacing:.1em;
+  background:none;border:none;cursor:pointer;padding:8px;
+  font-family:var(--sans);
+}
+.hairline{width:64px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto}
+.wood{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%),
+    repeating-linear-gradient(90deg,var(--wood1) 0 7px,var(--wood2) 7px 13px,#261809 13px 21px);
+  border-bottom:1px solid rgba(201,168,106,.35);
+}
+.glass{
+  background:linear-gradient(168deg,rgba(255,255,255,.08),rgba(255,255,255,.015) 32%,rgba(20,14,8,.6) 60%,rgba(10,8,6,.7));
+  border:1px solid rgba(201,168,106,.35);
+  backdrop-filter:blur(2px);
+}
+
+/* ---------- タイトル ---------- */
+#scr-title{justify-content:flex-end;align-items:center;text-align:center}
+#title-stage{position:absolute;inset:0;overflow:hidden}
+#title-stage .spotcone{position:absolute;top:-12%;left:50%;width:110%;height:85%;transform:translateX(-50%);
+  background:radial-gradient(55% 90% at 50% 0%,rgba(232,179,106,.18),rgba(232,179,106,.05) 45%,transparent 70%);
+  filter:blur(2px)}
+body.light-silver #title-stage .spotcone{background:radial-gradient(55% 90% at 50% 0%,rgba(220,224,232,.15),transparent 70%)}
+#title-piano{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(94%,470px)}
+#title-piano svg{width:100%;height:auto;display:block}
+#title-box{position:relative;z-index:5;padding-bottom:calc(36px + env(safe-area-inset-bottom));width:100%}
+.title-eyebrow{font-size:11px;letter-spacing:.5em;color:var(--gold-dim);text-transform:uppercase}
+#title-logo{
+  font-family:var(--serif);font-size:clamp(40px,12vw,60px);letter-spacing:.1em;
+  color:var(--ivory);text-shadow:0 0 26px rgba(232,179,106,.35);
+  margin:6px 0 2px;font-weight:normal;
+}
+#title-logo b{color:var(--gold);font-weight:normal}
+#title-sub{font-family:var(--serif);font-size:14px;letter-spacing:.3em;color:var(--ivory-dim)}
+#title-box .btn{margin-top:24px}
+.title-note{margin-top:13px;font-size:11px;color:#77694f;letter-spacing:.12em}
+.title-collection-link{margin-top:10px;background:none;border:none;color:var(--gold-dim);font-size:12px;letter-spacing:.2em;cursor:pointer;text-decoration:underline;text-underline-offset:4px;font-family:var(--sans)}
+
+/* ---------- 曲選択 ---------- */
+#scr-select{padding:calc(64px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom))}
+.screen-head{text-align:center;margin-bottom:16px}
+.screen-head h2{font-family:var(--serif);font-size:24px;letter-spacing:.3em;font-weight:normal}
+.screen-head p{font-size:11px;letter-spacing:.4em;color:var(--gold-dim);margin-top:4px}
+#song-list{display:flex;flex-direction:column;gap:12px;overflow-y:auto;padding-bottom:10px}
+.song-card{
+  border-radius:14px;padding:14px 16px 12px;
+  display:grid;grid-template-columns:50px 1fr;gap:13px;align-items:center;
+}
+.song-card.locked{opacity:.55;filter:saturate(.5)}
+.song-play{
+  width:50px;height:50px;border-radius:50%;
+  border:1px solid rgba(201,168,106,.6);background:rgba(201,168,106,.08);
+  color:var(--gold);font-size:17px;cursor:pointer;
+}
+.song-play.playing{background:var(--gold);color:#1a1206}
+.song-info h3{font-family:var(--serif);font-size:20px;letter-spacing:.08em;font-weight:normal}
+.song-info .song-desc{font-size:12px;color:var(--ivory-dim);margin-top:3px;line-height:1.5}
+.song-meta{display:flex;align-items:center;gap:10px;margin-top:7px;flex-wrap:wrap}
+.diff{font-size:10px;letter-spacing:.2em;padding:3px 10px;border-radius:999px;border:1px solid}
+.diff.d0{color:#a8b58c;border-color:#6f7a5c}
+.diff.d1{color:#c8c19a;border-color:#8a8460}
+.diff.d2{color:var(--gold);border-color:var(--gold-dim)}
+.diff.d3{color:#d8a97a;border-color:#9a6a44}
+.diff.d4{color:#d4907f;border-color:#8a5044}
+.hiscore{font-size:11px;color:var(--gold-dim);letter-spacing:.08em}
+.hiscore b{color:var(--gold);font-family:var(--serif);letter-spacing:.05em}
+.song-start{grid-column:1 / -1;margin-top:2px;width:100%;border-radius:10px;
+  font-family:var(--serif);letter-spacing:.24em;font-size:14px;padding:12px;
+  background:rgba(201,168,106,.1);border:1px solid rgba(201,168,106,.4);color:var(--ivory);cursor:pointer}
+.song-start:active{background:rgba(201,168,106,.25)}
+.song-lock{grid-column:1 / -1;font-size:11px;color:#8a7a5c;letter-spacing:.1em;text-align:center;padding:8px;
+  border:1px dashed rgba(138,116,76,.4);border-radius:10px}
+
+/* ---------- ゲーム ---------- */
+#scr-game{background:#080606}
+#game-top{
+  position:relative;z-index:20;
+  display:flex;align-items:center;gap:10px;
+  padding:calc(8px + env(safe-area-inset-top)) 12px 6px;
+}
+#btn-quit{background:none;border:1px solid rgba(242,234,216,.2);color:var(--ivory-dim);
+  width:30px;height:30px;border-radius:50%;font-size:13px;cursor:pointer;flex:none}
+#game-songname{font-family:var(--serif);font-size:12px;letter-spacing:.12em;color:var(--ivory-dim);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+#score-box{text-align:right;flex:none;margin-right:44px}
+#score{font-family:var(--serif);font-size:20px;color:var(--ivory);letter-spacing:.04em;line-height:1}
+#score-label{font-size:9px;letter-spacing:.3em;color:var(--gold-dim)}
+#bars{position:relative;z-index:20;margin:2px 12px 0;display:flex;flex-direction:column;gap:3px}
+#prog-wrap{height:3px;background:rgba(242,234,216,.12);border-radius:2px}
+#prog{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-dim),var(--warm));border-radius:2px;transition:width .2s linear}
+#gauge-wrap{height:6px;background:rgba(242,234,216,.08);border-radius:3px;border:1px solid rgba(201,168,106,.25);position:relative;overflow:hidden}
+#gauge{height:100%;width:0%;background:linear-gradient(90deg,#8a744c,#e8cf96);transition:width .3s}
+#gauge.full{animation:gaugeshine 1.4s ease-in-out infinite}
+@keyframes gaugeshine{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+#gauge-label{position:absolute;right:4px;top:-1px;font-size:7px;letter-spacing:.3em;color:rgba(20,14,8,.8)}
+
+#stage{position:relative;height:30%;flex:none;overflow:hidden}
+#stage .spot{position:absolute;top:-8%;width:60%;height:110%;
+  background:radial-gradient(50% 85% at 50% 0%,rgba(232,179,106,.24),rgba(232,179,106,.06) 50%,transparent 75%);
+  opacity:.3;transition:opacity 1.2s;filter:blur(1px)}
+#stage .spot.s1{left:20%}
+#stage .spot.s2{left:-14%;background:radial-gradient(50% 85% at 50% 0%,rgba(216,150,90,.2),transparent 70%)}
+#stage .spot.s3{right:-14%;background:radial-gradient(50% 85% at 50% 0%,rgba(240,205,140,.2),transparent 70%)}
+body.light-silver #stage .spot{background:radial-gradient(50% 85% at 50% 0%,rgba(222,226,234,.2),transparent 72%)}
+#stage[data-tier="1"] .spot{opacity:.55}
+#stage[data-tier="2"] .spot{opacity:.7}
+#stage[data-tier="3"] .spot{opacity:.88}
+#stage[data-tier="4"] .spot{opacity:1;filter:blur(0) brightness(1.25)}
+#stage-glow{position:absolute;inset:0;background:radial-gradient(60% 55% at 50% 62%,rgba(232,179,106,.16),transparent 70%);
+  opacity:.3;transition:opacity 1.2s}
+#stage[data-tier="2"] #stage-glow{opacity:.55}
+#stage[data-tier="3"] #stage-glow{opacity:.75}
+#stage[data-tier="4"] #stage-glow{opacity:1}
+/* 100コンボ：ステージ演出（ゆっくり回る光のビーム） */
+#beams{position:absolute;inset:-20%;opacity:0;transition:opacity 1.5s;pointer-events:none;
+  background:
+    conic-gradient(from 20deg at 50% 30%, transparent 0 40deg, rgba(232,179,106,.10) 46deg 52deg, transparent 58deg 140deg, rgba(240,205,140,.08) 146deg 152deg, transparent 158deg 360deg);
+  animation:beamspin 14s linear infinite}
+#stage[data-tier="4"] #beams{opacity:1}
+@keyframes beamspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+#stage-muu{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);width:min(80%,350px);
+  --amp:1.1deg;--spd:3s}
+#stage-muu svg{width:100%;height:auto;display:block}
+#stage-muu .reflection{position:absolute;top:99%;left:0;width:100%;transform:scaleY(-1);opacity:.13;
+  -webkit-mask-image:linear-gradient(0deg,transparent 45%,#000);mask-image:linear-gradient(0deg,transparent 45%,#000);pointer-events:none}
+#stage-muu .muu-body{transform-box:fill-box;transform-origin:50% 100%;animation:sway var(--spd) ease-in-out infinite}
+#stage-muu .muu-head{transform-box:fill-box;transform-origin:50% 92%;animation:hairsway 4.2s ease-in-out infinite}
+#stage-muu.tilt .muu-head{animation:tilt .75s ease}
+#stage-muu .muu-arm{transform-box:fill-box;transform-origin:15% 15%;animation:playhand .3s ease-in-out infinite alternate}
+#stage-muu .muu-arm.a2{animation-delay:.15s}
+#stage-muu.pose-bow .muu-arm{animation:none}
+@keyframes sway{0%,100%{transform:rotate(calc(var(--amp) * -1))}50%{transform:rotate(var(--amp))}}
+@keyframes hairsway{0%,100%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg)}}
+@keyframes tilt{0%{transform:rotate(0)}35%{transform:rotate(7deg)}75%{transform:rotate(7deg)}100%{transform:rotate(0)}}
+@keyframes playhand{from{transform:translateY(0)}to{transform:translateY(0.9px)}}
+/* 30コンボ：観客のシルエット */
+#crowd{position:absolute;left:0;right:0;bottom:10px;height:20px;z-index:5;opacity:0;transition:opacity 1s}
+#stage[data-tier="2"] #crowd,#stage[data-tier="3"] #crowd,#stage[data-tier="4"] #crowd{opacity:1}
+.head-sil{position:absolute;bottom:0;width:14px;height:14px;border-radius:50% 50% 40% 40%;
+  background:#060504;box-shadow:0 -1px 0 rgba(201,168,106,.14) inset}
+#stage.ovation .head-sil{animation:ova .5s ease-in-out infinite alternate}
+@keyframes ova{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+#audience{position:absolute;left:0;right:0;bottom:0;height:34px;z-index:6;
+  background:linear-gradient(180deg,transparent,#050403 70%)}
+.pen{position:absolute;bottom:2px;width:3px;border-radius:2px;opacity:.08;
+  transform-origin:bottom center;animation:pensway var(--pd) ease-in-out infinite alternate;
+  transition:opacity .8s}
+.pen i{position:absolute;top:-2px;left:-2px;width:7px;height:7px;border-radius:50%;opacity:0;transition:opacity .8s}
+.pen.on{opacity:.95}
+.pen.on i{opacity:.9}
+@keyframes pensway{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+#stage.burst .pen.on{animation-duration:.7s}
+
+#combo-wrap{position:relative;z-index:25;height:0;text-align:center}
+#combo{
+  position:absolute;left:50%;top:-6px;transform:translateX(-50%);
+  font-family:var(--serif);color:var(--ivory);text-shadow:0 0 18px rgba(232,179,106,.5);
+  opacity:0;pointer-events:none;white-space:nowrap;
+}
+#combo.show{opacity:1}
+#combo b{font-size:38px;font-weight:normal;letter-spacing:.04em;display:inline-block}
+#combo span{font-size:10px;letter-spacing:.4em;color:var(--gold);display:block;margin-top:-4px}
+#combo.pop b{animation:pop .18s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
+#lane-wrap{position:relative;flex:1;z-index:10}
+#lanes{position:absolute;inset:0;width:100%;height:100%;display:block}
+#judge-pop{
+  position:absolute;left:0;right:0;top:58%;text-align:center;pointer-events:none;
+  font-family:var(--serif);font-size:26px;letter-spacing:.3em;opacity:0;
+}
+#judge-pop.show{animation:judgepop .5s ease forwards}
+@keyframes judgepop{0%{opacity:0;transform:translateY(8px) scale(.9)}25%{opacity:1;transform:translateY(0) scale(1.06)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:translateY(-6px)}}
+#judge-pop.j-perfect{color:#f0d9a0;text-shadow:0 0 16px rgba(240,217,160,.8)}
+#judge-pop.j-great{color:var(--ivory);text-shadow:0 0 12px rgba(242,234,216,.5)}
+#judge-pop.j-good{color:#b9a988}
+#judge-pop.j-miss{color:#6d6a75;letter-spacing:.2em}
+#countdown{
+  position:absolute;inset:0;z-index:40;display:none;
+  align-items:center;justify-content:center;flex-direction:column;
+  background:rgba(8,6,6,.35);
+}
+#countdown.show{display:flex}
+#cd-num{font-family:var(--serif);font-size:96px;color:var(--gold);text-shadow:0 0 40px rgba(232,179,106,.6)}
+#cd-hint{font-size:11px;color:var(--ivory-dim);letter-spacing:.2em;margin-top:10px}
+/* ライブ終了・アンコールの幕間 */
+.interlude{
+  position:absolute;inset:0;z-index:45;display:none;
+  align-items:center;justify-content:center;flex-direction:column;text-align:center;
+  background:rgba(6,5,4,.55);
+}
+.interlude.show{display:flex;animation:fadein .8s ease}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.interlude h3{font-family:var(--serif);font-size:34px;letter-spacing:.3em;color:var(--gold);
+  text-shadow:0 0 30px rgba(232,179,106,.6);font-weight:normal}
+.interlude p{font-size:12px;letter-spacing:.3em;color:var(--ivory-dim);margin-top:10px}
+
+/* ---------- リザルト ---------- */
+#scr-result{padding:calc(54px + env(safe-area-inset-top)) 20px calc(18px + env(safe-area-inset-bottom));overflow-y:auto}
+#result-inner{max-width:400px;margin:0 auto;width:100%;text-align:center;display:flex;flex-direction:column;min-height:100%}
+#result-song{font-family:var(--serif);font-size:14px;letter-spacing:.2em;color:var(--ivory-dim)}
+#result-rank-row{display:flex;align-items:center;justify-content:center;gap:22px;margin:8px 0 2px}
+#result-rank{font-family:var(--serif);font-size:88px;line-height:1;color:var(--gold);
+  text-shadow:0 0 34px rgba(232,179,106,.5)}
+#result-muu{width:112px;flex:none}
+#result-muu svg{width:100%;height:auto}
+#result-muu.rank-s .muu-hand{animation:clap .4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+#result-muu.rank-s .muu-hand.h2{animation-delay:.2s}
+#result-muu.rank-b .muu-head{animation:nod 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 92%}
+@keyframes clap{from{transform:translateX(-0.6px) rotate(-5deg)}to{transform:translateX(0.6px) rotate(5deg)}}
+@keyframes nod{0%,100%{transform:rotate(0)}45%{transform:rotate(4deg)}}
+#result-bubble{font-size:12px;color:var(--warm);letter-spacing:.1em;min-height:18px;margin-top:2px}
+.result-badges{display:flex;gap:14px;justify-content:center;margin-top:4px;min-height:18px}
+.result-badges span{display:none;font-family:var(--serif);letter-spacing:.3em;font-size:12px}
+#fc-badge{color:#f0d9a0;text-shadow:0 0 18px rgba(240,217,160,.9)}
+#encore-badge{color:#d8b4d8;text-shadow:0 0 14px rgba(216,180,216,.6)}
+.result-badges span.show{display:inline;animation:fcshine 1.8s ease-in-out infinite}
+@keyframes fcshine{0%,100%{opacity:.75}50%{opacity:1}}
+#result-score{font-family:var(--serif);font-size:40px;letter-spacing:.05em;margin-top:6px}
+#result-title-badge{
+  display:inline-block;margin:12px auto 0;padding:8px 26px;border-radius:999px;
+  border:1px solid rgba(201,168,106,.55);color:var(--gold);font-size:13px;letter-spacing:.24em;
+  background:rgba(201,168,106,.07);font-family:var(--serif);
+}
+#result-title-badge small{display:block;font-size:9px;letter-spacing:.4em;color:var(--gold-dim);font-family:var(--sans)}
+#result-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:16px;
+  border:1px solid rgba(201,168,106,.25);border-radius:12px;overflow:hidden;
+  background:rgba(201,168,106,.25);
+}
+#result-stats div{background:#120e09;padding:11px 4px}
+#result-stats dt{font-size:9px;letter-spacing:.24em;color:var(--gold-dim)}
+#result-stats dd{font-family:var(--serif);font-size:18px;margin-top:4px}
+#result-unlocks{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.unlock-toast{font-size:12px;letter-spacing:.15em;color:#e8cf96;border:1px solid rgba(232,207,150,.4);
+  border-radius:999px;padding:7px 14px;background:rgba(232,207,150,.06)}
+#result-btns{display:flex;gap:12px;justify-content:center;margin-top:auto;padding-top:20px}
+
+/* ---------- コレクション ---------- */
+#scr-collection{padding:calc(60px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));overflow-y:auto}
+#col-stats{display:flex;justify-content:center;gap:22px;margin-bottom:14px;font-size:11px;color:var(--ivory-dim);letter-spacing:.1em}
+#col-stats b{color:var(--gold);font-family:var(--serif);font-size:16px;display:block;text-align:center}
+.col-section{margin-bottom:18px}
+.col-section h3{font-family:var(--serif);font-size:14px;letter-spacing:.3em;color:var(--gold);
+  border-bottom:1px solid rgba(201,168,106,.3);padding-bottom:6px;margin-bottom:10px;font-weight:normal}
+.col-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.col-item{
+  border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;
+  border:1px solid rgba(201,168,106,.3);
+  background:linear-gradient(168deg,rgba(255,255,255,.05),rgba(20,14,8,.6));
+  transition:transform .1s;
+}
+.col-item:active{transform:scale(.96)}
+.col-item .col-name{font-size:11px;letter-spacing:.06em;line-height:1.4}
+.col-item .col-state{font-size:9px;letter-spacing:.2em;margin-top:5px;color:var(--gold-dim)}
+.col-item.equipped{border-color:#e8cf96;background:rgba(232,207,150,.1)}
+.col-item.equipped .col-state{color:#e8cf96}
+.col-item.locked{opacity:.45;cursor:default}
+.col-item .col-hint{font-size:9px;color:#8a7a5c;margin-top:4px;line-height:1.4}
+.col-swatch{width:22px;height:22px;border-radius:50%;margin:0 auto 6px;border:1px solid rgba(242,234,216,.25)}
+.col-icon{width:34px;height:34px;margin:0 auto 4px}
+.col-icon svg{width:100%;height:100%}
+.title-chip{display:inline-block;margin:3px;padding:6px 14px;border-radius:999px;font-size:11px;letter-spacing:.15em;
+  border:1px solid rgba(201,168,106,.45);color:var(--gold);font-family:var(--serif)}
+.title-chip.off{opacity:.4;border-style:dashed;color:#8a7a5c}
+
+#fx{position:fixed;inset:0;z-index:80;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <button id="btn-sound" aria-label="サウンド切替">♪</button>
+  <canvas id="fx"></canvas>
+
+  <!-- ============ タイトル ============ -->
+  <section class="screen active" id="scr-title">
+    <div id="title-stage">
+      <div class="spotcone"></div>
+      <div id="title-piano"></div>
+    </div>
+    <div id="title-box">
+      <p class="title-eyebrow">Make the Best Live Together</p>
+      <h1 id="title-logo">Muu <b>RHYTHM</b></h1>
+      <p id="title-sub">— むぅちゃんと奏でる夜 —</p>
+      <div class="hairline"></div>
+      <button class="btn" id="btn-start">S T A R T</button>
+      <p class="title-note">♪ 音を出してお楽しみください</p>
+      <button class="title-collection-link" id="btn-to-collection">コレクション</button>
+    </div>
+  </section>
+
+  <!-- ============ 曲選択 ============ -->
+  <section class="screen" id="scr-select">
+    <button class="back-link" data-nav="title">← タイトル</button>
+    <div class="screen-head">
+      <h2>今夜のライブ</h2>
+      <p>SONG SELECT</p>
+    </div>
+    <div id="song-list"></div>
+  </section>
+
+  <!-- ============ ゲーム ============ -->
+  <section class="screen" id="scr-game">
+    <div id="game-top" class="wood">
+      <button id="btn-quit" aria-label="やめる">✕</button>
+      <span id="game-songname"></span>
+      <div id="score-box">
+        <div id="score">0</div>
+        <div id="score-label">SCORE</div>
+      </div>
+    </div>
+    <div id="bars">
+      <div id="prog-wrap"><div id="prog"></div></div>
+      <div id="gauge-wrap"><div id="gauge"></div><span id="gauge-label">LIVE</span></div>
+    </div>
+    <div id="stage" data-tier="0">
+      <div id="beams"></div>
+      <div id="stage-glow"></div>
+      <div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div>
+      <div id="stage-muu"></div>
+      <div id="crowd"></div>
+      <div id="audience"></div>
+    </div>
+    <div id="combo-wrap"><div id="combo"><b>0</b><span>COMBO</span></div></div>
+    <div id="lane-wrap">
+      <canvas id="lanes"></canvas>
+      <div id="judge-pop"></div>
+    </div>
+    <div id="countdown"><div id="cd-num">3</div><div id="cd-hint">スマホはタップ ／ PCは D・F・J・K</div></div>
+    <div class="interlude" id="live-complete"><h3>LIVE COMPLETE</h3><p>今夜も、いい音だった</p></div>
+    <div class="interlude" id="encore-call"><h3>ENCORE !</h3><p>鳴りやまない拍手に応えて…</p></div>
+  </section>
+
+  <!-- ============ リザルト ============ -->
+  <section class="screen" id="scr-result">
+    <div id="result-inner">
+      <p id="result-song">Prelude</p>
+      <div id="result-rank-row">
+        <div id="result-rank">S</div>
+        <div id="result-muu"></div>
+      </div>
+      <p id="result-bubble"></p>
+      <div class="result-badges">
+        <span id="fc-badge">— FULL COMBO —</span>
+        <span id="encore-badge">✦ ENCORE ✦</span>
+      </div>
+      <div id="result-score">0</div>
+      <div id="result-title-badge"><small>称号</small><span id="result-title">はじめての共演</span></div>
+      <dl id="result-stats">
+        <div><dt>MAX COMBO</dt><dd id="st-combo">0</dd></div>
+        <div><dt>PERFECT率</dt><dd id="st-prate">0%</dd></div>
+        <div><dt>PERFECT</dt><dd id="st-perfect">0</dd></div>
+        <div><dt>GREAT</dt><dd id="st-great">0</dd></div>
+        <div><dt>GOOD</dt><dd id="st-good">0</dd></div>
+        <div><dt>MISS</dt><dd id="st-miss">0</dd></div>
+      </dl>
+      <div id="result-unlocks"></div>
+      <div id="result-btns">
+        <button class="btn small gold" id="btn-retry">もう一度</button>
+        <button class="btn small" id="btn-to-select">曲選択へ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ コレクション ============ -->
+  <section class="screen" id="scr-collection">
+    <button class="back-link" data-nav="title">← タイトル</button>
+    <div class="screen-head">
+      <h2>コレクション</h2>
+      <p>COLLECTION</p>
+    </div>
+    <div id="col-stats"></div>
+    <div id="col-body"></div>
+  </section>
+</div>
+
+<script>
+'use strict';
+/* =====================================================
+   Muu RHYTHM — むぅちゃんと奏でる夜
+   「むぅちゃんと一緒に最高のライブを完成させる」体験のプロトタイプ。
+   楽曲はすべて Web Audio 合成のオリジナル曲。
+   BGM（伴奏イベント）・譜面（ノーツ）・効果音は分離構造。
+   ===================================================== */
+const $ = s => document.querySelector(s);
+
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+};
+
+/* ---------------- オーディオ ---------------- */
+let actx = null, master = null;
+let muted = store.get('muurhythm.muted') === '1';
+
+function audio(){
+  if(!actx){
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = actx.createDynamicsCompressor();
+    comp.threshold.value = -18; comp.ratio.value = 6;
+    comp.connect(actx.destination);
+    master = actx.createGain();
+    master.gain.value = muted ? 0 : 1;
+    master.connect(comp);
+  }
+  if(actx.state === 'suspended') actx.resume();
+  return actx;
+}
+
+/* 簡易ピアノ音源（3倍音の加算合成＋減衰エンベロープ） */
+function piano(midi, when, dur = 1.4, vel = 0.4){
+  if(!actx) return;
+  const f = 440 * Math.pow(2, (midi - 69) / 12);
+  const t0 = Math.max(when, actx.currentTime);
+  const g = actx.createGain();
+  const lp = actx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = Math.min(f * 7, 8500); lp.Q.value = 0.3;
+  g.connect(lp); lp.connect(master);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(Math.max(vel, 0.001), t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0005, t0 + dur);
+  [[1, .85, 'triangle'], [2, .3, 'sine'], [3, .1, 'sine']].forEach(([mul, amp, type]) => {
+    const o = actx.createOscillator();
+    o.type = type; o.frequency.value = f * mul;
+    const og = actx.createGain(); og.gain.value = amp;
+    o.connect(og); og.connect(g);
+    o.start(t0); o.stop(t0 + dur + 0.1);
+  });
+}
+
+/* 効果音：拍手（ノイズ合成） */
+function applauseSE(dur = 2.4){
+  if(!actx) return;
+  const t0 = actx.currentTime;
+  const buf = actx.createBuffer(1, Math.floor(actx.sampleRate * dur), actx.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let i = 0; i < d.length; i++){
+    const t = i / actx.sampleRate;
+    const swell = Math.min(1, t * 4) * Math.min(1, (dur - t) * 1.2);
+    d[i] = (Math.random() * 2 - 1) * swell * (0.55 + 0.45 * Math.sin(t * 37 + Math.sin(t * 13) * 3));
+  }
+  const src = actx.createBufferSource(); src.buffer = buf;
+  const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1900; bp.Q.value = 0.5;
+  const g = actx.createGain(); g.gain.value = 0.35;
+  src.connect(bp); bp.connect(g); g.connect(master);
+  src.start(t0);
+}
+
+/* 先読み型スケジューラ（BGM・試聴用） */
+const sched = { events: null, idx: 0, start: 0, timer: null };
+function startSchedule(events, startTime){
+  stopSchedule();
+  sched.events = events; sched.idx = 0; sched.start = startTime;
+  sched.timer = setInterval(tickSchedule, 30);
+  tickSchedule();
+}
+function tickSchedule(){
+  if(!sched.events) return;
+  const ahead = actx.currentTime + 0.18;
+  while(sched.idx < sched.events.length && sched.start + sched.events[sched.idx].t <= ahead){
+    const e = sched.events[sched.idx++];
+    piano(e.m, sched.start + e.t, e.d || 1.2, e.v || 0.3);
+  }
+  if(sched.idx >= sched.events.length) stopSchedule();
+}
+function stopSchedule(){
+  if(sched.timer) clearInterval(sched.timer);
+  sched.timer = null; sched.events = null;
+}
+
+/* ---------------- むぅちゃん ドット絵 ----------------
+   全画面共通のスプライト関数。粗いグリッドに図形を落とし、
+   行ごとにラン圧縮したrectで描く16bit風スタイル。 */
+const PAL_DEFAULT = {
+  h:'#d9cf9f', H:'#f2edd2', d:'#b7ab77',           /* 髪：くすんだカーキベージュ */
+  s:'#f6e3cd', S:'#e3c3a3',                        /* 肌 */
+  e:'#2b2015', w:'#ffffff', b:'#f2a58a',           /* 目・ハイライト・ほっぺ */
+  m:'#a5674f', M:'#7c4437',                        /* 口 */
+  c:'#4a4438', C:'#312d25',                        /* Tシャツ・ショートパンツ */
+  T:'#efe6d2',                                     /* Tシャツのプリント */
+  r:'#a8433e',                                     /* 赤い靴下 */
+  k:'#1d1712', K:'#0d0a08', p:'#171310',           /* ピアノ・ベンチ */
+  o:'#6b6353', g:'#c9a86a', i:'#efe6d2',           /* 汎用・金・鍵盤 */
+  x:'#3a2f24'                                      /* 暗所で見える輪郭 */
+};
+let PAL = Object.assign({}, PAL_DEFAULT);
+function newGrid(w, h){ return Array.from({length:h}, () => Array(w).fill(null)); }
+function P(g, x, y, c){
+  x = Math.round(x); y = Math.round(y);
+  if(y >= 0 && y < g.length && x >= 0 && x < g[0].length) g[y][x] = c;
+}
+function R(g, x, y, w, h, c){ for(let j = 0; j < h; j++) for(let i = 0; i < w; i++) P(g, x + i, y + j, c); }
+function D(g, cx, cy, r, c){
+  const r2 = r * r + r * 0.45;
+  for(let y = Math.floor(cy - r); y <= cy + r; y++)
+    for(let x = Math.floor(cx - r); x <= cx + r; x++){
+      const dx = x - cx, dy = y - cy;
+      if(dx * dx + dy * dy <= r2) P(g, x, y, c);
+    }
+}
+function gridRects(g){
+  let out = '';
+  for(let y = 0; y < g.length; y++){
+    for(let x = 0; x < g[0].length;){
+      const c = g[y][x];
+      if(!c){ x++; continue; }
+      let x2 = x;
+      while(x2 + 1 < g[0].length && g[y][x2 + 1] === c) x2++;
+      out += "<rect x='" + x + "' y='" + y + "' width='" + (x2 - x + 1) + "' height='1' fill='" + PAL[c] + "'/>";
+      x = x2 + 1;
+    }
+  }
+  return out;
+}
+
+/* 頭部スプライト：もこもこの金髪＋大きな瞳。表情差分もドットで打つ */
+function drawHead(g, cx, top, exp){
+  D(g, cx + 0.3, top + 9.4, 9.4, 'd');
+  D(g, cx - 0.3, top + 8.6, 9.0, 'h');
+  D(g, cx, top + 12, 6.3, 's');
+  R(g, cx - 2, top + 18, 4, 1, 'S');
+  R(g, cx - 8, top + 12, 1, 4, 'h'); R(g, cx + 8, top + 12, 1, 4, 'h');
+  P(g, cx - 9, top + 13, 'd'); P(g, cx + 9, top + 13, 'd');
+  const dep = [2,1,3,1,2,3,1,2,1,3,2,1,2];
+  for(let i = 0; i < 13; i++){
+    const x = cx - 6 + i;
+    for(let y = top + 6; y <= top + 7 + dep[i]; y++) P(g, x, y, 'h');
+  }
+  P(g, cx - 10, top + 5, 'h'); P(g, cx - 11, top + 4, 'h');
+  P(g, cx + 10, top + 4, 'h'); P(g, cx + 11, top + 3, 'h');
+  P(g, cx + 1, top - 1, 'd'); P(g, cx + 2, top - 2, 'd');
+  R(g, cx - 5, top + 2, 4, 1, 'H'); R(g, cx - 2, top + 1, 3, 1, 'H'); P(g, cx - 6, top + 3, 'H');
+  const ey = top + 11, my = top + 16;
+  const eyesOpen = () => { R(g, cx-4, ey, 2, 2, 'e'); P(g, cx-4, ey, 'w'); R(g, cx+3, ey, 2, 2, 'e'); P(g, cx+3, ey, 'w'); };
+  const eyesHalf = () => { R(g, cx-4, ey+1, 2, 1, 'e'); R(g, cx+3, ey+1, 2, 1, 'e'); };
+  const eyesClosed = () => { R(g, cx-5, ey+1, 3, 1, 'e'); R(g, cx+3, ey+1, 3, 1, 'e'); };
+  const eyesJoy = () => {
+    P(g, cx-5, ey+1, 'e'); P(g, cx-4, ey, 'e'); P(g, cx-3, ey, 'e'); P(g, cx-2, ey+1, 'e');
+    P(g, cx+2, ey+1, 'e'); P(g, cx+3, ey, 'e'); P(g, cx+4, ey, 'e'); P(g, cx+5, ey+1, 'e');
+  };
+  const mouthLine = () => R(g, cx-1, my, 2, 1, 'm');
+  const mouthSoft = () => { P(g, cx-2, my-1, 'm'); R(g, cx-1, my, 2, 1, 'm'); P(g, cx+1, my-1, 'm'); };
+  const mouthOpen = () => R(g, cx-2, my-1, 4, 2, 'M');
+  const blush = (big) => {
+    R(g, cx-6, my-2, 2, 1, 'b'); R(g, cx+5, my-2, 2, 1, 'b');
+    if(big){ R(g, cx-6, my-1, 2, 1, 'b'); R(g, cx+5, my-1, 2, 1, 'b'); }
+  };
+  switch(exp){
+    case 'smile':  eyesOpen(); mouthSoft(); blush(); break;
+    case 'focus':  eyesHalf(); mouthLine(); break;
+    case 'closed': eyesClosed(); mouthSoft(); blush(); break;
+    case 'joy':    eyesJoy(); mouthOpen(); blush(); break;
+    case 'gentle': eyesHalf(); mouthSoft(); blush(); break;
+    case 'shy':    /* 照れる：目を伏せて大きめのほっぺ */
+      eyesClosed(); mouthSoft(); blush(true); break;
+    case 'cheer':
+      R(g, cx-4, ey, 2, 2, 'e'); P(g, cx-4, ey, 'w');
+      P(g, cx+2, ey+1, 'e'); P(g, cx+3, ey, 'e'); P(g, cx+4, ey, 'e'); P(g, cx+5, ey+1, 'e');
+      mouthOpen(); blush(); break;
+    case 'sad':
+      P(g, cx-5, ey+2, 'e'); P(g, cx-4, ey+1, 'e'); P(g, cx-3, ey+1, 'e');
+      P(g, cx+3, ey+1, 'e'); P(g, cx+4, ey+1, 'e'); P(g, cx+5, ey+2, 'e');
+      P(g, cx-2, my+1, 'm'); R(g, cx-1, my, 2, 1, 'm'); P(g, cx+1, my+1, 'm');
+      blush(); break;
+    default: eyesOpen(); mouthLine(); blush(); /* cool */
+  }
+}
+
+/* 全身ミニキャラ（立ち）。opt.hands で両手を上げて喜ぶポーズ */
+function muuChibi(exp, opt){
+  opt = opt || {};
+  const W = 28, H = 34, cx = 13, top = 3;
+  const body = newGrid(W, H), head = newGrid(W, H);
+  drawHead(head, cx, top, exp);
+  R(body, 8, 21, 12, 8, 'c');
+  body[21][8] = null; body[21][19] = null;
+  R(body, 8, 28, 12, 1, 'C');
+  R(body, 11, 23, 6, 1, 'T'); R(body, 12, 25, 4, 1, 'T');
+  R(body, 9, 29, 4, 2, 'C'); R(body, 15, 29, 4, 2, 'C');
+  R(body, 10, 31, 2, 1, 's'); R(body, 16, 31, 2, 1, 's');
+  R(body, 10, 32, 2, 1, 'r'); R(body, 16, 32, 2, 1, 'r');
+  R(body, 9, 33, 4, 1, 'K'); R(body, 15, 33, 4, 1, 'K');
+  let hands = '';
+  if(opt.hands){
+    const h1 = newGrid(W, H), h2 = newGrid(W, H);
+    for(let i = 0; i < 4; i++){ R(h1, 7 - i, 20 - i, 2, 1, 'c'); R(h2, 19 + i, 20 - i, 2, 1, 'c'); }
+    P(h1, 3, 16, 'c'); P(h2, 24, 16, 'c');
+    R(h1, 2, 14, 2, 2, 's'); R(h2, 24, 14, 2, 2, 's');
+    hands = "<g class='muu-hand h1'>" + gridRects(h1) + "</g><g class='muu-hand h2'>" + gridRects(h2) + "</g>";
+  }else{
+    R(body, 6, 22, 2, 4, 'c'); R(body, 20, 22, 2, 4, 'c');
+    R(body, 6, 26, 2, 3, 'c'); R(body, 20, 26, 2, 3, 'c');
+    R(body, 6, 29, 2, 2, 's'); R(body, 20, 29, 2, 2, 's');
+  }
+  return "<svg viewBox='0 0 " + W + " " + H + "' shape-rendering='crispEdges' xmlns='http://www.w3.org/2000/svg'>" +
+    "<g class='muu-body'>" + gridRects(body) + hands +
+    "<g class='muu-head'>" + gridRects(head) + "</g></g></svg>";
+}
+
+/* 顔だけのアイコン（コレクション用） */
+function muuIcon(exp){
+  const g = newGrid(26, 24);
+  drawHead(g, 13, 3, exp);
+  return "<svg viewBox='0 0 26 24' shape-rendering='crispEdges' xmlns='http://www.w3.org/2000/svg'>" + gridRects(g) + "</svg>";
+}
+
+/* 相棒の黒猫（rect群を返すので<svg>に包んで使う） */
+function blackCat(){
+  const g = newGrid(12, 13);
+  P(g, 2, 0, 'K'); R(g, 2, 1, 2, 1, 'K');
+  P(g, 9, 0, 'K'); R(g, 8, 1, 2, 1, 'K');
+  R(g, 2, 2, 8, 4, 'K');
+  P(g, 4, 4, 'g'); P(g, 7, 4, 'g');
+  R(g, 1, 6, 10, 5, 'K');
+  P(g, 10, 5, 'K'); P(g, 11, 6, 'K'); P(g, 11, 7, 'K');
+  R(g, 2, 11, 2, 1, 'K'); R(g, 7, 11, 2, 1, 'K');
+  return gridRects(g);
+}
+
+/* ステージ：ドット絵のグランドピアノ＋むぅちゃん＋黒猫。
+   pose: 'play'（演奏） / 'bow'（お辞儀） */
+function muuPianoScene(exp, pose){
+  pose = pose || 'play';
+  const W = 72, H = 40;
+  const stage = newGrid(W, H), armF = newGrid(W, H), armB = newGrid(W, H),
+        body = newGrid(W, H), head = newGrid(W, H), cat = newGrid(W, H);
+  /* ピアノ本体（暗い会場でも輪郭が読めるようエッジに x と金を入れる） */
+  R(stage, 18, 20, 46, 8, 'K');
+  R(stage, 18, 20, 46, 1, 'x');
+  R(stage, 18, 27, 46, 1, 'x');
+  R(stage, 63, 20, 1, 8, 'x');
+  R(stage, 20, 21, 43, 1, 'g');
+  stage[20][63] = null; stage[27][63] = null;
+  for(let t = 0; t <= 36; t++){
+    const x = 30 + t, y = 18 - Math.round(t * 14 / 36);
+    P(stage, x, y, 'x'); P(stage, x, y + 1, 'k');
+    P(stage, x, y + 2, 'd');
+  }
+  P(stage, 66, 3, 'x'); P(stage, 66, 4, 'x');
+  for(let t = 0; t <= 7; t++) P(stage, 46 - Math.round(t * 0.5), 12 + t, 'g');
+  R(stage, 16, 20, 14, 2, 'i');
+  for(let x = 17; x < 29; x += 2) P(stage, x, 20, 'K');
+  R(stage, 16, 22, 14, 1, 'x');
+  R(stage, 20, 28, 3, 7, 'K'); R(stage, 20, 28, 1, 7, 'x');
+  R(stage, 58, 28, 3, 7, 'K'); R(stage, 58, 28, 1, 7, 'x');
+  R(stage, 38, 28, 2, 4, 'x'); R(stage, 36, 32, 6, 1, 'g');
+  R(stage, 2, 26, 12, 2, 'p'); R(stage, 2, 26, 12, 1, 'x');
+  R(stage, 3, 28, 2, 7, 'p'); R(stage, 11, 28, 2, 7, 'p');
+  /* ピアノの下で聴いている黒猫 */
+  P(cat, 47, 28, 'K'); P(cat, 50, 28, 'K');
+  R(cat, 46, 29, 6, 3, 'K');
+  P(cat, 47, 30, 'g'); P(cat, 50, 30, 'g');
+  R(cat, 45, 32, 8, 3, 'K');
+  P(cat, 53, 31, 'K'); P(cat, 54, 30, 'K'); P(cat, 54, 29, 'K');
+
+  if(pose === 'bow'){
+    /* お辞儀：ベンチの手前に立って深く一礼 */
+    R(body, 8, 26, 3, 8, 'C');
+    R(body, 8, 30, 2, 3, 's'); R(body, 8, 33, 2, 1, 'r');
+    R(body, 12, 26, 3, 8, 'C');
+    R(body, 13, 30, 2, 3, 's'); R(body, 13, 33, 2, 1, 'r');
+    R(body, 7, 34, 4, 2, 'K'); R(body, 12, 34, 4, 2, 'K');
+    for(let j = 0; j < 6; j++) R(body, 7 + Math.round(j * 0.8), 21 + j, 6, 1, 'c');
+    R(body, 5, 24, 2, 5, 'c'); R(body, 5, 29, 2, 2, 's');
+    R(body, 15, 24, 2, 5, 'c'); R(body, 15, 29, 2, 2, 's');
+    drawHead(head, 8, 2, exp);
+  }else{
+    /* 演奏：小さな体で前傾。チャコールT＋短パン＋赤ソックス */
+    for(let j = 0; j < 7; j++) R(body, 6 + Math.round((6 - j) * 0.5), 20 + j, 6, 1, 'c');
+    R(body, 9, 26, 4, 2, 'C');
+    R(body, 12, 28, 2, 4, 's'); R(body, 12, 32, 2, 2, 'r'); R(body, 12, 34, 4, 2, 'K');
+    R(armB, 13, 21, 4, 1, 'C'); R(armB, 17, 21, 2, 1, 'S');
+    R(armF, 12, 22, 5, 1, 'c'); R(armF, 17, 22, 2, 1, 's');
+    drawHead(head, 10, 2, exp);
+  }
+  return "<svg viewBox='0 0 " + W + " " + H + "' shape-rendering='crispEdges' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMidYMax meet'>" +
+    "<rect x='2' y='36' width='64' height='1.4' fill='#000' opacity='.4'/>" +
+    gridRects(stage) +
+    "<g>" + gridRects(cat) + "</g>" +
+    "<g class='muu-body'>" + gridRects(body) +
+      "<g class='muu-arm a2'>" + gridRects(armB) + "</g>" +
+      "<g class='muu-arm'>" + gridRects(armF) + "</g>" +
+      "<g class='muu-head'>" + gridRects(head) + "</g>" +
+    "</g>" +
+  "</svg>";
+}
+
+/* ---------------- 楽曲データ（オリジナル・モジュール構造） ----------------
+   楽曲は「メタ情報 / BGM(伴奏イベント) / 譜面(ノーツ)」を分離。
+   新曲を足すときは build 関数を書いて SONGDEFS に1エントリ追加するだけ。 */
+function beatFn(bpm){ const spb = 60 / bpm; return (bar, beat) => (bar * 4 + beat) * spb; }
+
+function assignLanes(mel){
+  mel.sort((a, b) => a.t - b.t || a.m - b.m);
+  let lo = Infinity, hi = -Infinity;
+  mel.forEach(n => { lo = Math.min(lo, n.m); hi = Math.max(hi, n.m); });
+  const used = new Map();
+  mel.forEach(n => {
+    let lane = Math.min(3, Math.floor((n.m - lo) / (hi - lo + 1) * 4));
+    const key = Math.round(n.t * 50);
+    let tries = 0;
+    while(used.has(key + ':' + lane) && tries < 4){ lane = (lane + 1) % 4; tries++; }
+    used.set(key + ':' + lane, 1);
+    n.lane = lane;
+  });
+  return mel;
+}
+
+/* 曲1「Prelude」 やさしい夜のはじまり (76bpm / Am) */
+function buildPrelude(){
+  const bpm = 76, T = beatFn(bpm);
+  const CH = {
+    Am:{b:45, t:[69,72,76]}, F:{b:41, t:[65,69,72]}, C:{b:48, t:[67,72,76]},
+    G:{b:43, t:[67,71,74]}, E:{b:40, t:[68,71,76]}
+  };
+  const prog = ['Am','Am',
+    'Am','F','C','G','Am','F','C','G',
+    'Am','F','C','E','Am','F','C','E',
+    'Am','Am'];
+  const acc = [];
+  prog.forEach((name, bar) => {
+    const c = CH[name];
+    acc.push({t:T(bar,0), m:c.b, d:2.2, v:.38});
+    acc.push({t:T(bar,2), m:c.b + 12, d:1.8, v:.22});
+    [0,1,2,1,0,1,2,1].forEach((ti, i) => {
+      acc.push({t:T(bar, i * .5), m:c.t[ti], d:1.1, v:i % 2 ? .12 : .17});
+    });
+  });
+  const melData = [
+    [2,0,76],[2,2,72],[2,3,74],   [3,0,72],[3,2,69],[3,3,72],
+    [4,0,76],[4,2,79],            [5,0,74],[5,2,71],[5,3,74],
+    [6,0,76],[6,1,81],[6,2,79],[6,3,76], [7,0,77],[7,2,76],[7,3,72],
+    [8,0,79],[8,2,76],[8,3,74],   [9,0,74],[9,2,71],
+    [10,0,81],[10,2,76],[10,3,77],[11,0,77],[11,1,76],[11,2,74],[11,3,72],
+    [12,0,76],[12,2,72],[12,3,74],[13,0,71],[13,2,68],[13,3,71],
+    [14,0,69],[14,2,72],[14,3,76],[15,0,77],[15,2,81],
+    [16,0,79],[16,1,76],[16,2,74],[16,3,72],[17,0,71],[17,2,76],
+    [18,0,81],[18,2,76],          [19,0,69]
+  ];
+  const notes = assignLanes(melData.map(([bar, beat, m]) => ({t:T(bar, beat), m})));
+  return { notes, acc, dur:T(prog.length, 0) + 2.5 };
+}
+
+/* 曲2「Melody」/「Crescendo」 黒鍵を駆けるライブ曲 (bpm可変 / dense=高難度) */
+function buildMelody(bpm, dense){
+  const T = beatFn(bpm);
+  const roots = {Eb:39, Cb:35, Db:37, Gb:42};
+  const prog = ['Eb','Eb',
+    'Eb','Eb','Cb','Db','Eb','Eb','Cb','Db',
+    'Gb','Gb','Eb','Eb','Cb','Db','Eb','Eb',
+    'Eb','Eb','Cb','Db','Eb','Eb','Cb','Db',
+    'Cb','Cb','Db','Db',
+    'Eb','Eb','Cb','Db',
+    'Eb','Eb'];
+  const bridge = [26,27,28,29];
+  const acc = [];
+  prog.forEach((name, bar) => {
+    const r = roots[name];
+    if(bridge.includes(bar)){
+      [0,1,2,3].forEach(b => acc.push({t:T(bar,b), m:r + (b % 2 ? 12 : 0), d:.5, v:.3}));
+      return;
+    }
+    [0,0,12,0,0,12,0,12].forEach((off, i) => {
+      acc.push({t:T(bar, i * .5), m:r + off, d:.32, v:i % 2 ? .2 : .28});
+    });
+    [1.5, 3.5].forEach(b => {
+      acc.push({t:T(bar,b), m:r + 19, d:.3, v:.14});
+      acc.push({t:T(bar,b), m:r + 24, d:.3, v:.14});
+    });
+  });
+  const Pt = {
+    EbA:[[0,75],[2,73],[3,70],[5,68],[6,70]],
+    EbB:[[0,75],[1,78],[2,75],[4,73],[6,70],[7,73]],
+    Cb: [[0,78],[2,75],[3,73],[5,70],[6,73]],
+    Db: [[0,80],[2,78],[3,75],[5,73],[6,75],[7,78]],
+    Gb: [[0,78],[2,80],[4,82],[6,80],[7,78]],
+    GbB:[[0,78],[1,80],[2,82],[4,80],[6,78],[7,75]],
+    EbHi:[[0,82],[2,80],[3,78],[5,75],[6,78]],
+    CbQ:[[0,66],[4,68]],
+    DbQ:[[0,68],[4,70],[6,73]],
+    End1:[[0,75],[2,75],[4,75],[6,78]],
+    End2:[[0,82]]
+  };
+  const barPat = [null,null,
+    'EbA','EbB','Cb','Db','EbA','EbB','Cb','Db',
+    'Gb','GbB','EbHi','EbB','Cb','Db','EbA','EbB',
+    'EbA','EbB','Cb','Db','EbA','EbB','Cb','Db',
+    'CbQ','CbQ','DbQ','DbQ',
+    'EbA','End1','Cb','Db',
+    'End2',null];
+  const melData = [];
+  barPat.forEach((pat, bar) => {
+    if(!pat) return;
+    Pt[pat].forEach(([slot, m]) => melData.push({t:T(bar, slot * .5), m}));
+    /* dense（Crescendo）：裏拍を足して疾走感を上げる */
+    if(dense && !bridge.includes(bar) && pat !== 'End2'){
+      melData.push({t:T(bar, 0.5), m:73});
+      melData.push({t:T(bar, 2.5), m:75});
+    }
+  });
+  const notes = assignLanes(melData);
+  return { notes, acc, dur:T(prog.length, 0) + 2.5 };
+}
+
+/* 曲3「Passion」/「Virtuoso」 感情のバラード (bpm可変 / dense=高難度) */
+function buildPassion(bpm, dense){
+  const T = beatFn(bpm);
+  const CH = {
+    Dm:{b:38, t:[62,65,69]}, Bb:{b:46, t:[62,65,70]}, F:{b:41, t:[60,65,69]},
+    C:{b:36, t:[60,64,67]}, Gm:{b:43, t:[62,67,70]}, A7:{b:45, t:[61,64,69]}
+  };
+  const prog = ['Dm','Dm',
+    'Dm','Bb','F','C','Dm','Bb','F','C',
+    'Gm','Dm','Bb','A7','Gm','Bb','C','A7',
+    'Dm','Bb','F','C','Dm','Bb','F','A7',
+    'Dm','Dm'];
+  const acc = [];
+  prog.forEach((name, bar) => {
+    const c = CH[name];
+    acc.push({t:T(bar,0), m:c.b, d:2.4, v:.42});
+    acc.push({t:T(bar,2), m:c.b, d:2.0, v:.3});
+    const arr = [c.b + 12, c.t[0], c.t[1], c.t[2]];
+    [0,1,2,3,2,1,2,3].forEach((ai, i) => {
+      acc.push({t:T(bar, i * .5), m:arr[ai], d:1.0, v:i % 2 ? .11 : .16});
+    });
+  });
+  const melData = [];
+  const put = (bar, arr) => arr.forEach(([beat, ...ms]) => ms.forEach(m => melData.push({t:T(bar, beat), m})));
+  put(2,[[0,74],[1,69],[1.5,70],[2,74],[2.5,72],[3,72],[3.5,70]]);
+  put(3,[[0,70],[1,65],[1.5,67],[2,70],[2.5,72],[3,74]]);
+  put(4,[[0,72],[1,69],[1.5,67],[2,65],[2.5,67],[3,69],[3.5,70]]);
+  put(5,[[0,72],[1,67],[1.5,71],[2,72],[3,76]]);
+  put(6,[[0,74],[0.5,76],[1,74],[2,72],[2.5,70],[3,70],[3.5,72]]);
+  put(7,[[0,70],[1,72],[1.5,74],[2,74],[2.5,72],[3,70]]);
+  put(8,[[0,69],[1,65],[1.5,62],[2,62],[2.5,65],[3,65],[3.5,67]]);
+  put(9,[[0,64],[1,67],[2,72],[3,74],[3.5,76]]);
+  put(10,[[0,74],[1,70],[1.5,72],[2,74],[2.5,77],[3,79]]);
+  put(11,[[0,77],[1,74],[2,74],[2.5,72],[3,70],[3.5,69]]);
+  put(12,[[0,70],[0.5,72],[1,74],[2,77],[2.5,74],[3,74]]);
+  put(13,[[0,73],[1,69],[2,64],[2.5,66],[3,69]]);
+  put(14,[[0,74],[1,70],[1.5,72],[2,74],[3,79],[3.5,77]]);
+  put(15,[[0,77],[1,74],[2,70],[2.5,72],[3,74]]);
+  put(16,[[0,76],[1,72],[1.5,74],[2,76],[2.5,77],[3,79]]);
+  put(17,[[0,81],[1.5,76],[2,73],[2.5,69],[3,69]]);
+  put(18,[[0,74,69],[0.5,76],[1,77],[1.5,76],[2,74],[2.25,72],[2.5,74],[2.75,72],[3,69],[3.5,70]]);
+  put(19,[[0,77,74],[0.5,74],[1,72],[1.5,74],[2,77],[2.25,79],[2.5,77],[3,74],[3.5,72]]);
+  put(20,[[0,81,77],[0.5,79],[1,77],[1.5,76],[2,77],[2.25,76],[2.5,74],[2.75,72],[3,72],[3.5,74]]);
+  put(21,[[0,76,72],[0.5,74],[1,76],[1.5,79],[2,76],[2.5,74],[3,72],[3.5,71]]);
+  put(22,[[0,74,69],[0.5,76],[1,77],[1.5,76],[2,74],[2.25,72],[2.5,74],[2.75,72],[3,69],[3.5,70]]);
+  put(23,[[0,77,74],[0.5,74],[1,72],[1.5,74],[2,77],[2.25,79],[2.5,77],[3,74],[3.5,72]]);
+  put(24,[[0,81,77],[0.5,79],[1,77],[1.5,76],[2,77],[2.25,76],[2.5,74],[3,72],[3.5,74]]);
+  put(25,[[0,73,69],[0.5,76],[1,73],[1.5,69],[2,64],[2.5,69],[3,73],[3.5,76]]);
+  put(26,[[0,77],[1,76],[2,74],[3,72]]);
+  put(27,[[0,74,62]]);
+  /* dense（Virtuoso）：A/Bセクションに裏拍とコードトーンを足す */
+  if(dense){
+    for(let bar = 2; bar <= 17; bar++){
+      const c = CH[prog[bar]];
+      melData.push({t:T(bar, 1.75), m:c.t[2]});
+      melData.push({t:T(bar, 3.25), m:c.t[1]});
+    }
+    for(let bar = 18; bar <= 25; bar++){
+      melData.push({t:T(bar, 1.25), m:CH[prog[bar]].t[2] + 12 > 84 ? CH[prog[bar]].t[2] : CH[prog[bar]].t[2] + 12});
+    }
+  }
+  const notes = assignLanes(melData);
+  return { notes, acc, dur:T(prog.length, 0) + 2.5 };
+}
+
+/* 収録曲。expr = 演奏中のむぅちゃんの基本表情（難易度コンセプト） */
+const SONGDEFS = [
+  {id:'prelude',   title:'Prelude',   dc:0, sub:'やさしい夜のはじまり。ゆったりと寄り添って',      bpm:76,  approach:1.9,  expr:'smile',
+   locked:()=>false, build:()=>buildPrelude()},
+  {id:'melody',    title:'Melody',    dc:1, sub:'黒鍵を駆けるライブ曲。少し真剣な横顔',            bpm:132, approach:1.5,  expr:'focus',
+   locked:()=>false, build:()=>buildMelody(132,false)},
+  {id:'passion',   title:'Passion',   dc:2, sub:'感情のバラード。演奏に没頭していく',              bpm:88,  approach:1.25, expr:'focus',
+   locked:()=>false, build:()=>buildPassion(88,false)},
+  {id:'crescendo', title:'Crescendo', dc:3, sub:'ゾーン状態。音が光になって溢れる',                bpm:148, approach:1.1,  expr:'closed',
+   locked:s=>!rankAtLeast(s,'A'), lockHint:'いずれかの曲で Aランク を獲得すると解放', build:()=>buildMelody(148,true)},
+  {id:'virtuoso',  title:'Virtuoso',  dc:4, sub:'完全ライブモード。目を閉じて、最後だけ笑顔',      bpm:96,  approach:0.95, expr:'closed',
+   locked:s=>!(rankAtLeast(s,'S') || (s.fcCount||0)>0), lockHint:'Sランク または フルコンボ で解放', build:()=>buildPassion(96,true)}
+];
+const DIFF_NAMES = ['Prelude','Melody','Passion','Crescendo','Virtuoso'];
+const songCache = {};
+function getSong(i){
+  const def = SONGDEFS[i];
+  if(!songCache[def.id]) songCache[def.id] = def.build();
+  return Object.assign({}, def, songCache[def.id]);
+}
+
+/* ---------------- 記録・コレクション ---------------- */
+function loadStats(){
+  try{ return JSON.parse(store.get('muurhythm.stats') || '{}'); }catch(e){ return {}; }
+}
+function saveStats(s){ store.set('muurhythm.stats', JSON.stringify(s)); }
+const RANKV = {C:0, B:1, A:2, S:3};
+function rankAtLeast(s, r){
+  const best = s.best || {};
+  return Object.values(best).some(b => RANKV[b.rank] >= RANKV[r]);
+}
+function clearedSong(s, id){ return !!(s.best && s.best[id]); }
+
+/* コレクション：遊ぶほど増える。課金なし */
+const ITEMS = [
+  {id:'outfit-black', type:'outfit', name:'ブラックT',     hint:'はじめから',
+   check:()=>true, pal:{}},
+  {id:'outfit-ivory', type:'outfit', name:'アイボリーT',   hint:'Aランクで解放',
+   check:s=>rankAtLeast(s,'A'), pal:{c:'#d8cfba', C:'#8f8672', T:'#3a352b'}},
+  {id:'outfit-wine',  type:'outfit', name:'ワインレッドT', hint:'Sランクで解放',
+   check:s=>rankAtLeast(s,'S'), pal:{c:'#5c3038', C:'#3a1e24', T:'#e8d9c8'}},
+  {id:'piano-noir',   type:'piano', name:'ノワール',       hint:'はじめから',
+   check:()=>true, pal:{}},
+  {id:'piano-gold',   type:'piano', name:'ゴールドライン', hint:'3回プレイで解放',
+   check:s=>(s.plays||0)>=3, pal:{g:'#eed9a0'}},
+  {id:'piano-mahogany',type:'piano', name:'マホガニー',    hint:'Passionをプレイで解放',
+   check:s=>clearedSong(s,'passion'), pal:{K:'#1c100a', x:'#5a3a26'}},
+  {id:'bg-hall',      type:'bg', name:'クラブ・ノワール',  hint:'はじめから',
+   check:()=>true, cls:''},
+  {id:'bg-moon',      type:'bg', name:'月あかり',          hint:'Melodyをプレイで解放',
+   check:s=>clearedSong(s,'melody'), cls:'bg-moon'},
+  {id:'bg-sunset',    type:'bg', name:'夕映え',            hint:'5回プレイで解放',
+   check:s=>(s.plays||0)>=5, cls:'bg-sunset'},
+  {id:'light-amber',  type:'light', name:'アンバー',       hint:'はじめから',
+   check:()=>true, cls:''},
+  {id:'light-silver', type:'light', name:'シルバームーン', hint:'フルコンボで解放',
+   check:s=>(s.fcCount||0)>0, cls:'light-silver'},
+  {id:'venue-club',   type:'venue', name:'スタンダード',   hint:'はじめから',
+   check:()=>true, pens:46},
+  {id:'venue-grand',  type:'venue', name:'グランドホール', hint:'総スコア100万で解放',
+   check:s=>(s.totalScore||0)>=1000000, pens:64}
+];
+const ICONS = [
+  {id:'icon-smile', exp:'smile',  name:'すまいる',   hint:'はじめてのライブ', check:s=>(s.plays||0)>=1},
+  {id:'icon-joy',   exp:'joy',    name:'だいまんぞく', hint:'Sランクで解放',   check:s=>rankAtLeast(s,'S')},
+  {id:'icon-shy',   exp:'shy',    name:'てれてる',   hint:'アンコール発生で解放', check:s=>(s.encores||0)>0},
+  {id:'icon-closed',exp:'closed', name:'ゾーン',     hint:'Virtuoso解放で入手', check:s=>rankAtLeast(s,'S')||(s.fcCount||0)>0}
+];
+const TYPE_LABEL = {outfit:'衣装', piano:'ピアノ', bg:'背景', light:'照明', venue:'ライブ会場'};
+
+function loadEquip(){
+  try{ return Object.assign({outfit:'outfit-black', piano:'piano-noir', bg:'bg-hall', light:'light-amber', venue:'venue-club'},
+    JSON.parse(store.get('muurhythm.equip') || '{}')); }catch(e){ return {outfit:'outfit-black', piano:'piano-noir', bg:'bg-hall', light:'light-amber', venue:'venue-club'}; }
+}
+let EQUIP = loadEquip();
+function applyEquips(){
+  PAL = Object.assign({}, PAL_DEFAULT);
+  document.body.className = '';
+  ITEMS.forEach(item => {
+    if(EQUIP[item.type] !== item.id) return;
+    if(item.pal) Object.assign(PAL, item.pal);
+    if(item.cls) document.body.classList.add(item.cls);
+  });
+  /* 表示中のスプライトを再描画 */
+  renderTitlePiano();
+}
+function equippedVenue(){ return ITEMS.find(i => i.type === 'venue' && i.id === EQUIP.venue) || ITEMS.find(i=>i.id==='venue-club'); }
+
+function earnedTitles(){
+  try{ return JSON.parse(store.get('muurhythm.titles') || '[]'); }catch(e){ return []; }
+}
+function earnTitle(t){
+  const arr = earnedTitles();
+  if(!arr.includes(t)){ arr.push(t); store.set('muurhythm.titles', JSON.stringify(arr)); }
+}
+const ALL_TITLES = ['はじめての共演','夜を奏でる人','アンコールを呼ぶ人','黒鍵マスター','むぅちゃんの相棒','奇跡のフルコンボ'];
+
+/* ---------------- 画面遷移 ---------------- */
+function show(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('#scr-' + name).classList.add('active');
+  stopPreview();
+  if(name !== 'result') particles = [];
+}
+document.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click', () => show(b.dataset.nav)));
+
+/* ---------------- タイトル ---------------- */
+function renderTitlePiano(){
+  $('#title-piano').innerHTML = muuPianoScene('cool');
+}
+$('#btn-start').addEventListener('click', () => { audio(); renderSelect(); show('select'); });
+$('#btn-to-collection').addEventListener('click', () => { renderCollection(); show('collection'); });
+
+/* ---------------- サウンドトグル ---------------- */
+function refreshSoundBtn(){
+  $('#btn-sound').textContent = muted ? '×' : '♪';
+  $('#btn-sound').classList.toggle('off', muted);
+}
+$('#btn-sound').addEventListener('click', () => {
+  muted = !muted;
+  store.set('muurhythm.muted', muted ? '1' : '0');
+  if(master) master.gain.value = muted ? 0 : 1;
+  refreshSoundBtn();
+});
+refreshSoundBtn();
+
+/* ---------------- 曲選択 ---------------- */
+let previewing = null, previewTimer = null;
+function stopPreview(){
+  if(previewing !== null){
+    stopSchedule();
+    clearTimeout(previewTimer);
+    document.querySelectorAll('.song-play').forEach(b => { b.classList.remove('playing'); b.textContent = '▶'; });
+    previewing = null;
+  }
+}
+function renderSelect(){
+  const stats = loadStats();
+  const list = $('#song-list');
+  list.innerHTML = '';
+  SONGDEFS.forEach((def, i) => {
+    const rec = (stats.best || {})[def.id];
+    const locked = def.locked(stats);
+    const card = document.createElement('div');
+    card.className = 'song-card glass' + (locked ? ' locked' : '');
+    card.innerHTML =
+      "<button class='song-play' aria-label='試聴'>▶</button>" +
+      "<div class='song-info'>" +
+        "<h3>" + def.title + "</h3>" +
+        "<p class='song-desc'>" + def.sub + "</p>" +
+        "<div class='song-meta'>" +
+          "<span class='diff d" + def.dc + "'>" + DIFF_NAMES[def.dc] + "</span>" +
+          "<span class='hiscore'>BEST <b>" + (rec ? rec.score.toLocaleString() : '---') + "</b>" +
+          (rec ? " ／ " + rec.rank + (rec.fc ? ' ✦FC' : '') : '') + "</span>" +
+        "</div>" +
+      "</div>" +
+      (locked
+        ? "<div class='song-lock'>🔒 " + def.lockHint + "</div>"
+        : "<button class='song-start'>この曲でライブする</button>");
+    const playBtn = card.querySelector('.song-play');
+    if(locked){ playBtn.disabled = true; }
+    else{
+      playBtn.addEventListener('click', (e) => {
+        audio();
+        const btn = e.currentTarget;
+        if(previewing === i){ stopPreview(); return; }
+        stopPreview();
+        previewing = i;
+        btn.classList.add('playing'); btn.textContent = '■';
+        const song = getSong(i);
+        const ev = song.acc.concat(song.notes.map(n => ({t:n.t, m:n.m, d:1.3, v:.32})))
+          .filter(e2 => e2.t < 13).sort((a,b) => a.t - b.t);
+        startSchedule(ev, actx.currentTime + 0.1);
+        previewTimer = setTimeout(stopPreview, 13500);
+      });
+      card.querySelector('.song-start').addEventListener('click', () => { audio(); startGame(i); });
+    }
+    list.appendChild(card);
+  });
+}
+
+/* ---------------- 観客・ペンライト ---------------- */
+const PEN_COLORS = ['#e8b36a','#f2ead8','#d98c5f','#c9a86a','#e8cf96','#caa2c9'];
+function buildAudience(){
+  const aud = $('#audience');
+  aud.innerHTML = '';
+  const n = equippedVenue().pens || 46;
+  for(let i = 0; i < n; i++){
+    const p = document.createElement('span');
+    p.className = 'pen';
+    const c = PEN_COLORS[i % PEN_COLORS.length];
+    const h = 14 + Math.random() * 14;
+    p.style.cssText = 'left:' + (2 + Math.random() * 96) + '%;height:' + h + 'px;' +
+      'background:linear-gradient(180deg,' + c + ',transparent);' +
+      '--pd:' + (1.6 + Math.random() * 1.8) + 's;animation-delay:-' + (Math.random() * 3) + 's;';
+    p.innerHTML = "<i style='background:radial-gradient(circle," + c + ",transparent);'></i>";
+    aud.appendChild(p);
+  }
+  const crowd = $('#crowd');
+  crowd.innerHTML = '';
+  for(let i = 0; i < 16; i++){
+    const hsil = document.createElement('span');
+    hsil.className = 'head-sil';
+    hsil.style.cssText = 'left:' + (2 + i * 6 + Math.random() * 3) + '%;' +
+      'transform:scale(' + (0.8 + Math.random() * 0.5) + ');animation-delay:' + (Math.random() * .5) + 's;';
+    crowd.appendChild(hsil);
+  }
+}
+function litPens(count){
+  const pens = document.querySelectorAll('#audience .pen');
+  pens.forEach((p, i) => p.classList.toggle('on', ((i * 7) % pens.length) < count));
+}
+
+/* ---------------- FXキャンバス（光の粒・紙吹雪） ---------------- */
+const fx = $('#fx'), fctx = fx.getContext('2d');
+let particles = [];
+function fxResize(){
+  fx.width = innerWidth * devicePixelRatio;
+  fx.height = innerHeight * devicePixelRatio;
+}
+addEventListener('resize', fxResize); fxResize();
+function spawnDust(rect){
+  particles.push({
+    kind:'dust',
+    x:(rect.left + Math.random() * rect.width) * devicePixelRatio,
+    y:(rect.top + rect.height * (0.4 + Math.random() * 0.6)) * devicePixelRatio,
+    vx:(Math.random() - .5) * .35, vy:-(.3 + Math.random() * .6),
+    life:1, decay:.004 + Math.random() * .004,
+    r:(1 + Math.random() * 2.2) * devicePixelRatio,
+    c:Math.random() < .7 ? '232,179,106' : '242,234,216'
+  });
+}
+function confettiBurst(){
+  for(let i = 0; i < 130; i++){
+    particles.push({
+      kind:'confetti',
+      x:Math.random() * fx.width, y:-20 - Math.random() * fx.height * .5,
+      vx:(Math.random() - .5) * 1.2, vy:1.2 + Math.random() * 2.2,
+      rot:Math.random() * Math.PI, vr:(Math.random() - .5) * .2,
+      w:(4 + Math.random() * 5) * devicePixelRatio, h:(7 + Math.random() * 8) * devicePixelRatio,
+      life:1, decay:.0022,
+      c:['223,227,232','200,204,212','244,246,248','185,191,201','240,217,160'][i % 5]
+    });
+  }
+}
+function goldBurst(rect){
+  for(let i = 0; i < 46; i++){
+    const a = Math.random() * Math.PI * 2, sp = 1 + Math.random() * 3;
+    particles.push({
+      kind:'dust',
+      x:(rect.left + rect.width / 2) * devicePixelRatio,
+      y:(rect.top + rect.height * .55) * devicePixelRatio,
+      vx:Math.cos(a) * sp, vy:Math.sin(a) * sp - 1,
+      life:1, decay:.008 + Math.random() * .008,
+      r:(1.4 + Math.random() * 2.4) * devicePixelRatio, c:'240,217,160'
+    });
+  }
+}
+(function fxLoop(){
+  requestAnimationFrame(fxLoop);
+  if(!particles.length){ fctx.clearRect(0, 0, fx.width, fx.height); return; }
+  fctx.clearRect(0, 0, fx.width, fx.height);
+  particles = particles.filter(p => p.life > 0);
+  const dpr = devicePixelRatio;
+  particles.forEach(p => {
+    p.life -= p.decay;
+    p.x += p.vx * dpr; p.y += p.vy * dpr;
+    if(p.kind === 'confetti'){
+      p.rot += p.vr; p.vx += Math.sin(p.y * .01) * .02;
+      fctx.save();
+      fctx.translate(p.x, p.y); fctx.rotate(p.rot);
+      fctx.fillStyle = 'rgba(' + p.c + ',' + Math.min(1, p.life * 1.4) + ')';
+      fctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      fctx.restore();
+    }else{
+      fctx.beginPath();
+      fctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      fctx.fillStyle = 'rgba(' + p.c + ',' + (p.life * .8) + ')';
+      fctx.fill();
+    }
+  });
+})();
+
+/* ---------------- ゲーム本体 ---------------- */
+const JUDGE = { perfect:.055, great:.105, good:.18 };
+const G = {
+  songIdx:0, song:null, notes:null, songStart:0, running:false, raf:0,
+  score:0, combo:0, maxCombo:0, tier:-1, gauge:0,
+  counts:{perfect:0, great:0, good:0, miss:0},
+  judged:0, base:0, keyFlash:[0,0,0,0], effects:[], ended:false,
+  encore:false, encorePlayed:false, baseExpr:'smile', pose:'play', curExpr:''
+};
+const laneCanvas = $('#lanes'), lctx = laneCanvas.getContext('2d');
+const KEYMAP = {d:0, f:1, j:2, k:3};
+
+function laneResize(){
+  const r = laneCanvas.parentElement.getBoundingClientRect();
+  laneCanvas.width = r.width * devicePixelRatio;
+  laneCanvas.height = r.height * devicePixelRatio;
+}
+addEventListener('resize', () => { if(G.running) laneResize(); });
+
+function setMuu(exp, pose){
+  G.curExpr = exp; G.pose = pose || G.pose;
+  const svg = muuPianoScene(exp, G.pose);
+  /* ガラスのような床反射（16bit風＋現代的ライティング） */
+  $('#stage-muu').innerHTML = svg + "<div class='reflection'>" + svg + "</div>";
+  $('#stage-muu').classList.toggle('pose-bow', G.pose === 'bow');
+}
+/* 会場の進化：コンボで照明→観客→ペンライト→ステージ演出 */
+const TIER_CONF = [
+  {amp:'1.1deg', spd:'3s',   pens:4},
+  {amp:'1.6deg', spd:'2.6s', pens:8},
+  {amp:'2.6deg', spd:'2.2s', pens:14},
+  {amp:'3.6deg', spd:'1.8s', pens:40},
+  {amp:'4.2deg', spd:'1.6s', pens:99}
+];
+function tierOf(c){ return c >= 100 ? 4 : c >= 50 ? 3 : c >= 30 ? 2 : c >= 10 ? 1 : 0; }
+function applyTier(t, force){
+  if(t === G.tier && !force) return;
+  const up = t > G.tier;
+  G.tier = t;
+  const conf = TIER_CONF[t];
+  $('#stage').dataset.tier = t;
+  $('#stage').classList.toggle('burst', t === 4);
+  const muu = $('#stage-muu');
+  muu.style.setProperty('--amp', conf.amp);
+  muu.style.setProperty('--spd', conf.spd);
+  litPens(conf.pens);
+  if(t === 4 && up) goldBurst($('#stage').getBoundingClientRect());
+}
+
+function startGame(idx){
+  const song = getSong(idx);
+  stopPreview();
+  G.songIdx = idx;
+  G.song = song;
+  G.notes = song.notes.map(n => ({t:n.t, m:n.m, lane:n.lane, state:0, missAt:0}));
+  G.score = 0; G.combo = 0; G.maxCombo = 0; G.tier = -1; G.gauge = 0;
+  G.counts = {perfect:0, great:0, good:0, miss:0};
+  G.judged = 0; G.ended = false;
+  G.encore = false; G.encorePlayed = false;
+  G.base = 1000000 / G.notes.length;
+  G.keyFlash = [0,0,0,0]; G.effects = [];
+  G.baseExpr = song.expr;
+  $('#game-songname').textContent = song.title + ' — ' + DIFF_NAMES[song.dc];
+  $('#score').textContent = '0';
+  $('#prog').style.width = '0%';
+  $('#gauge').style.width = '0%'; $('#gauge').classList.remove('full');
+  $('#combo').classList.remove('show');
+  $('#live-complete').classList.remove('show');
+  $('#encore-call').classList.remove('show');
+  $('#stage').classList.remove('ovation');
+  show('game');
+  buildAudience();
+  setMuu(G.baseExpr, 'play');
+  applyTier(0, true);
+  laneResize();
+  audio();
+  /* 3秒カウントダウン後に演奏開始。BGMは絶対時刻で予約する */
+  G.songStart = actx.currentTime + 3.4;
+  startSchedule(song.acc.slice().sort((a,b) => a.t - b.t), G.songStart);
+  [3,2,1].forEach(n => piano(81, G.songStart - n, .25, .12));
+  $('#countdown').classList.add('show');
+  G.running = true;
+  cancelAnimationFrame(G.raf);
+  loop();
+}
+
+function quitGame(toName){
+  G.running = false;
+  G.token = (G.token || 0) + 1;   /* 進行中の終了シーケンスを無効化 */
+  cancelAnimationFrame(G.raf);
+  stopSchedule();
+  $('#countdown').classList.remove('show');
+  $('#live-complete').classList.remove('show');
+  $('#encore-call').classList.remove('show');
+  show(toName || 'select');
+  if(toName === 'select') renderSelect();
+}
+$('#btn-quit').addEventListener('click', () => { renderSelect(); quitGame('select'); });
+
+function now(){ return actx.currentTime - G.songStart; }
+
+function setGauge(delta){
+  G.gauge = Math.max(0, Math.min(100, G.gauge + delta));
+  $('#gauge').style.width = G.gauge + '%';
+  $('#gauge').classList.toggle('full', G.gauge >= 99.5);
+}
+
+function judgeHit(lane){
+  const t = now();
+  if(t < -0.2) return;
+  let best = null, bestAbs = Infinity;
+  for(const n of G.notes){
+    if(n.state !== 0 || n.lane !== lane) continue;
+    if(n.t - t > JUDGE.good) break;
+    const abs = Math.abs(n.t - t);
+    if(abs <= JUDGE.good && abs < bestAbs){ best = n; bestAbs = abs; }
+  }
+  G.keyFlash[lane] = 1;
+  if(!best) return;
+  best.state = 1;
+  piano(best.m, actx.currentTime, 1.5, .5);
+  let kind;
+  if(bestAbs <= JUDGE.perfect) kind = 'perfect';
+  else if(bestAbs <= JUDGE.great) kind = 'great';
+  else kind = 'good';
+  G.counts[kind]++;
+  G.judged++;
+  G.score += G.base * (kind === 'perfect' ? 1 : kind === 'great' ? .7 : .35);
+  G.combo++;
+  G.maxCombo = Math.max(G.maxCombo, G.combo);
+  setGauge(140 / G.notes.length * (kind === 'perfect' ? 1.15 : kind === 'great' ? 1 : .7));
+  applyTier(tierOf(G.combo));
+  if(G.counts.miss === 0 && G.judged === G.notes.length) applyTier(4);
+  popJudge(kind);
+  popCombo();
+  G.effects.push({lane, t:performance.now(), kind});
+  $('#score').textContent = Math.round(G.score).toLocaleString();
+}
+
+/* MISSしてもライブは止まらない。少し首を傾け、すぐ笑顔で演奏を続ける */
+let smileTimer = null;
+function registerMiss(n){
+  n.state = 2; n.missAt = performance.now();
+  G.counts.miss++; G.judged++;
+  G.combo = 0;
+  setGauge(-3);
+  applyTier(tierOf(0));
+  popJudge('miss');
+  popCombo();
+  setMuu('smile');
+  clearTimeout(smileTimer);
+  smileTimer = setTimeout(() => { if(G.running) setMuu(G.baseExpr); }, 900);
+  const muu = $('#stage-muu');
+  muu.classList.remove('tilt'); void muu.offsetWidth; muu.classList.add('tilt');
+}
+
+function popJudge(kind){
+  const el = $('#judge-pop');
+  el.className = 'j-' + kind;
+  el.textContent = kind.toUpperCase();
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+function popCombo(){
+  const el = $('#combo');
+  el.querySelector('b').textContent = G.combo;
+  el.classList.toggle('show', G.combo >= 2);
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+
+/* 入力 */
+laneCanvas.addEventListener('pointerdown', e => {
+  if(!G.running) return;
+  e.preventDefault();
+  const r = laneCanvas.getBoundingClientRect();
+  const lane = Math.max(0, Math.min(3, Math.floor((e.clientX - r.left) / r.width * 4)));
+  judgeHit(lane);
+});
+addEventListener('keydown', e => {
+  if(!G.running || e.repeat) return;
+  const lane = KEYMAP[e.key.toLowerCase()];
+  if(lane !== undefined) judgeHit(lane);
+});
+
+/* 描画ループ */
+function loop(){
+  if(!G.running) return;
+  G.raf = requestAnimationFrame(loop);
+  const t = now();
+  const W = laneCanvas.width, H = laneCanvas.height;
+  const laneW = W / 4;
+  const judgeY = H * 0.84;
+  const approach = G.song.approach;
+  const dpr = devicePixelRatio;
+
+  const cd = $('#countdown');
+  if(t < 0){
+    cd.classList.add('show');
+    $('#cd-num').textContent = Math.min(3, Math.ceil(-t));
+  }else if(cd.classList.contains('show')){
+    cd.classList.remove('show');
+  }
+
+  const prog = Math.max(0, Math.min(1, t / G.song.dur));
+  $('#prog').style.width = (prog * 100) + '%';
+  for(const n of G.notes){
+    if(n.state === 0 && t - n.t > JUDGE.good) registerMiss(n);
+  }
+
+  /* 終盤：光の粒が舞う */
+  if(prog > 0.78 && Math.random() < 0.2){
+    spawnDust($('#stage').getBoundingClientRect());
+  }
+
+  lctx.clearRect(0, 0, W, H);
+  for(let i = 0; i < 4; i++){
+    lctx.fillStyle = i % 2 ? 'rgba(242,234,216,0.02)' : 'rgba(242,234,216,0.035)';
+    lctx.fillRect(i * laneW, 0, laneW, H);
+    if(G.keyFlash[i] > 0){
+      const grad = lctx.createLinearGradient(0, H, 0, H * .5);
+      grad.addColorStop(0, 'rgba(232,179,106,' + (G.keyFlash[i] * .28) + ')');
+      grad.addColorStop(1, 'rgba(232,179,106,0)');
+      lctx.fillStyle = grad;
+      lctx.fillRect(i * laneW, H * .5, laneW, H * .5);
+      G.keyFlash[i] = Math.max(0, G.keyFlash[i] - 0.07);
+    }
+  }
+  lctx.strokeStyle = 'rgba(201,168,106,0.22)';
+  lctx.lineWidth = 1;
+  for(let i = 1; i < 4; i++){
+    lctx.beginPath(); lctx.moveTo(i * laneW, 0); lctx.lineTo(i * laneW, H); lctx.stroke();
+  }
+  lctx.strokeStyle = 'rgba(201,168,106,0.85)';
+  lctx.lineWidth = 2 * dpr;
+  lctx.shadowColor = 'rgba(232,179,106,.8)'; lctx.shadowBlur = 10 * dpr;
+  lctx.beginPath(); lctx.moveTo(0, judgeY); lctx.lineTo(W, judgeY); lctx.stroke();
+  lctx.shadowBlur = 0;
+  lctx.fillStyle = 'rgba(242,234,216,0.18)';
+  lctx.font = (11 * dpr) + 'px Georgia';
+  lctx.textAlign = 'center';
+  ['D','F','J','K'].forEach((k, i) => lctx.fillText(k, (i + .5) * laneW, H - 10 * dpr));
+
+  const noteH = 15 * dpr, noteW = laneW * .7;
+  const travel = judgeY + noteH * 2;
+  for(const n of G.notes){
+    const dt = n.t - t;
+    if(n.state === 1) continue;
+    if(dt > approach || dt < -0.35) continue;
+    const y = judgeY - dt / approach * travel;
+    const x = n.lane * laneW + (laneW - noteW) / 2;
+    const missed = n.state === 2;
+    lctx.globalAlpha = missed ? Math.max(0, 1 - (performance.now() - n.missAt) / 300) : 1;
+    lctx.fillStyle = missed ? 'rgba(120,115,110,.5)' : '#f2ead8';
+    lctx.strokeStyle = 'rgba(201,168,106,.9)';
+    lctx.lineWidth = 1.5 * dpr;
+    roundRect(lctx, x, y - noteH / 2, noteW, noteH, 6 * dpr);
+    lctx.fill();
+    if(!missed){
+      lctx.stroke();
+      lctx.fillStyle = 'rgba(201,168,106,.55)';
+      lctx.fillRect(x + noteW * .12, y - 1 * dpr, noteW * .76, 2 * dpr);
+    }
+    lctx.globalAlpha = 1;
+  }
+  const pnow = performance.now();
+  G.effects = G.effects.filter(e => pnow - e.t < 360);
+  for(const e of G.effects){
+    const p = (pnow - e.t) / 360;
+    const cx = (e.lane + .5) * laneW;
+    lctx.beginPath();
+    lctx.arc(cx, judgeY, (10 + p * 34) * dpr, 0, Math.PI * 2);
+    lctx.strokeStyle = 'rgba(' + (e.kind === 'perfect' ? '240,217,160' : '242,234,216') + ',' + (1 - p) * .8 + ')';
+    lctx.lineWidth = 2.5 * dpr * (1 - p);
+    lctx.stroke();
+  }
+
+  /* ライブ終了：最後の一音→静寂→拍手→お辞儀→笑顔→LIVE COMPLETE */
+  if(!G.ended && t > G.song.dur + 0.6 && G.judged >= G.notes.length){
+    G.ended = true;
+    G.running = false;
+    endSequence();
+  }
+}
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+/* ---------------- ライブ終了シーケンスとアンコール ---------------- */
+function projectedRank(){
+  const acc = G.score / 1000000;
+  return acc >= .95 ? 'S' : acc >= .85 ? 'A' : acc >= .70 ? 'B' : 'C';
+}
+function endSequence(){
+  stopSchedule();
+  cancelAnimationFrame(G.raf);
+  const fc = G.counts.miss === 0;
+  const tok = (G.token = (G.token || 0) + 1);   /* 途中で「やめる」を押したら中断 */
+  const seq = [];
+  const step = (delay, fn) => seq.push([delay, () => { if(G.token === tok) fn(); }]);
+  step(700, () => {                       /* 静寂のあとに拍手 */
+    applauseSE(2.6);
+    litPens(99);
+    if(fc || projectedRank() !== 'C') $('#stage').classList.add('ovation');  /* 観客総立ち */
+    if(fc){ confettiBurst(); goldBurst($('#stage').getBoundingClientRect()); }
+  });
+  step(900, () => setMuu('smile', 'bow'));  /* お辞儀 */
+  step(1300, () => setMuu('joy', 'play'));  /* 顔を上げて笑顔 */
+  step(900, () => $('#live-complete').classList.add('show'));
+  step(1600, () => {
+    $('#live-complete').classList.remove('show');
+    /* アンコール判定：Sランク / FULL COMBO / ハイスコア更新 のいずれかでランダム発生 */
+    const stats = loadStats();
+    const prev = (stats.best || {})[G.song.id];
+    const newRecord = !prev || Math.round(G.score) > prev.score;
+    const eligible = !G.encorePlayed && (projectedRank() === 'S' || fc || newRecord);
+    if(eligible && Math.random() < 0.6){
+      startEncore();
+    }else{
+      showResult();
+    }
+  });
+  let acc = 0;
+  seq.forEach(([d, fn]) => { acc += d; setTimeout(fn, acc); });
+}
+
+function startEncore(){
+  G.encore = true; G.encorePlayed = true;
+  const tok = G.token;
+  setMuu('shy', 'play');                 /* 照れながらもう一曲 */
+  $('#encore-call').classList.add('show');
+  setTimeout(() => {
+    if(G.token !== tok) return;
+    $('#encore-call').classList.remove('show');
+    /* 楽曲終盤をもう一度：譜面とBGMをスライスして再スケジュール。
+       スコア・コンボ・判定数は本編から継続して合算する */
+    const cut = Math.max(0, G.song.dur - 16);
+    const encNotes = G.song.notes.filter(n => n.t >= cut)
+      .map(n => ({t:n.t - cut + 2, m:n.m, lane:n.lane, state:0, missAt:0}));
+    const encAcc = G.song.acc.filter(e => e.t >= cut)
+      .map(e => ({t:e.t - cut + 2, m:e.m, d:e.d, v:e.v}));
+    G.notes = encNotes;
+    G.song = Object.assign({}, G.song, {dur:(encNotes.length ? encNotes[encNotes.length - 1].t : 14) + 2});
+    G.songStart = actx.currentTime + 0.6;
+    G.judged = 0;
+    G.ended = false;
+    setMuu('closed', 'play');
+    startSchedule(encAcc.sort((a, b) => a.t - b.t), G.songStart);
+    G.running = true;
+    loop();
+  }, 1700);
+}
+
+/* ---------------- リザルト ---------------- */
+const RANK_MUU = {
+  S:{exp:'joy',    cls:'rank-s', hands:true,  bubble:'「最高の夜だったね！」'},
+  A:{exp:'gentle', cls:'rank-a', hands:false, bubble:'「いい音、鳴ってたよ」'},
+  B:{exp:'cool',   cls:'rank-b', hands:false, bubble:'「うん、悪くない」'},
+  C:{exp:'cheer',  cls:'rank-c', hands:false, bubble:'「もう一回いこ」'}
+};
+function titleFor(rank, fc, songId){
+  if(fc) return '奇跡のフルコンボ';
+  if(rank === 'S') return 'むぅちゃんの相棒';
+  if(rank === 'A') return (songId === 'melody' || songId === 'crescendo') ? '黒鍵マスター' : 'アンコールを呼ぶ人';
+  if(rank === 'B') return '夜を奏でる人';
+  return 'はじめての共演';
+}
+function showResult(){
+  stopSchedule();
+  cancelAnimationFrame(G.raf);
+  G.running = false;
+  const total = G.counts.perfect + G.counts.great + G.counts.good + G.counts.miss;
+  const score = Math.round(G.score);
+  const acc = G.score / 1000000;
+  const rank = acc >= .95 ? 'S' : acc >= .85 ? 'A' : acc >= .70 ? 'B' : 'C';
+  const fc = G.counts.miss === 0;
+  const title = titleFor(rank, fc, SONGDEFS[G.songIdx].id);
+  earnTitle(title);
+
+  /* 記録の更新とコレクション解放チェック */
+  const stats = loadStats();
+  const before = ITEMS.filter(i => i.check(stats)).map(i => i.id)
+    .concat(ICONS.filter(i => i.check(stats)).map(i => i.id));
+  stats.plays = (stats.plays || 0) + 1;
+  stats.totalScore = (stats.totalScore || 0) + score;
+  stats.fcCount = (stats.fcCount || 0) + (fc ? 1 : 0);
+  stats.encores = (stats.encores || 0) + (G.encore ? 1 : 0);
+  stats.best = stats.best || {};
+  const id = SONGDEFS[G.songIdx].id;
+  if(!stats.best[id] || score > stats.best[id].score) stats.best[id] = {score, rank, fc};
+  saveStats(stats);
+  const after = ITEMS.filter(i => i.check(stats)).map(i => i.id)
+    .concat(ICONS.filter(i => i.check(stats)).map(i => i.id));
+  const newly = after.filter(x => !before.includes(x));
+
+  $('#result-song').textContent = SONGDEFS[G.songIdx].title + ' — ' + DIFF_NAMES[SONGDEFS[G.songIdx].dc];
+  $('#result-rank').textContent = rank;
+  $('#result-score').textContent = score.toLocaleString();
+  $('#result-title').textContent = title;
+  $('#st-combo').textContent = G.maxCombo;
+  $('#st-prate').textContent = Math.round(G.counts.perfect / total * 100) + '%';
+  $('#st-perfect').textContent = G.counts.perfect;
+  $('#st-great').textContent = G.counts.great;
+  $('#st-good').textContent = G.counts.good;
+  $('#st-miss').textContent = G.counts.miss;
+  $('#fc-badge').classList.toggle('show', fc);
+  $('#encore-badge').classList.toggle('show', G.encore);
+  const rm = RANK_MUU[rank];
+  const muuEl = $('#result-muu');
+  muuEl.className = rm.cls;
+  muuEl.innerHTML = muuChibi(rm.exp, {hands:rm.hands});
+  $('#result-bubble').textContent = rm.bubble;
+  const ul = $('#result-unlocks');
+  ul.innerHTML = '';
+  newly.forEach(nid => {
+    const item = ITEMS.find(i => i.id === nid) || ICONS.find(i => i.id === nid);
+    if(!item) return;
+    const div = document.createElement('div');
+    div.className = 'unlock-toast';
+    div.textContent = '✦ NEW　' + (TYPE_LABEL[item.type] || 'アイコン') + '「' + item.name + '」を解放！';
+    ul.appendChild(div);
+  });
+  show('result');
+  if(fc) confettiBurst();
+}
+$('#btn-retry').addEventListener('click', () => startGame(G.songIdx));
+$('#btn-to-select').addEventListener('click', () => { renderSelect(); show('select'); });
+
+/* ---------------- コレクション ---------------- */
+function renderCollection(){
+  const stats = loadStats();
+  $('#col-stats').innerHTML =
+    "<div><b>" + (stats.plays || 0) + "</b>ライブ回数</div>" +
+    "<div><b>" + ((stats.totalScore || 0)).toLocaleString() + "</b>総スコア</div>" +
+    "<div><b>" + (stats.encores || 0) + "</b>アンコール</div>";
+  const body = $('#col-body');
+  body.innerHTML = '';
+  ['outfit','piano','bg','light','venue'].forEach(type => {
+    const sec = document.createElement('div');
+    sec.className = 'col-section';
+    sec.innerHTML = "<h3>" + TYPE_LABEL[type] + "</h3>";
+    const grid = document.createElement('div');
+    grid.className = 'col-grid';
+    ITEMS.filter(i => i.type === type).forEach(item => {
+      const unlocked = item.check(stats);
+      const equipped = EQUIP[type] === item.id;
+      const div = document.createElement('div');
+      div.className = 'col-item' + (equipped ? ' equipped' : '') + (unlocked ? '' : ' locked');
+      const swatchColor = item.pal && item.pal.c ? item.pal.c : (item.pal && item.pal.g ? item.pal.g : (item.pal && item.pal.K ? item.pal.K : '#4a4438'));
+      div.innerHTML =
+        "<div class='col-swatch' style='background:" + swatchColor + "'></div>" +
+        "<div class='col-name'>" + item.name + "</div>" +
+        (unlocked
+          ? "<div class='col-state'>" + (equipped ? '✦ 装備中' : 'タップで装備') + "</div>"
+          : "<div class='col-hint'>🔒 " + item.hint + "</div>");
+      if(unlocked){
+        div.addEventListener('click', () => {
+          EQUIP[type] = item.id;
+          store.set('muurhythm.equip', JSON.stringify(EQUIP));
+          applyEquips();
+          renderCollection();
+        });
+      }
+      grid.appendChild(div);
+    });
+    sec.appendChild(grid);
+    body.appendChild(sec);
+  });
+  /* 称号 */
+  const secT = document.createElement('div');
+  secT.className = 'col-section';
+  secT.innerHTML = "<h3>称号</h3>";
+  const earned = earnedTitles();
+  ALL_TITLES.forEach(t => {
+    const chip = document.createElement('span');
+    chip.className = 'title-chip' + (earned.includes(t) ? '' : ' off');
+    chip.textContent = earned.includes(t) ? t : '？？？';
+    secT.appendChild(chip);
+  });
+  body.appendChild(secT);
+  /* アイコン */
+  const secI = document.createElement('div');
+  secI.className = 'col-section';
+  secI.innerHTML = "<h3>アイコン</h3>";
+  const gridI = document.createElement('div');
+  gridI.className = 'col-grid';
+  ICONS.forEach(ic => {
+    const unlocked = ic.check(stats);
+    const div = document.createElement('div');
+    div.className = 'col-item' + (unlocked ? '' : ' locked');
+    div.innerHTML =
+      "<div class='col-icon'>" + (unlocked ? muuIcon(ic.exp) : '') + "</div>" +
+      "<div class='col-name'>" + (unlocked ? ic.name : '？？？') + "</div>" +
+      (unlocked ? '' : "<div class='col-hint'>🔒 " + ic.hint + "</div>");
+    gridI.appendChild(div);
+  });
+  secI.appendChild(gridI);
+  body.appendChild(secI);
+}
+
+/* ---------------- 初期化 ---------------- */
+applyEquips();
+buildAudience();
+</script>
+</body>
+</html>
