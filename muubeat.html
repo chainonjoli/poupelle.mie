@@ -748,6 +748,11 @@ function drawHead(g, cx, top, exp){
       R(g, cx-4, ey, 2, 2, 'e'); P(g, cx-4, ey, 'w');
       P(g, cx+2, ey+1, 'e'); P(g, cx+3, ey, 'e'); P(g, cx+4, ey, 'e'); P(g, cx+5, ey+1, 'e');
       mouthOpen(); blush(); break;
+    case 'sad': /* しょんぼり：たれ目の閉じ目＋への字口 */
+      P(g, cx-5, ey+2, 'e'); P(g, cx-4, ey+1, 'e'); P(g, cx-3, ey+1, 'e');
+      P(g, cx+3, ey+1, 'e'); P(g, cx+4, ey+1, 'e'); P(g, cx+5, ey+2, 'e');
+      P(g, cx-2, my+1, 'm'); R(g, cx-1, my, 2, 1, 'm'); P(g, cx+1, my+1, 'm');
+      blush(); break;
     default: eyesOpen(); mouthLine(); blush(); /* cool（スタンプ準拠で常にほっぺ） */
   }
 }
@@ -1141,6 +1146,7 @@ function judgeHit(lane){
   $('#score').textContent = Math.round(G.score).toLocaleString();
 }
 
+let sadTimer = null;
 function registerMiss(n){
   n.state = 2; n.missAt = performance.now();
   G.counts.miss++; G.judged++;
@@ -1148,7 +1154,10 @@ function registerMiss(n){
   applyTier(tierOf(0));
   popJudge('miss');
   popCombo();
-  /* 失敗は強調しない：むうちゃんは少し首を傾け、演奏に戻る */
+  /* 失敗は強調しない：一瞬しょんぼりして首を傾け、すぐ演奏に戻る */
+  setMuuExpr('sad');
+  clearTimeout(sadTimer);
+  sadTimer = setTimeout(() => { if(G.running) setMuuExpr(TIER_CONF[G.tier].exp); }, 900);
   const muu = $('#stage-muu');
   muu.classList.remove('tilt'); void muu.offsetWidth; muu.classList.add('tilt');
 }
@@ -1349,7 +1358,7 @@ $('#btn-retry').addEventListener('click', () => {
 $('#btn-to-select').addEventListener('click', () => { renderSelect(); show('select'); });
 
 /* ---------------- キャラクター紹介 ---------------- */
-const CHARA_EXPRS = ['cool','smile','gentle','closed','joy'];
+const CHARA_EXPRS = ['cool','smile','gentle','closed','joy','sad','cheer'];
 let charaExpr = 0;
 function renderChara(){
   $('#chara-figure').innerHTML = muuChibi(CHARA_EXPRS[charaExpr]) +
