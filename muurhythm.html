@@ -3,9 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Muu RHYTHM — むぅちゃんと奏でる夜</title>
+<title>Muu RHYTHM — 奏でる夜</title>
 <meta name="description" content="ピアニスト・むぅちゃんと一緒に最高のライブを完成させる16bit風リズムゲーム『Muu RHYTHM』。">
 <meta name="theme-color" content="#0b0908">
+<meta property="og:title" content="Muu RHYTHM — 奏でる夜">
+<meta property="og:description" content="ピアニスト・むぅちゃんと一緒に最高のライブを完成させるリズムゲーム。ミスしてもライブは止まらない。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/muurhythm/icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Muu RHYTHM">
+<link rel="apple-touch-icon" href="assets/muurhythm/icon-180.png">
+<link rel="manifest" href="muurhythm.webmanifest">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎹</text></svg>">
 <style>
 :root{
@@ -123,7 +134,35 @@ body.light-silver #title-stage .spotcone{background:radial-gradient(55% 90% at 5
 #title-sub{font-family:var(--serif);font-size:14px;letter-spacing:.3em;color:var(--ivory-dim)}
 #title-box .btn{margin-top:24px}
 .title-note{margin-top:13px;font-size:11px;color:#77694f;letter-spacing:.12em}
-.title-collection-link{margin-top:10px;background:none;border:none;color:var(--gold-dim);font-size:12px;letter-spacing:.2em;cursor:pointer;text-decoration:underline;text-underline-offset:4px;font-family:var(--sans)}
+.title-links{display:flex;gap:20px;justify-content:center;margin-top:10px}
+.title-collection-link{background:none;border:none;color:var(--gold-dim);font-size:12px;letter-spacing:.2em;cursor:pointer;text-decoration:underline;text-underline-offset:4px;font-family:var(--sans)}
+.title-version{margin-top:12px;font-size:9px;letter-spacing:.2em;color:#5c5344}
+/* ポーズ・READY */
+.pause-btns{display:flex;gap:14px;margin-top:22px}
+/* モーダル（あそびかた・せってい） */
+.modal{position:absolute;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:rgba(6,5,4,.72);padding:24px}
+.modal.show{display:flex;animation:fadein .3s ease}
+.modal-card{border-radius:16px;padding:24px 22px;max-width:360px;width:100%;text-align:center}
+.modal-card h3{font-family:var(--serif);font-size:18px;letter-spacing:.3em;color:var(--gold);font-weight:normal;margin-bottom:14px}
+.modal-card ol{text-align:left;font-size:13px;line-height:1.8;padding-left:20px;color:var(--ivory)}
+.modal-card ol li{margin-bottom:8px}
+.modal-card ol b{color:var(--gold)}
+.modal-card .btn{margin-top:16px}
+.set-row{margin-bottom:16px;text-align:left}
+.set-row label{font-size:11px;letter-spacing:.2em;color:var(--gold-dim);display:block;margin-bottom:8px}
+.set-opts{display:flex;gap:8px;align-items:center;justify-content:center}
+.set-opts button{
+  flex:1;padding:10px 6px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);
+  border:1px solid rgba(201,168,106,.4);background:rgba(201,168,106,.06);color:var(--ivory);
+}
+.set-opts button.sel{background:rgba(232,207,150,.25);border-color:#e8cf96;color:#f5e8c8}
+.set-opts #ofs-minus,.set-opts #ofs-plus{flex:none;width:44px;font-size:17px}
+.set-opts #ofs-val{flex:1;text-align:center;font-family:var(--serif);font-size:16px;color:var(--gold)}
+.set-note{font-size:10px;color:#8a7a5c;margin-top:8px;line-height:1.6}
+/* 横画面ガード */
+#rotate-hint{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;
+  background:var(--black);color:var(--ivory-dim);font-size:14px;letter-spacing:.2em}
+@media (orientation:landscape) and (max-height:520px){ #rotate-hint{display:flex} }
 
 /* ---------- 曲選択 ---------- */
 #scr-select{padding:calc(64px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom))}
@@ -369,11 +408,16 @@ body.light-silver #stage .spot{background:radial-gradient(50% 85% at 50% 0%,rgba
     <div id="title-box">
       <p class="title-eyebrow">Make the Best Live Together</p>
       <h1 id="title-logo">Muu <b>RHYTHM</b></h1>
-      <p id="title-sub">— むぅちゃんと奏でる夜 —</p>
+      <p id="title-sub">— 奏でる夜 —</p>
       <div class="hairline"></div>
       <button class="btn" id="btn-start">S T A R T</button>
       <p class="title-note">♪ 音を出してお楽しみください</p>
-      <button class="title-collection-link" id="btn-to-collection">コレクション</button>
+      <div class="title-links">
+        <button class="title-collection-link" id="btn-to-collection">コレクション</button>
+        <button class="title-collection-link" id="btn-howto">あそびかた</button>
+        <button class="title-collection-link" id="btn-settings">せってい</button>
+      </div>
+      <p class="title-version">ver 1.0.0 ／ © Muu RHYTHM Project</p>
     </div>
   </section>
 
@@ -417,6 +461,15 @@ body.light-silver #stage .spot{background:radial-gradient(50% 85% at 50% 0%,rgba
     <div id="countdown"><div id="cd-num">3</div><div id="cd-hint">スマホはタップ ／ PCは D・F・J・K</div></div>
     <div class="interlude" id="live-complete"><h3>LIVE COMPLETE</h3><p>今夜も、いい音だった</p></div>
     <div class="interlude" id="encore-call"><h3>ENCORE !</h3><p>鳴りやまない拍手に応えて…</p></div>
+    <div class="interlude" id="pause-overlay">
+      <h3>PAUSE</h3>
+      <p>ひと息ついたら、続きを聴かせて</p>
+      <div class="pause-btns">
+        <button class="btn small gold" id="btn-resume">つづける</button>
+        <button class="btn small" id="btn-quit-confirm">ライブをやめる</button>
+      </div>
+    </div>
+    <div class="interlude" id="ready-overlay"><h3>READY…</h3></div>
   </section>
 
   <!-- ============ リザルト ============ -->
@@ -460,6 +513,42 @@ body.light-silver #stage .spot{background:radial-gradient(50% 85% at 50% 0%,rgba
     <div id="col-stats"></div>
     <div id="col-body"></div>
   </section>
+
+  <!-- ============ あそびかた／せってい ============ -->
+  <div class="modal" id="howto-modal">
+    <div class="modal-card glass">
+      <h3>あそびかた</h3>
+      <ol>
+        <li>上から流れてくる音符が<b>金のラインに重なったらタップ</b>（PCは D・F・J・K）</li>
+        <li>タイミングが良いほど <b>PERFECT</b>。むぅちゃんのピアノが鳴ります</li>
+        <li>コンボがつながるほど、<b>照明・観客・ペンライト</b>…ライブ会場が育っていきます</li>
+        <li>ミスしてもライブは止まりません。<b>最後まで一緒に演奏しましょう</b></li>
+      </ol>
+      <button class="btn small gold" id="btn-howto-close">はじめる</button>
+    </div>
+  </div>
+  <div class="modal" id="settings-modal">
+    <div class="modal-card glass">
+      <h3>せってい</h3>
+      <div class="set-row">
+        <label>ノーツ速度</label>
+        <div class="set-opts" id="set-speed">
+          <button data-v="0.85">ゆっくり</button><button data-v="1">ふつう</button><button data-v="1.15">はやい</button>
+        </div>
+      </div>
+      <div class="set-row">
+        <label>判定タイミング</label>
+        <div class="set-opts">
+          <button id="ofs-minus">−</button>
+          <span id="ofs-val">0ms</span>
+          <button id="ofs-plus">＋</button>
+        </div>
+        <p class="set-note">音より判定が早いと感じたら「＋」、遅いと感じたら「−」</p>
+      </div>
+      <button class="btn small gold" id="btn-settings-close">とじる</button>
+    </div>
+  </div>
+  <div id="rotate-hint"><p>📱 縦向きにしてお楽しみください</p></div>
 </div>
 
 <script>
@@ -476,6 +565,11 @@ const store = {
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
   set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 };
+
+/* プレイ設定：ノーツ速度と判定タイミング調整 */
+const OPT = Object.assign({speed:1, offset:0},
+  (() => { try{ return JSON.parse(store.get('muurhythm.opt') || '{}'); }catch(e){ return {}; } })());
+function saveOpt(){ store.set('muurhythm.opt', JSON.stringify(OPT)); }
 
 /* ---------------- オーディオ ---------------- */
 let actx = null, master = null;
@@ -1065,8 +1159,31 @@ document.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click',
 function renderTitlePiano(){
   $('#title-piano').innerHTML = muuPianoScene('cool');
 }
-$('#btn-start').addEventListener('click', () => { audio(); renderSelect(); show('select'); });
+$('#btn-start').addEventListener('click', () => {
+  audio();
+  if(!store.get('muurhythm.howto')){ $('#howto-modal').classList.add('show'); return; }
+  renderSelect(); show('select');
+});
 $('#btn-to-collection').addEventListener('click', () => { renderCollection(); show('collection'); });
+
+/* ---------------- あそびかた・せってい ---------------- */
+$('#btn-howto').addEventListener('click', () => $('#howto-modal').classList.add('show'));
+$('#btn-howto-close').addEventListener('click', () => {
+  store.set('muurhythm.howto', '1');
+  $('#howto-modal').classList.remove('show');
+  renderSelect(); show('select');
+});
+function renderSettings(){
+  document.querySelectorAll('#set-speed button').forEach(b =>
+    b.classList.toggle('sel', parseFloat(b.dataset.v) === OPT.speed));
+  $('#ofs-val').textContent = (OPT.offset > 0 ? '+' : '') + OPT.offset + 'ms';
+}
+$('#btn-settings').addEventListener('click', () => { renderSettings(); $('#settings-modal').classList.add('show'); });
+$('#btn-settings-close').addEventListener('click', () => $('#settings-modal').classList.remove('show'));
+document.querySelectorAll('#set-speed button').forEach(b =>
+  b.addEventListener('click', () => { OPT.speed = parseFloat(b.dataset.v); saveOpt(); renderSettings(); }));
+$('#ofs-minus').addEventListener('click', () => { OPT.offset = Math.max(-150, OPT.offset - 10); saveOpt(); renderSettings(); });
+$('#ofs-plus').addEventListener('click', () => { OPT.offset = Math.min(150, OPT.offset + 10); saveOpt(); renderSettings(); });
 
 /* ---------------- サウンドトグル ---------------- */
 function refreshSoundBtn(){
@@ -1300,6 +1417,8 @@ function startGame(idx){
   G.base = 1000000 / G.notes.length;
   G.keyFlash = [0,0,0,0]; G.effects = [];
   G.baseExpr = song.expr;
+  G.approach = song.approach / OPT.speed;   /* ノーツ速度設定を反映 */
+  G.paused = false;
   $('#game-songname').textContent = song.title + ' — ' + DIFF_NAMES[song.dc];
   $('#score').textContent = '0';
   $('#prog').style.width = '0%';
@@ -1335,7 +1454,42 @@ function quitGame(toName){
   show(toName || 'select');
   if(toName === 'select') renderSelect();
 }
-$('#btn-quit').addEventListener('click', () => { renderSelect(); quitGame('select'); });
+/* ✕ボタン＝ポーズ（即終了はさせない）。バックグラウンド移行時も自動ポーズ */
+$('#btn-quit').addEventListener('click', () => { if(G.running && !G.paused) pauseGame(); });
+$('#btn-resume').addEventListener('click', () => resumeGame());
+$('#btn-quit-confirm').addEventListener('click', () => {
+  G.paused = false;
+  if(master) master.gain.value = muted ? 0 : 1;
+  $('#pause-overlay').classList.remove('show');
+  renderSelect(); quitGame('select');
+});
+document.addEventListener('visibilitychange', () => { if(document.hidden) pauseGame(); });
+
+function pauseGame(){
+  if(!G.running || G.paused || !actx) return;
+  G.paused = true;
+  G.pauseAt = actx.currentTime;
+  cancelAnimationFrame(G.raf);
+  if(sched.timer){ clearInterval(sched.timer); sched.timer = null; }
+  if(master) master.gain.value = 0;
+  $('#pause-overlay').classList.add('show');
+}
+function resumeGame(){
+  if(!G.paused) return;
+  $('#pause-overlay').classList.remove('show');
+  $('#ready-overlay').classList.add('show');
+  /* ポーズ時間ぶん＋1.4秒巻き戻して再開（落下中のノーツに反応する余裕を作る） */
+  const delta = (actx.currentTime + 1.4) - G.pauseAt;
+  G.songStart += delta;
+  if(sched.events){
+    sched.start += delta;
+    if(sched.idx < sched.events.length) sched.timer = setInterval(tickSchedule, 30);
+  }
+  if(master) master.gain.value = muted ? 0 : 1;
+  setTimeout(() => $('#ready-overlay').classList.remove('show'), 1200);
+  G.paused = false;
+  loop();
+}
 
 function now(){ return actx.currentTime - G.songStart; }
 
@@ -1346,7 +1500,7 @@ function setGauge(delta){
 }
 
 function judgeHit(lane){
-  const t = now();
+  const t = now() - OPT.offset / 1000;   /* 判定タイミング調整 */
   if(t < -0.2) return;
   let best = null, bestAbs = Infinity;
   for(const n of G.notes){
@@ -1427,10 +1581,11 @@ function loop(){
   if(!G.running) return;
   G.raf = requestAnimationFrame(loop);
   const t = now();
+  const tj = t - OPT.offset / 1000;      /* 判定用の補正時刻 */
   const W = laneCanvas.width, H = laneCanvas.height;
   const laneW = W / 4;
   const judgeY = H * 0.84;
-  const approach = G.song.approach;
+  const approach = G.approach || G.song.approach;
   const dpr = devicePixelRatio;
 
   const cd = $('#countdown');
@@ -1444,7 +1599,7 @@ function loop(){
   const prog = Math.max(0, Math.min(1, t / G.song.dur));
   $('#prog').style.width = (prog * 100) + '%';
   for(const n of G.notes){
-    if(n.state === 0 && t - n.t > JUDGE.good) registerMiss(n);
+    if(n.state === 0 && tj - n.t > JUDGE.good) registerMiss(n);
   }
 
   /* 終盤：光の粒が舞う */
