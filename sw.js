@@ -1,11 +1,11 @@
 /* 十色神社 Service Worker
    方針: ネットワーク優先＋キャッシュフォールバック。
    更新はすぐ届き、オフライン時は前回の参拝内容で表示できる。 */
-var CACHE_NAME = 'toiro-shrine-v15';
+var CACHE_NAME = 'toiro-shrine-v16';
 var CORE_ASSETS = [
     './shrine.html',
-    './styles/shrine.css?v=20260712a',
-    './scripts/shrine.js?v=20260712a',
+    './styles/shrine.css?v=20260712b',
+    './scripts/shrine.js?v=20260712b',
     './manifest.webmanifest',
     './assets/icon-192.png',
     './assets/icon-512.png',
