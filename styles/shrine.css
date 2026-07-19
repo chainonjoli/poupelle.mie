@@ -56,6 +56,9 @@ body[data-mode="ink"] {
 }
 body[data-mode="paper"] {
     color-scheme: light;
+    /* 明るい紙の上では標準の金（#b8923a）はコントラスト比2.7でAA基準に
+       届かないため、濃い金茶に沈める（4.67でAA適合） */
+    --gold: #8a6a22;
     --bg: var(--paper);
     --bg-deep: var(--paper-deep);
     --surface: color-mix(in srgb, #fff 65%, var(--paper-deep));
