@@ -18,6 +18,9 @@
   /* 隠しキャラカード（低確率でデッキに混ざる） */
   const DOKI_CARD = { id: 'dokidoki', name: 'DOKIDOKI', type: 'secret' };
 
+  /* チャーミーカード（さらにまれ。姿はシルエットのまま登場する） */
+  const CHARMY_CARD = { id: 'charmy', name: 'チャーミー', type: 'secret' };
+
   /* アイテムカード（世界観の小道具たち） */
   const ITEM_CARDS = [
     { id: 'guitar',   emoji: '🎸', name: 'ギター' },
@@ -72,7 +75,7 @@
       desc: 'まだ見ぬステージ。夢の続きはここから。' },
   ];
 
-  const DZCards = { MEMBER_CARDS, ITEM_CARDS, DOKI_CARD, DIFFICULTIES, STAGES };
+  const DZCards = { MEMBER_CARDS, ITEM_CARDS, DOKI_CARD, CHARMY_CARD, DIFFICULTIES, STAGES };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = DZCards;
   global.DZCards = DZCards;

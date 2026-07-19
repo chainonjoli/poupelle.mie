@@ -21,6 +21,7 @@
     totalClears: 0,
     best: {},                // diffId -> {moves, timeMs}
     dokiSeen: false,
+    charmySeen: false,
     sfx: true, bgm: true,
   });
   let save = defaultSave();
@@ -45,7 +46,7 @@
     { id: 'terako', part: 'ドラム＆応援団長', text: '声がとにかく大きい。メンバーの成功を自分のことのように大騒ぎして祝う。メガホンは魂。' },
     { id: 'shibakuzo', part: 'ギター', text: 'いつも眠そう。名前はいかついが、カードより睡眠優先。ギターを弾くと少しだけ目が覚める。' },
     { id: 'dokidoki', part: '？？？', text: 'めったに姿を見せない、ひみつのなかま。会えたらラッキー。', secret: true },
-    { id: 'charmy', part: '？？？', text: '最後まで姿は見えない。でも、いつもどこかでダサザウルスを見ている……らしい。', silhouette: true },
+    { id: 'charmy', part: 'プロデューサー', text: 'ダサザウルスの敏腕プロデューサー。最後まで姿は見えない。目撃情報は「黄色いマスクに黒のワンピースの影」だけ。いつも、どこかからメンバーを見守っている……らしい。', silhouette: true },
   ];
 
   /* ---------- 画面遷移 ---------- */
@@ -132,6 +133,7 @@
       ['クリアかいすう', save.totalClears + ' 回'],
       ['いまの会場', Cards.STAGES[save.stageIndex].name],
       ['DOKIDOKI', save.dokiSeen ? '会えた！💗' : 'まだ会えていない'],
+      ['チャーミー', save.charmySeen ? '気配を感じた…✨' : 'まだ気づいていない'],
     ];
     Cards.DIFFICULTIES.forEach((d) => {
       const b = save.best[d.id];
@@ -170,6 +172,10 @@
     if (id === Cards.DOKI_CARD.id) {
       return `<div class="face-member face-doki">${Chars.charSVG('dokidoki')}</div>`;
     }
+    if (id === Cards.CHARMY_CARD.id) {
+      // 姿は見せない。シルエットと「？？？」だけ
+      return `<div class="face-member face-charmy">${Chars.charSVG('charmy')}</div><span class="face-name">？？？</span>`;
+    }
     if (MEMBER_IDS.indexOf(id) !== -1) {
       return `<div class="face-member">${Chars.charSVG(id)}</div><span class="face-name">${CHAR_NAMES[id]}</span>`;
     }
@@ -180,7 +186,8 @@
   function startGame(diffId) {
     diff = Cards.DIFFICULTIES.find((d) => d.id === diffId);
     const dokiChance = diffId === 'legend' ? 0.15 : 0.07;
-    game = new Engine.MemoryGame({ cols: diff.cols, rows: diff.rows, dokiChance });
+    const charmyChance = diffId === 'legend' ? 0.12 : 0.06;
+    game = new Engine.MemoryGame({ cols: diff.cols, rows: diff.rows, dokiChance, charmyChance });
     picker = new Engine.ReactionPicker(Math.random);
     startedAt = Date.now();
     clearTimeout(missTimer);
@@ -252,6 +259,11 @@
         Audio.sfx('doki');
         showDokiCutin();
         talk(picker.pick('doki'));
+      } else if (ev.isCharmy) {
+        save.charmySeen = true; persist();
+        Audio.sfx('charmy');
+        showCharmyCutin();
+        talk(picker.pick('charmy'));
       } else if (ev.combo >= 2) {
         Audio.sfx('match', { combo: ev.combo });
         popCombo(ev.combo);
@@ -293,6 +305,14 @@
     $('doki-char').innerHTML = Chars.charSVG('dokidoki');
     c.hidden = false;
     setTimeout(() => { c.hidden = true; }, 2200);
+  }
+
+  /* チャーミーカットイン（姿は見せず、シルエットのまま） */
+  function showCharmyCutin() {
+    const c = $('charmy-cutin');
+    $('charmy-char').innerHTML = Chars.charSVG('charmy');
+    c.hidden = false;
+    setTimeout(() => { c.hidden = true; }, 2600);
   }
 
   /* ---------- 吹き出し（キャラのひとこと） ---------- */
