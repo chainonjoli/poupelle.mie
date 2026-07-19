@@ -39,6 +39,8 @@
   function buildDeck(opt) {
     const { cols, rows, rng } = opt;
     const dokiChance = opt.dokiChance == null ? 0.07 : opt.dokiChance;
+    // チャーミーはさらにまれ（人気なので出現機会は作るが、姿は見せない）
+    const charmyChance = opt.charmyChance == null ? 0.05 : opt.charmyChance;
     const total = cols * rows;
     if (total % 2 !== 0) throw new Error('カード枚数は偶数が必要');
     const pairs = total / 2;
@@ -54,22 +56,28 @@
       ids.push(next);
     }
 
-    let hasDoki = false;
-    if (rng() < dokiChance) {
-      // メンバー以外の1種を隠しキャラに差し替え
+    // メンバー以外のアイテム枠を、隠しキャラに差し替える
+    const replaceItem = (newId) => {
       for (let i = ids.length - 1; i >= 0; i--) {
-        if (members.indexOf(ids[i]) === -1) {
-          ids[i] = Cards.DOKI_CARD.id;
-          hasDoki = true;
-          break;
+        if (members.indexOf(ids[i]) === -1 &&
+            ids[i] !== Cards.DOKI_CARD.id && ids[i] !== Cards.CHARMY_CARD.id) {
+          ids[i] = newId;
+          return true;
         }
       }
-    }
+      return false;
+    };
+
+    let hasDoki = false;
+    if (rng() < dokiChance) hasDoki = replaceItem(Cards.DOKI_CARD.id);
+
+    let hasCharmy = false;
+    if (rng() < charmyChance) hasCharmy = replaceItem(Cards.CHARMY_CARD.id);
 
     const deck = [];
     ids.forEach((id) => { deck.push(id, id); });
     shuffle(deck, rng);
-    return { deck, hasDoki, pairs };
+    return { deck, hasDoki, hasCharmy, pairs };
   }
 
   /* 神経衰弱ゲーム本体 */
@@ -79,9 +87,10 @@
       this.rows = opt.rows;
       this.rng = opt.rng || makeRng(opt.seed || (Date.now() & 0xffffffff));
       const built = buildDeck({ cols: this.cols, rows: this.rows, rng: this.rng,
-        dokiChance: opt.dokiChance });
+        dokiChance: opt.dokiChance, charmyChance: opt.charmyChance });
       this.deck = built.deck;          // カードID配列
       this.hasDoki = built.hasDoki;
+      this.hasCharmy = built.hasCharmy;
       this.pairs = built.pairs;
       this.matched = new Array(this.deck.length).fill(false);
       this.open = [];                  // 現在オープン中のindex（最大2）
@@ -121,6 +130,7 @@
           type: 'match', indices: [a, b], cardId: this.deck[a],
           combo: this.combo, cleared: this.cleared,
           isDoki: this.deck[a] === Cards.DOKI_CARD.id,
+          isCharmy: this.deck[a] === Cards.CHARMY_CARD.id,
         };
       }
       this.combo = 0;
@@ -165,11 +175,15 @@
       return t;
     }
 
-    /* event: 'start'|'first'|'match'|'miss'|'combo'|'clear'|'doki' */
+    /* event: 'start'|'first'|'match'|'miss'|'combo'|'clear'|'doki'|'charmy' */
     pick(event) {
       const solo = Lines.solo;
       if (event === 'doki') {
         return [{ c: 'dokidoki', t: this._pickFrom(solo.dokidoki.doki) }];
+      }
+      if (event === 'charmy') {
+        // チャーミーは姿を見せず、謎めいた一言だけ残す（ラストの通知への伏線）
+        return [{ c: 'charmy', t: this._pickFrom(solo.charmy.charmy) }];
       }
 
       // 掛け合い（開始・クリア以外の通常イベントで発生）

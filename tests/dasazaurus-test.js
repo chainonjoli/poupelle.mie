@@ -40,15 +40,35 @@ console.log('--- デッキ生成 ---');
   });
 
   const rng1 = makeRng(5);
-  const withDoki = buildDeck({ cols: 4, rows: 4, rng: rng1, dokiChance: 1 });
+  const withDoki = buildDeck({ cols: 4, rows: 4, rng: rng1, dokiChance: 1, charmyChance: 0 });
   ok(withDoki.hasDoki, 'dokiChance=1 で隠しキャラが入る');
   ok(withDoki.deck.filter((id) => id === 'dokidoki').length === 2, '隠しキャラもペアで入る');
   const members = Cards.MEMBER_CARDS.map((c) => c.id);
   ok(members.every((m) => withDoki.deck.indexOf(m) !== -1), '隠しキャラが入ってもメンバーは残る');
 
   const rng2 = makeRng(5);
-  const noDoki = buildDeck({ cols: 4, rows: 4, rng: rng2, dokiChance: 0 });
+  const noDoki = buildDeck({ cols: 4, rows: 4, rng: rng2, dokiChance: 0, charmyChance: 0 });
   ok(!noDoki.hasDoki && noDoki.deck.indexOf('dokidoki') === -1, 'dokiChance=0 では入らない');
+
+  // チャーミー（人気キャラ・姿は見せず隠しカードとして登場）
+  const rng3 = makeRng(9);
+  const withCharmy = buildDeck({ cols: 4, rows: 4, rng: rng3, dokiChance: 0, charmyChance: 1 });
+  ok(withCharmy.hasCharmy, 'charmyChance=1 でチャーミーが入る');
+  ok(withCharmy.deck.filter((id) => id === 'charmy').length === 2, 'チャーミーもペアで入る');
+  ok(members.every((m) => withCharmy.deck.indexOf(m) !== -1), 'チャーミーが入ってもメンバーは残る');
+
+  const rng4 = makeRng(9);
+  const both = buildDeck({ cols: 4, rows: 4, rng: rng4, dokiChance: 1, charmyChance: 1 });
+  ok(both.hasDoki && both.hasCharmy, 'DOKIDOKIとチャーミーは同時に入りうる');
+  ok(both.deck.filter((id) => id === 'dokidoki').length === 2 &&
+     both.deck.filter((id) => id === 'charmy').length === 2, '両方ともペアで入る');
+  const count = {};
+  both.deck.forEach((id) => { count[id] = (count[id] || 0) + 1; });
+  ok(Object.values(count).every((n) => n === 2), '両方入っても全カードがちょうど2枚');
+
+  const rng5 = makeRng(9);
+  const noCharmy = buildDeck({ cols: 4, rows: 4, rng: rng5, dokiChance: 0, charmyChance: 0 });
+  ok(!noCharmy.hasCharmy && noCharmy.deck.indexOf('charmy') === -1, 'charmyChance=0 では入らない');
 }
 
 console.log('--- 神経衰弱の状態遷移 ---');
@@ -105,13 +125,21 @@ console.log('--- 神経衰弱の状態遷移 ---');
 
 console.log('--- 隠しキャラのマッチ ---');
 {
-  const g = new MemoryGame({ cols: 4, rows: 4, seed: 9, dokiChance: 1 });
+  const g = new MemoryGame({ cols: 4, rows: 4, seed: 9, dokiChance: 1, charmyChance: 0 });
   const idx = [];
   g.deck.forEach((id, i) => { if (id === 'dokidoki') idx.push(i); });
   ok(idx.length === 2, '隠しキャラペアがある');
   g.flip(idx[0]);
   const ev = g.flip(idx[1]);
-  ok(ev.type === 'match' && ev.isDoki, '隠しキャラのマッチで isDoki フラグ');
+  ok(ev.type === 'match' && ev.isDoki && !ev.isCharmy, '隠しキャラのマッチで isDoki フラグ');
+
+  const g2 = new MemoryGame({ cols: 4, rows: 4, seed: 9, dokiChance: 0, charmyChance: 1 });
+  const cidx = [];
+  g2.deck.forEach((id, i) => { if (id === 'charmy') cidx.push(i); });
+  ok(cidx.length === 2, 'チャーミーペアがある');
+  g2.flip(cidx[0]);
+  const cev = g2.flip(cidx[1]);
+  ok(cev.type === 'match' && cev.isCharmy && !cev.isDoki, 'チャーミーのマッチで isCharmy フラグ');
 }
 
 console.log('--- リアクション抽選 ---');
@@ -129,6 +157,10 @@ console.log('--- リアクション抽選 ---');
 
   const doki = p.pick('doki');
   ok(doki.length === 1 && doki[0].c === 'dokidoki', 'doki: DOKIDOKIが喋る');
+
+  const charmy = p.pick('charmy');
+  ok(charmy.length === 1 && charmy[0].c === 'charmy' && charmy[0].t.length > 0,
+     'charmy: チャーミーが姿を見せず一言残す');
 
   // 多数回まわして、直近重複しない・掛け合いと居眠りが出る
   let prevText = null, dupAdjacent = 0, duoCount = 0, sleepCount = 0;
