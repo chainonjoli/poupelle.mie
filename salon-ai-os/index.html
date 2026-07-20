@@ -269,10 +269,10 @@
 
 <!-- ================= デモ入口ハブ ================= -->
 <div id="hub">
-  <div class="mark">凛</div>
+  <div class="mark">Cj</div>
   <p class="eyebrow">SALON AI OS — CLICKABLE PROTOTYPE</p>
   <h1>AIスタッフが、24時間働くサロンへ。</h1>
-  <p class="sub">受付・カウンセラー・広報・秘書・教育担当。5つの「AI部署」がひとつのナレッジで動く、個人サロンのためのOSです。デモサロン「Salon 凛 -Rin-」を題材に、実際に操作できます。</p>
+  <p class="sub">受付・カウンセラー・広報・秘書・教育担当。5つの「AI部署」がひとつのナレッジで動く、個人サロンのためのOSです。デモサロン「Chainon Joli」を題材に、実際に操作できます。</p>
   <div class="hub-cards">
     <button class="hub-card" onclick="enter('customer')">
       <div class="who">FOR GUESTS</div>
@@ -301,7 +301,7 @@
       <section class="screen active" id="c-home">
         <div class="c-hero">
           <span class="eyebrow">PRIVATE BEAUTY SALON</span>
-          <h1>Salon 凛<span style="font-size:16px;color:var(--muted)"> -Rin-</span></h1>
+          <h1 style="letter-spacing:.03em">Chainon Joli</h1>
           <p class="tag">肌と心がほどける、大人のためのプライベートエステ</p>
         </div>
         <div class="hero-visual"><span class="in">— お一人おひとりの肌に、静かに向き合う。</span></div>
@@ -334,7 +334,7 @@
         <div class="topbar"><button class="back" onclick="goC('c-home')">←</button><span class="t">メニュー・料金</span></div>
         <h2 class="sec-h" style="margin-top:8px">フェイシャル</h2>
         <div class="card">
-          <div class="menu-item"><span><b>凛スタンダードフェイシャル</b><span class="d">クレンジング＋ハンドトリートメント 60分</span></span><span class="p num">¥8,800<small> / 60分</small></span></div>
+          <div class="menu-item"><span><b>スタンダードフェイシャル</b><span class="d">クレンジング＋ハンドトリートメント 60分</span></span><span class="p num">¥8,800<small> / 60分</small></span></div>
           <div class="menu-item"><span><b>ホワイトニングフェイシャル</b><span class="d">くすみ・シミ予防の集中ケア 75分</span></span><span class="p num">¥11,000<small> / 75分</small></span></div>
           <div class="menu-item"><span><b>リフトアップフェイシャル</b><span class="d">たるみ・ほうれい線にアプローチ 75分</span></span><span class="p num">¥12,100<small> / 75分</small></span></div>
           <div class="menu-item"><span><b>鎮静フェイシャル（敏感肌向け）</b><span class="d">赤み・ゆらぎ肌をやさしく整える 60分</span></span><span class="p num">¥9,900<small> / 60分</small></span></div>
@@ -614,7 +614,7 @@ const FAQ={
 let chatInited=false;
 function initChat(){
   if(chatInited) return; chatInited=true;
-  aiSay('こんにちは、Salon 凛のAI受付です🛎\n営業時間・料金・駐車場など、なんでもお尋ねください。深夜でもすぐお答えします。');
+  aiSay('こんにちは、Chainon Joli のAI受付です🛎\n営業時間・料金・駐車場など、なんでもお尋ねください。深夜でもすぐお答えします。');
   renderChips();
 }
 function renderChips(){
@@ -718,12 +718,12 @@ function refreshSegs(){
 refreshSegs();
 const GEN={
   body:{
-    '7月キャンペーン告知':'【7月限定｜初回フェイシャル体験】\n\n梅雨明けの肌、少しお疲れではないですか？☀️\n\nSalon 凛では7月中、初回の方限定で\nカウンセリング＋60分フェイシャルを\n¥6,600 → ¥4,980 でご案内しています。\n\n「何のメニューが合うか分からない…」という方は、プロフィールのAIカウンセラーに相談してみてくださいね🌸\n\nご予約はLINEから、24時間受け付けています。',
+    '7月キャンペーン告知':'【7月限定｜初回フェイシャル体験】\n\n梅雨明けの肌、少しお疲れではないですか？☀️\n\nChainon Joli では7月中、初回の方限定で\nカウンセリング＋60分フェイシャルを\n¥6,600 → ¥4,980 でご案内しています。\n\n「何のメニューが合うか分からない…」という方は、プロフィールのAIカウンセラーに相談してみてくださいね🌸\n\nご予約はLINEから、24時間受け付けています。',
     'お客様の声':'【お客様の声】\n\n「頬のくすみが気にならなくなって、ファンデを薄くできました」\n\n4月から月1回、ホワイトニングケアに通ってくださっているお客様の言葉です☺️\n\n変化はすぐには出ません。でも、3ヶ月続けた肌は正直です。\n\n同じお悩みの方は、まずはAIカウンセラーの無料相談からどうぞ🌸',
     '美容豆知識':'【日焼け止め、朝だけになっていませんか？】\n\n実は日焼け止めの効果は2〜3時間で落ち始めます。\n\n・お昼休みに1回だけ塗り直す\n・パウダータイプなら化粧の上からでもOK\n・くもりの日も紫外線は7割届いています\n\n夏のシミ予防は「塗り直し」がすべてです☀️\n\n詳しいケアはLINEのホームケアガイドで配布中です。',
-    '今週の空き枠案内':'【今週のご案内】\n\nこんにちは、Salon 凛です🌿\n\n今週は\n・木曜 14:00 / 16:00\n・土曜 10:00\nにお席をご用意できます。\n\n梅雨明けの集中保湿ケア、この機会にいかがですか？\n\nご予約はこのままトークにお名前とご希望時間をどうぞ。'
+    '今週の空き枠案内':'【今週のご案内】\n\nこんにちは、Chainon Joli です🌿\n\n今週は\n・木曜 14:00 / 16:00\n・土曜 10:00\nにお席をご用意できます。\n\n梅雨明けの集中保湿ケア、この機会にいかがですか？\n\nご予約はこのままトークにお名前とご希望時間をどうぞ。'
   },
-  tags:'#静岡エステ #〇〇市エステ #プライベートサロン #フェイシャルエステ #毛穴ケア #くすみケア #乾燥肌ケア #大人肌 #ご褒美時間 #サロン凛',
+  tags:'#静岡エステ #〇〇市エステ #プライベートサロン #フェイシャルエステ #毛穴ケア #くすみケア #乾燥肌ケア #大人肌 #ご褒美時間 #chainonjoli',
   reel:'【リール台本（約20秒）】\n\n0-2秒｜フック（テロップ大）\n「日焼け止め、朝だけの人〜🙋」\n\n3-8秒｜問題提起\n施術ベッドを整えながら「実は2〜3時間で効果が落ち始めます」\n\n9-15秒｜解決策（3連テロップ）\n①昼に1回塗り直す ②パウダーでもOK ③くもりの日こそ油断しない\n\n16-20秒｜締め\n「保存して、今日のお昼から試してみてね」→ プロフィールのAI相談へ誘導',
   img:'【画像生成プロンプト】\n\nA serene private beauty salon interior in soft morning light, beige and greige tones, a single facial treatment bed with clean white linen, small vase with dried flowers, minimal Japanese aesthetic, warm and calm atmosphere, photorealistic, 4:5 portrait'
 };
@@ -744,7 +744,7 @@ document.getElementById('gen-tabs').addEventListener('click',e=>{
 
 /* ============ 理解度チェック ============ */
 const QUIZ=[
-  {q:'お客様をお出迎えするとき、最初にすることは？',opts:['予約内容の確認から始める','名前でお呼びして、お荷物を預かる','施術室へ直接ご案内する'],ans:1,why:'凛では「お名前でのお声がけ」を最優先にしています。'},
+  {q:'お客様をお出迎えするとき、最初にすることは？',opts:['予約内容の確認から始める','名前でお呼びして、お荷物を預かる','施術室へ直接ご案内する'],ans:1,why:'Chainon Joli では「お名前でのお声がけ」を最優先にしています。'},
   {q:'香料アレルギーのお客様への対応は？',opts:['香りの弱い製品なら使ってよい','カルテの注意事項を確認し、指定ラインのみ使用','当日口頭で確認できればよい'],ans:1,why:'カルテの注意事項が最優先。佐藤様はA社ラインで統一しています。'},
   {q:'当日キャンセルの連絡を受けたら？',opts:['規定どおり50%を必ず請求する','事情を伺い、体調不良なら柔軟に対応してオーナーへ報告','無料で振り替える'],ans:1,why:'規定は50%ですが、体調不良時は柔軟対応がサロンの方針です。'}
 ];

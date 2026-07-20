@@ -34,7 +34,7 @@ knowledge/
 ```json
 {
   "id": "01J...",
-  "tenant_id": "t_rin",
+  "tenant_id": "t_chainonjoli",
   "category": "identity.tone",
   "key": "writing_style",
   "content": {
