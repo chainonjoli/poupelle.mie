@@ -551,7 +551,7 @@
    サロン固有の情報はすべて salon-config.js（SALON_CONFIG）から
    読み込みます。このファイルにサロン名や価格を書かないこと。
    ========================================================= */
-const C = window.SALON_CONFIG;
+let C = window.SALON_CONFIG;
 
 /* ============ 設定の流し込み ============ */
 function hydrate(){
@@ -720,8 +720,12 @@ function saveFaq(){
 }
 
 /* ============ AI広報 ============ */
-const TOPICS=Object.keys(C.marketing.gen.body);
-let mktMedia=C.marketing.media[0], mktTopic=TOPICS[0];
+let TOPICS, mktMedia, mktTopic;
+function initMarketing(){
+  TOPICS=Object.keys(C.marketing.gen.body);
+  mktMedia=C.marketing.media[0]; mktTopic=TOPICS[0];
+  refreshSegs();
+}
 function renderSeg(id,items,cur,setter){
   const el=document.getElementById(id);el.innerHTML='';
   items.forEach(v=>{
@@ -733,7 +737,7 @@ function refreshSegs(){
   renderSeg('mkt-media',C.marketing.media,mktMedia,v=>{mktMedia=v;refreshSegs();});
   renderSeg('mkt-topic',TOPICS,mktTopic,v=>{mktTopic=v;refreshSegs();});
 }
-refreshSegs();
+initMarketing();
 let genTab='body';
 function genPost(){
   document.getElementById('gen-box').hidden=false;
@@ -779,4 +783,21 @@ function quizAnswer(btn,i){
   setTimeout(()=>{quizIdx++;renderQuiz();},1800);
 }
 renderQuiz();
+
+/* ============ 設定エディタからのライブ更新 ============ */
+window.addEventListener('message',e=>{
+  const d=e.data;
+  if(!d || d.type!=='salon-config' || !d.config) return;
+  C=d.config;
+  hydrate();
+  chatInited=false;
+  document.getElementById('chat-log').innerHTML='';
+  document.getElementById('chat-chips').innerHTML='';
+  counselStarted=false;
+  document.getElementById('counsel-body').innerHTML='';
+  document.getElementById('gen-box').hidden=true;
+  initMarketing();
+  quizIdx=0;quizScore=0;renderQuiz();
+  if(document.getElementById('app-customer').classList.contains('active')) initChat();
+});
 </script>
