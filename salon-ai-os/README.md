@@ -9,7 +9,9 @@
 
 | ファイル | 内容 |
 |---|---|
-| [`index.html`](./index.html) | **クリックできる高品質プロトタイプ**（Phase 1相当・依存ゼロの単一ファイル） |
+| [`index.html`](./index.html) | **プロトタイプのエンジン**（全サロン共通・サロン固有情報ゼロ） |
+| [`salon-config.js`](./salon-config.js) | **サロン設定ファイル（ナレッジ）**。現在は chainonjoli（伊勢市）の実データ |
+| [`salon-config.template.js`](./salon-config.template.js) | 新規サロン用の空テンプレート（コメント付き） |
 | [`docs/01_screen_flow.md`](./docs/01_screen_flow.md) | 画面遷移図（お客様側／オーナー側） |
 | [`docs/02_system_architecture.md`](./docs/02_system_architecture.md) | システム構成図・SaaS化を見据えたアーキテクチャ |
 | [`docs/03_database_design.md`](./docs/03_database_design.md) | データベース設計（ER図＋テーブル定義） |
@@ -18,6 +20,16 @@
 
 プロトタイプはブラウザで `index.html` を開くだけで動きます（サーバー不要）。
 スマホで開けばそのまま実機の操作感、PCで開けばスマホフレーム内で表示されます。
+
+## カスタマイズ方法（新しいサロンを作る）
+
+コード（`index.html`）は一切編集しません。**設定ファイル1枚がサロンの全てです。**
+
+1. `salon-config.template.js` を複製し、`salon-config.js` として保存
+2. 「◯◯」の箇所をサロンの言葉で埋める（サロン名・色・連絡先・メニュー・FAQ・カウンセラー知識・投稿サンプル・研修クイズ）
+3. `index.html` を開けば、そのサロンとして動く
+
+これが本システムの**ナレッジ・ファースト**設計の縮図です。テンプレート販売＝この設定ファイルを書いて納品すること。Phase 1 の管理画面実装は「このファイルをフォームで編集するUI」として、この構造の上にそのまま載ります。
 
 ## プロダクトの核となる考え方
 
