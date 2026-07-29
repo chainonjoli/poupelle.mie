@@ -27,6 +27,13 @@ window.SALON_CONFIG = {
     accentSoft: '#F0E7E1'   // 薄い背景色
   },
 
+  /* ---------- AI接続 ----------
+     空欄＝サンプル応答のデモモード。
+     server/worker.js を設置したURLを入れると本物のAIが応答します。 */
+  ai: {
+    endpoint: ''
+  },
+
   /* ---------- 連絡先 ---------- */
   contact: {
     lineUrl: 'https://lin.ee/XXXXXXX',   // 公式LINEの友だち追加URL

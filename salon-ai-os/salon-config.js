@@ -26,6 +26,14 @@ window.SALON_CONFIG = {
     accentSoft: '#F0E7E1'   // 薄い背景色
   },
 
+  /* ---------- AI接続（Phase 1実装） ----------
+     空欄のままならサンプル応答で動作します（デモモード）。
+     server/worker.js をCloudflareに設置し、そのURLを入れると
+     AI受付が本物のAIとして会話を始めます。手順は docs/06_deploy.md */
+  ai: {
+    endpoint: ''
+  },
+
   /* ---------- 連絡先 ---------- */
   contact: {
     lineUrl: 'https://lin.ee/O1jhrwd',

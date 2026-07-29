@@ -172,6 +172,8 @@
   .typing{align-self:flex-start;color:var(--muted);font-size:12px;padding:4px 6px}
   .chips{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0 14px}
   .chat-note{font-size:11px;color:var(--muted);text-align:center;padding:6px 0 0}
+  #chat-form{display:flex;gap:8px;padding:2px 0 10px}
+  #chat-form[hidden]{display:none}
 
   /* カウンセラー */
   .step-dots{display:flex;gap:6px;margin:6px 0 18px}
@@ -333,7 +335,12 @@
           <span class="t">AI受付　<span class="pill sage">24時間対応</span></span></div>
         <div class="chat-log" id="chat-log"></div>
         <div class="chips" id="chat-chips"></div>
-        <p class="chat-note">AI受付はサロンの登録情報（ナレッジ）に基づいてお答えします。</p>
+        <form id="chat-form" hidden>
+          <input id="chat-input" placeholder="メッセージを入力…" autocomplete="off"
+            style="flex:1;min-width:0;border:1px solid var(--line);border-radius:999px;padding:11px 16px;background:var(--card);font-size:14px">
+          <button class="btn accent" type="submit" style="flex:none">送信</button>
+        </form>
+        <p class="chat-note" id="chat-note">AI受付はサロンの登録情報（ナレッジ）に基づいてお答えします。</p>
       </section>
 
       <!-- AIカウンセラー -->
@@ -634,9 +641,15 @@ function toast(msg){
 }
 
 /* ============ AI受付チャット ============ */
-let chatInited=false;
+let chatInited=false, chatHistory=[];
+const aiMode=()=>!!(C.ai && C.ai.endpoint);
 function initChat(){
   if(chatInited) return; chatInited=true;
+  chatHistory=[];
+  document.getElementById('chat-form').hidden=!aiMode();
+  document.getElementById('chat-note').textContent=aiMode()
+    ? 'AIがサロンの登録情報（ナレッジ）に基づいてお答えします。個人情報の入力はお控えください。'
+    : 'AI受付はサロンの登録情報（ナレッジ）に基づいてお答えします。';
   aiSay(C.reception.greeting);
   renderChips();
 }
@@ -648,18 +661,53 @@ function renderChips(){
     b.onclick=()=>ask(k);c.appendChild(b);
   });
 }
-function ask(k){
+function addUserMsg(text){
   const log=document.getElementById('chat-log');
-  const me=document.createElement('div');me.className='msg me';me.textContent=k;log.appendChild(me);
+  const me=document.createElement('div');me.className='msg me';me.textContent=text;log.appendChild(me);
   const ty=document.createElement('div');ty.className='typing';ty.textContent='AI受付が入力中…';log.appendChild(ty);
   scrollChat();
+  return ty;
+}
+function ask(k){
+  /* 「予約したい」は常に予約導線（AI接続時も確実に誘導するため） */
+  const a=C.reception.faq[k];
+  if(aiMode() && typeof a==='string'){ sendToAI(k); return; }
+  const ty=addUserMsg(k);
   setTimeout(()=>{
     ty.remove();
-    const a=C.reception.faq[k];
     if(typeof a==='string') aiSay(a);
     else aiSay(a.text, a.reserve);
   },700);
 }
+async function sendToAI(text){
+  const ty=addUserMsg(text);
+  chatHistory.push({role:'user',content:text});
+  try{
+    const res=await fetch(C.ai.endpoint,{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({dept:'reception',messages:chatHistory.slice(-12)})
+    });
+    if(!res.ok) throw new Error('http '+res.status);
+    const data=await res.json();
+    ty.remove();
+    const reply=data.reply||'すみません、うまくお答えできませんでした。';
+    chatHistory.push({role:'assistant',content:reply});
+    aiSay(reply, data.reserve===true);
+  }catch(e){
+    ty.remove();
+    chatHistory.pop();
+    aiSay('申し訳ありません、ただいま接続が不安定です。お急ぎの場合は公式LINEまたはお電話（'+C.contact.telDisplay+'）でお問い合わせください。', true);
+  }
+}
+document.getElementById('chat-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const inp=document.getElementById('chat-input');
+  const text=inp.value.trim();
+  if(!text) return;
+  inp.value='';
+  sendToAI(text);
+});
 function aiSay(text,withReserve){
   const log=document.getElementById('chat-log');
   const m=document.createElement('div');m.className='msg ai';m.textContent=text;
@@ -790,7 +838,7 @@ window.addEventListener('message',e=>{
   if(!d || d.type!=='salon-config' || !d.config) return;
   C=d.config;
   hydrate();
-  chatInited=false;
+  chatInited=false;chatHistory=[];
   document.getElementById('chat-log').innerHTML='';
   document.getElementById('chat-chips').innerHTML='';
   counselStarted=false;

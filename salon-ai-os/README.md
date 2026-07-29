@@ -13,6 +13,8 @@
 | [`salon-config.js`](./salon-config.js) | **サロン設定ファイル（ナレッジ）**。現在は chainonjoli（伊勢市）の実データ |
 | [`salon-config.template.js`](./salon-config.template.js) | 新規サロン用の空テンプレート（コメント付き） |
 | [`editor.html`](./editor.html) | **設定エディタ**。フォーム編集→ライブプレビュー→`salon-config.js`書き出し |
+| [`server/worker.js`](./server/worker.js) | **AI受付ワーカー**（Cloudflare Workers用）。設置するとAI受付が本物のAIに |
+| [`docs/06_deploy.md`](./docs/06_deploy.md) | AI接続の設置手順（約30分・コピペのみ） |
 | [`docs/01_screen_flow.md`](./docs/01_screen_flow.md) | 画面遷移図（お客様側／オーナー側） |
 | [`docs/02_system_architecture.md`](./docs/02_system_architecture.md) | システム構成図・SaaS化を見据えたアーキテクチャ |
 | [`docs/03_database_design.md`](./docs/03_database_design.md) | データベース設計（ER図＋テーブル定義） |
@@ -86,6 +88,6 @@ AIは毎回ゼロから考えません。サロンのコンセプト・文体・
 
 | Phase | 内容 | 状態 |
 |---|---|---|
-| **Phase 1** | AI受付／AI美容相談／FAQ／予約導線／LINE導線／管理画面 | ✅ 本プロトタイプで画面・体験を定義 |
+| **Phase 1** | AI受付／AI美容相談／FAQ／予約導線／LINE導線／管理画面 | 🚧 画面・体験は完成。AI受付の本接続コードあり（`server/`・設置手順は docs/06）。`salon-config.js` の `ai.endpoint` が空ならデモモード、設定すると実AIで応答 |
 | **Phase 2** | カルテ／SNS投稿生成／商品管理／分析 | 画面はプロトタイプに先行実装済み |
 | **Phase 3** | 予約システム／決済／EC／外部API連携 | 設計のみ（docs/05） |
