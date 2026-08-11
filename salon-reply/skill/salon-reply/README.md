@@ -28,6 +28,9 @@ Salon Replyはその背景を考えてから文章を作ります。
 Salon Replyは「Agent Skill」という形式のファイル一式です。
 **中身はぜんぶ普通のテキストファイル** なので、壊す心配はありません。
 
+対応環境: **動作確認済みはClaude Code** です。claude.ai・Claude Desktopは
+同じAgent Skills仕様のため使える見込みですが、実機での動作確認は行っていません。
+
 ### Claude(claude.ai)で使う場合
 
 1. claude.ai にログイン → 設定(Settings)→「Capabilities」→「Skills」を開く
