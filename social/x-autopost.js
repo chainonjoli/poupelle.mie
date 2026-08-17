@@ -40,6 +40,12 @@ function dayOfYear(t) {
 
 /* ---- 今日の投稿を選ぶ ---- */
 function pickPost(posts, t) {
+    /* 特定日（推し活の大きな日：当落発表日など）は最優先。
+       social/x-posts.json の special に "YYYY-MM-DD": "本文" で追加する */
+    var key = t.y + '-' + String(t.m).padStart(2, '0') + '-' + String(t.d).padStart(2, '0');
+    if (posts.special && posts.special[key]) {
+        return posts.special[key];
+    }
     if (t.d === 1 && posts.tsuitachi && posts.tsuitachi.length) {
         return posts.tsuitachi[(t.m - 1) % posts.tsuitachi.length];
     }
