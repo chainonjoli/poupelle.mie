@@ -28,18 +28,19 @@ Salon Replyはその背景を考えてから文章を作ります。
 Salon Replyは「Agent Skill」という形式のファイル一式です。
 **中身はぜんぶ普通のテキストファイル** なので、壊す心配はありません。
 
-対応環境: **動作確認済みはClaude Code** です。claude.ai・Claude Desktopは
-同じAgent Skills仕様のため使える見込みですが、実機での動作確認は行っていません。
+対応環境: **動作確認済みはClaude Code**。claude.ai・Claude Cowork(デスクトップアプリ)は
+公式仕様上対応(ZIPアップロード方式)ですが、Salon Reply自体の実機テストは未実施です。
+対応プランは変わることがあるため、最新はAnthropic公式ヘルプをご確認ください。
 
-### Claude(claude.ai)で使う場合
+### claude.ai / Claude Cowork で使う場合
 
-1. claude.ai にログイン → 設定(Settings)→「Capabilities」→「Skills」を開く
-2. この `salon-reply` フォルダをZIPにしてアップロード
+1. 商品同梱の「Claudeにアップロードするファイル/salon-reply.zip」を用意(**解凍しない**)
+2. claude.ai(またはCoworkアプリ)の **Customize → Skills** からZIPをアップロード
 3. チャットでお客様のメッセージを貼って「返信考えて」と送るだけ
 
-### Claude Code / Claude Desktop(Cowork)で使う場合
+### Claude Code で使う場合
 
-1. `salon-reply` フォルダを `~/.claude/skills/` の中にコピー
+1. この `salon-reply` フォルダを `~/.claude/skills/` の中にコピー
 2. チャットでお客様のメッセージを貼るだけ(自動でこのスキルが働きます)
 
 ※画面の名称はアップデートで変わることがあります。詳しくは同梱の「導入ガイド」をどうぞ。
