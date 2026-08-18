@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>推し活レーダーOS</title>
+    <meta name="description" content="推し・予定・滞在エリアから「今から行ける推しイベント」を自動判定する個人用レーダー">
+    <meta name="theme-color" content="#faf8f4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/oshi-radar.css?v=20260818a">
+</head>
+<body>
+    <header class="app-header">
+        <h1><span class="logo-mark">◈</span> 推し活レーダー<span class="logo-os">OS</span></h1>
+        <p class="tagline">「知らんかった😭」をゼロに</p>
+    </header>
+
+    <main id="view" class="view"><!-- JSが描画 --></main>
+
+    <nav class="tabbar" id="tabbar">
+        <button data-tab="home" class="tab active"><span class="tab-icon">◈</span>ホーム</button>
+        <button data-tab="events" class="tab"><span class="tab-icon">🎪</span>イベント</button>
+        <button data-tab="oshi" class="tab"><span class="tab-icon">♡</span>推し</button>
+        <button data-tab="schedule" class="tab"><span class="tab-icon">📅</span>予定</button>
+        <button data-tab="settings" class="tab"><span class="tab-icon">⚙</span>設定</button>
+    </nav>
+
+    <!-- 汎用フォームダイアログ（中身はJSが差し込む） -->
+    <dialog id="dlg" class="dlg"><div id="dlg-body"></div></dialog>
+
+    <script src="scripts/oshi-radar/store.js?v=20260818a"></script>
+    <script src="scripts/oshi-radar/travel.js?v=20260818a"></script>
+    <script src="scripts/oshi-radar/logic.js?v=20260818a"></script>
+    <script src="scripts/oshi-radar/app.js?v=20260818a"></script>
+</body>
+</html>
