@@ -594,6 +594,94 @@
     }
 
     /* ---------- 設定 ---------- */
+    function cloudSection() {
+        var cfg = S.getRemoteConfig();
+        if (S.isRemote()) {
+            return '<section class="sec"><div class="sec-title">☁ クラウド同期</div>' +
+                '<div class="row">' +
+                  '<p class="settings-note">クラウドモードで動作中（' + (S.remoteStatus() === 'online' ? '接続OK' : '⚠ オフライン') + '）。<br>' +
+                  '接続先: ' + esc(cfg.apiUrl) + '<br>データはD1データベースに保存され、他の端末からも同じデータが見えます。</p>' +
+                  '<div class="card-actions"><button class="btn btn-danger" id="btn-cloud-off">ローカルモードに戻す</button></div>' +
+                  '<p class="settings-note">※戻してもローカルデータ（移行前のもの）は残っています。クラウド側のデータも消えません。</p>' +
+                '</div></section>';
+        }
+        return '<section class="sec"><div class="sec-title">☁ クラウドへ移行（Workers + D1）</div>' +
+            '<div class="row">' +
+              '<p class="settings-note">手順: ①バックアップ → ②接続テスト → ③移行 → ④検証 → ⑤切替。<br>ローカルデータは削除されません。</p>' +
+              '<div class="f-group"><label>API URL</label><input type="url" id="cw-url" value="' + esc(cfg.apiUrl) + '" placeholder="https://oshi-radar-api.〜.workers.dev"></div>' +
+              '<div class="f-group"><label>APIトークン</label><input type="text" id="cw-token" value="' + esc(cfg.token) + '" placeholder="wrangler secret put API_TOKEN で設定した値"></div>' +
+              '<div class="card-actions">' +
+                '<button class="btn" id="cw-backup">① バックアップ</button>' +
+                '<button class="btn" id="cw-test">② 接続テスト</button>' +
+                '<button class="btn" id="cw-migrate">③ 移行実行</button>' +
+                '<button class="btn" id="cw-verify">④ 検証</button>' +
+                '<button class="btn btn-gold" id="cw-switch" disabled>⑤ クラウドモードへ切替</button>' +
+              '</div>' +
+              '<div id="cw-log" class="settings-note" style="white-space:pre-line"></div>' +
+            '</div></section>';
+    }
+
+    function bindCloudSection() {
+        if (S.isRemote()) {
+            document.getElementById('btn-cloud-off').addEventListener('click', function () {
+                if (!confirm('ローカルモードに戻しますか？（クラウドのデータは消えません）')) return;
+                S.switchToLocal();
+                location.reload();
+            });
+            return;
+        }
+        var log = document.getElementById('cw-log');
+        function say(msg) { log.textContent += msg + '\n'; }
+        function cfg() {
+            var c = { enabled: false, apiUrl: document.getElementById('cw-url').value.trim(), token: document.getElementById('cw-token').value.trim() };
+            S.saveRemoteConfig(c); /* 入力値を保存（enabledはfalseのまま） */
+            return c;
+        }
+        document.getElementById('cw-backup').addEventListener('click', function () {
+            try {
+                var b = S.backupLocal();
+                var blob = new Blob([b.json], { type: 'application/json' });
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'oshi-radar-backup-' + L.toDateStr(new Date()) + '.json';
+                a.click();
+                say('① バックアップ完了: ブラウザ内(' + b.key + ')＋ファイルをダウンロードしました');
+            } catch (e) { say('① 失敗: ' + e.message); }
+        });
+        document.getElementById('cw-test').addEventListener('click', function () {
+            var c = cfg();
+            if (!c.apiUrl || !c.token) { say('② API URLとトークンを入力してください'); return; }
+            S.testConnection(c).then(function (st) {
+                say('② 接続OK（サーバー上: 推し' + st.oshi.length + '件・イベント' + st.events.length + '件・予定' + st.schedules.length + '件）');
+            }).catch(function (e) { say('② 接続失敗: ' + e.message); });
+        });
+        document.getElementById('cw-migrate').addEventListener('click', function () {
+            var c = cfg();
+            if (!confirm('ローカルデータをクラウドへコピーします（ローカル側は消えません）。実行しますか？')) return;
+            S.migrateToCloud(c).then(function (r) {
+                say('③ 移行完了: 推し' + r.imported.oshi + '・イベント' + r.imported.events + '・予定' + r.imported.schedules +
+                    (r.imported.skippedDuplicates ? '（重複スキップ' + r.imported.skippedDuplicates + '）' : ''));
+            }).catch(function (e) { say('③ 移行失敗: ' + e.message); });
+        });
+        document.getElementById('cw-verify').addEventListener('click', function () {
+            var c = cfg();
+            S.verifyCloud(c).then(function (v) {
+                var ok = v.local.oshi <= v.server.oshi && v.local.events <= v.server.events && v.local.schedules <= v.server.schedules;
+                say('④ 検証: ローカル(推し' + v.local.oshi + '/イベント' + v.local.events + '/予定' + v.local.schedules + ') → ' +
+                    'サーバー(推し' + v.server.oshi + '/イベント' + v.server.events + '/予定' + v.server.schedules + ') … ' + (ok ? '✅ OK' : '❌ 不一致'));
+                if (ok) {
+                    document.getElementById('cw-switch').disabled = false;
+                    say('⑤ の切替ボタンが押せるようになりました');
+                }
+            }).catch(function (e) { say('④ 検証失敗: ' + e.message); });
+        });
+        document.getElementById('cw-switch').addEventListener('click', function () {
+            S.switchToCloud(cfg());
+            alert('クラウドモードに切り替えました。再読み込みします。');
+            location.reload();
+        });
+    }
+
     function renderSettings() {
         var s = S.getSettings();
         var areas = T.areaNames();
@@ -612,16 +700,21 @@
                 }).join('') + '</select></div>' +
               '<button class="btn btn-gold" id="btn-save-set">設定を保存</button>' +
             '</div></section>' +
+            cloudSection() +
             '<section class="sec"><div class="sec-title">データのバックアップ</div>' +
             '<div class="row">' +
-              '<p class="settings-note">データはこの端末のブラウザ内にのみ保存されています。機種変更やブラウザ変更の前に必ずエクスポートしてください。</p>' +
+              '<p class="settings-note">' + (S.isRemote()
+                  ? 'クラウド上のデータのコピーをエクスポートできます。'
+                  : 'データはこの端末のブラウザ内にのみ保存されています。機種変更やブラウザ変更の前に必ずエクスポートしてください。') + '</p>' +
               '<div class="card-actions"><button class="btn" id="btn-export">エクスポート</button><button class="btn" id="btn-import">インポート</button></div>' +
               '<textarea class="export-area" id="io-area" placeholder="エクスポートを押すとここにJSONが出ます。インポートはここに貼り付けてから押してください。"></textarea>' +
             '</div></section>' +
             '<section class="sec"><div class="sec-title">このアプリについて</div>' +
-            '<div class="row"><p class="settings-note">推し活レーダーOS Phase 1（自分専用MVP）。<br>' +
-            '通知（プッシュ）は静的サイトの制約で未対応のため、外出予定がある日はアプリを開いて「今日の推し活チャンス」を確認してください。<br>' +
-            '設計仕様: docs/OSHI_RADAR_SPEC.md</p></div></section>';
+            '<div class="row"><p class="settings-note">推し活レーダーOS Phase 2a（クラウド基盤対応）。<br>' +
+            'プッシュ通知はPhase 2cで対応予定です。外出予定がある日はアプリを開いて「今日の推し活チャンス」を確認してください。<br>' +
+            '設計仕様: docs/OSHI_RADAR_SPEC.md / docs/OSHI_RADAR_PHASE2_DESIGN.md</p></div></section>';
+
+        bindCloudSection();
 
         document.getElementById('btn-save-set').addEventListener('click', function () {
             S.saveSettings({
@@ -637,9 +730,16 @@
         document.getElementById('btn-import').addEventListener('click', function () {
             var text = document.getElementById('io-area').value.trim();
             if (!text) { alert('インポートするJSONを貼り付けてください'); return; }
-            if (!confirm('現在のデータを貼り付けた内容で置き換えます。よろしいですか？')) return;
-            try { S.importJson(text); alert('インポートしました'); render(); }
-            catch (e) { alert('インポートに失敗しました: ' + e.message); }
+            var msg = S.isRemote()
+                ? '貼り付けた内容をクラウドへ取り込みます（既存IDは上書き）。よろしいですか？'
+                : '現在のデータを貼り付けた内容で置き換えます。よろしいですか？';
+            if (!confirm(msg)) return;
+            try {
+                Promise.resolve(S.importJson(text)).then(function () {
+                    alert('インポートしました');
+                    if (S.isRemote()) location.reload(); else render();
+                }).catch(function (e) { alert('インポートに失敗しました: ' + e.message); });
+            } catch (e) { alert('インポートに失敗しました: ' + e.message); }
         });
     }
 
@@ -682,5 +782,13 @@
         }
     });
 
-    render();
+    /* クラウドモードならAPIから状態を取得してから描画する */
+    view.innerHTML = '<div class="empty" style="margin-top:24px">読み込み中…</div>';
+    S.init().then(function () {
+        var tagline = document.querySelector('.tagline');
+        if (tagline && S.isRemote()) {
+            tagline.textContent = (S.remoteStatus() === 'online' ? '☁ クラウド同期中' : '⚠ オフライン（前回同期データ）') + '｜「知らんかった😭」をゼロに';
+        }
+        render();
+    });
 })();

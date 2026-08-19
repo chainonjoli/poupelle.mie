@@ -1,0 +1,21 @@
+# 推し活レーダーOS API (Cloudflare Workers + D1)
+name = "oshi-radar-api"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# ---- D1 バインディング ----
+# 本番デプロイ前に `npx wrangler d1 create oshi-radar-db` を実行し、
+# 出力された database_id で下の値を置き換えること。
+# ローカル開発 (`npx wrangler dev --local`) はこのままで動く。
+[[d1_databases]]
+binding = "DB"
+database_name = "oshi-radar-db"
+database_id = "00000000-0000-0000-0000-000000000000" # ← 要置換
+
+# ---- シークレット ----
+# API_TOKEN: 本番は `npx wrangler secret put API_TOKEN` で設定。
+# ローカルは .dev.vars（gitignore済み）に API_TOKEN=... を書く。
+
+# ---- Phase 2b で有効化する予定のcron（現時点ではコメントアウト） ----
+# [triggers]
+# crons = ["0 * * * *"]  # 毎時tick。スケジューラが通常日/遠征前日/当日で巡回内容を決める

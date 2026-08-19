@@ -1,10 +1,15 @@
 /* 推し活レーダーOS データ層
-   localStorage 単一キーに保存。読み書きはこのモジュール経由に限定し、
-   将来 GAS/Supabase 等へ差し替える際もこのAPIを維持する。 */
+   2つのモードを持つ:
+   - ローカルモード: localStorage 'oshiRadar.v1'（Phase 1 と同一。既存データはそのまま）
+   - クラウドモード: Cloudflare Workers + D1 のAPIが真実。メモリキャッシュを同期読み、
+     変更はAPIへ書き込み。オフライン閲覧用に 'oshiRadar.cloudCache.v1' にミラーする。
+   読み書きAPI（listEvents等）は Phase 1 と同一のまま。app.js/logic.js は無改修で動く。 */
 (function (global) {
     'use strict';
 
-    var KEY = 'oshiRadar.v1';
+    var KEY = 'oshiRadar.v1';               /* ローカルモードの本体（移行後も消さない） */
+    var CACHE_KEY = 'oshiRadar.cloudCache.v1'; /* クラウドモードのオフラインミラー */
+    var REMOTE_KEY = 'oshiRadar.remote';    /* {enabled, apiUrl, token} */
 
     function uid(prefix) {
         return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
@@ -12,9 +17,49 @@
 
     function nowIso() { return new Date().toISOString(); }
 
-    /* ---- 初期データ（シード） ----
-       イベントのシードは「使い方が分かる見本」であり、開催情報の断定ではない。
-       非公式ソースのみのため【要確認】として表示される。 */
+    /* ---- リモート設定 ---- */
+    function getRemoteConfig() {
+        try { return JSON.parse(localStorage.getItem(REMOTE_KEY)) || { enabled: false, apiUrl: '', token: '' }; }
+        catch (e) { return { enabled: false, apiUrl: '', token: '' }; }
+    }
+    function saveRemoteConfig(cfg) { localStorage.setItem(REMOTE_KEY, JSON.stringify(cfg)); }
+    function isRemote() { return !!getRemoteConfig().enabled; }
+
+    var remoteStatus = 'local'; /* local | online | offline */
+    var syncErrorShown = false;
+
+    function apiFetch(method, path, body, cfg) {
+        cfg = cfg || getRemoteConfig();
+        return fetch(cfg.apiUrl.replace(/\/$/, '') + path, {
+            method: method,
+            headers: {
+                'Authorization': 'Bearer ' + cfg.token,
+                'Content-Type': 'application/json'
+            },
+            body: body ? JSON.stringify(body) : undefined
+        }).then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+                if (!res.ok) { var e = new Error(data.error || ('HTTP ' + res.status)); e.data = data; e.status = res.status; throw e; }
+                return data;
+            });
+        });
+    }
+
+    /* 変更のクラウド反映（fire-and-forget。失敗時は一度だけ警告） */
+    function push(method, path, body) {
+        if (!isRemote()) return Promise.resolve();
+        return apiFetch(method, path, body).catch(function (e) {
+            console.error('cloud sync failed', e);
+            if (e.status === 409) {
+                alert('クラウド側に同じイベント（名前×会場×開始日×主催者）が既にあります。ページを再読み込みして確認してください。');
+            } else if (!syncErrorShown) {
+                syncErrorShown = true;
+                alert('クラウドへの保存に失敗しました。通信環境を確認してください。\nこの端末での変更は再読み込みまでは画面に残りますが、サーバーには保存されていません。');
+            }
+        });
+    }
+
+    /* ---- 初期データ（シード。ローカルモード初回のみ） ---- */
     function seedData() {
         var oshiKing = {
             id: uid('oshi'), name: 'King & Prince', group: 'King & Prince', category: 'アイドル',
@@ -90,9 +135,41 @@
     }
 
     var cache = null;
+    var initialized = false;
 
-    function load() {
-        if (cache) return cache;
+    /* 初期化。クラウドモードならAPIから状態を取得してから解決する。
+       app.js は init() の完了後に描画を始めること。 */
+    function init() {
+        if (initialized) return Promise.resolve();
+        if (!isRemote()) {
+            loadLocal();
+            remoteStatus = 'local';
+            initialized = true;
+            return Promise.resolve();
+        }
+        return apiFetch('GET', '/api/state').then(function (data) {
+            cache = data;
+            remoteStatus = 'online';
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) { /* 容量超過は無視 */ }
+            initialized = true;
+        }).catch(function (e) {
+            console.error('cloud load failed', e);
+            var mirror = null;
+            try { mirror = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e2) { }
+            if (mirror) {
+                cache = mirror;
+                remoteStatus = 'offline';
+                alert('クラウドに接続できないため、前回同期したデータを表示しています（閲覧のみ推奨）。');
+            } else {
+                loadLocal();
+                remoteStatus = 'offline';
+                alert('クラウドに接続できません。ローカルデータを表示しています。');
+            }
+            initialized = true;
+        });
+    }
+
+    function loadLocal() {
         try {
             var raw = localStorage.getItem(KEY);
             if (raw) {
@@ -101,24 +178,29 @@
                 if (!cache.oshi) cache.oshi = [];
                 if (!cache.events) cache.events = [];
                 if (!cache.schedules) cache.schedules = [];
-                return cache;
+                return;
             }
         } catch (e) {
             console.error('storage load error', e);
         }
         cache = seedData();
-        save();
+        persistLocal();
+    }
+
+    function persistLocal() {
+        try {
+            localStorage.setItem(isRemote() ? CACHE_KEY : KEY, JSON.stringify(cache));
+        } catch (e) {
+            console.error('storage save error', e);
+        }
+    }
+
+    function load() {
+        if (!cache) loadLocal(); /* init()を経ない直アクセスの保険（ローカルモード動作） */
         return cache;
     }
 
-    function save() {
-        try {
-            localStorage.setItem(KEY, JSON.stringify(cache));
-        } catch (e) {
-            console.error('storage save error', e);
-            alert('保存に失敗しました。端末の空き容量を確認してください。');
-        }
-    }
+    function save() { persistLocal(); }
 
     /* ---- 推し ---- */
     function listOshi() { return load().oshi.slice(); }
@@ -133,6 +215,7 @@
             if (i >= 0) db.oshi[i] = oshi; else db.oshi.push(oshi);
         }
         save();
+        push('POST', '/api/oshi', oshi);
         return oshi;
     }
     function deleteOshi(id) {
@@ -142,6 +225,7 @@
             ev.oshiLinks = (ev.oshiLinks || []).filter(function (l) { return l.oshiId !== id; });
         });
         save();
+        push('DELETE', '/api/oshi/' + id);
     }
 
     /* ---- イベント ---- */
@@ -170,12 +254,14 @@
             if (i >= 0) db.events[i] = ev; else db.events.push(ev);
         }
         save();
+        push('POST', '/api/events', ev);
         return ev;
     }
     function deleteEvent(id) {
         var db = load();
         db.events = db.events.filter(function (e) { return e.id !== id; });
         save();
+        push('DELETE', '/api/events/' + id);
     }
 
     /* ---- 予定 ---- */
@@ -190,28 +276,84 @@
         if (i >= 0) db.schedules[i] = sc; else db.schedules.push(sc);
         db.schedules.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
         save();
+        push('POST', '/api/schedules', sc);
         return sc;
     }
     function deleteSchedule(id) {
         var db = load();
         db.schedules = db.schedules.filter(function (s) { return s.id !== id; });
         save();
+        push('DELETE', '/api/schedules/' + id);
     }
 
     /* ---- 設定 ---- */
     function getSettings() { return load().settings; }
-    function saveSettings(s) { load().settings = s; save(); }
+    function saveSettings(s) {
+        load().settings = s;
+        save();
+        push('PUT', '/api/settings', s);
+    }
 
     /* ---- バックアップ ---- */
     function exportJson() { return JSON.stringify(load(), null, 2); }
     function importJson(text) {
         var data = JSON.parse(text); /* 不正JSONはここで例外 */
         if (!data || data.version !== 1) throw new Error('対応していないデータ形式です');
+        if (isRemote()) {
+            /* クラウドモードでは移行APIで取り込み、取り込み後に再読込を促す */
+            return apiFetch('POST', '/api/migrate', data);
+        }
         cache = data;
         save();
+        return Promise.resolve();
+    }
+
+    /* ---- クラウド移行（設定画面のウィザードが使う） ----
+       手順: backup → migrate → verify → switch。localStorage版データは消さない。 */
+    function backupLocal() {
+        var raw = localStorage.getItem(KEY);
+        if (!raw) throw new Error('ローカルデータがありません');
+        var backupKey = 'oshiRadar.backup.' + nowIso().replace(/[:.]/g, '-');
+        localStorage.setItem(backupKey, raw);
+        return { key: backupKey, json: raw };
+    }
+    function testConnection(cfg) {
+        return apiFetch('GET', '/api/state', null, cfg);
+    }
+    function migrateToCloud(cfg) {
+        var raw = localStorage.getItem(KEY);
+        if (!raw) return Promise.reject(new Error('ローカルデータがありません'));
+        return apiFetch('POST', '/api/migrate', JSON.parse(raw), cfg);
+    }
+    function verifyCloud(cfg) {
+        var local = JSON.parse(localStorage.getItem(KEY) || '{}');
+        return apiFetch('GET', '/api/export', null, cfg).then(function (server) {
+            return {
+                local: {
+                    oshi: (local.oshi || []).length,
+                    events: (local.events || []).length,
+                    schedules: (local.schedules || []).length
+                },
+                server: {
+                    oshi: (server.oshi || []).length,
+                    events: (server.events || []).length,
+                    schedules: (server.schedules || []).length
+                }
+            };
+        });
+    }
+    function switchToCloud(cfg) {
+        cfg.enabled = true;
+        saveRemoteConfig(cfg);
+    }
+    function switchToLocal() {
+        var cfg = getRemoteConfig();
+        cfg.enabled = false;
+        saveRemoteConfig(cfg);
     }
 
     global.OshiStore = {
+        init: init,
         load: load, save: save, uid: uid, nowIso: nowIso,
         listOshi: listOshi, getOshi: getOshi, upsertOshi: upsertOshi, deleteOshi: deleteOshi,
         listEvents: listEvents, getEvent: getEvent, upsertEvent: upsertEvent,
@@ -219,6 +361,13 @@
         listSchedules: listSchedules, getScheduleByDate: getScheduleByDate,
         upsertSchedule: upsertSchedule, deleteSchedule: deleteSchedule,
         getSettings: getSettings, saveSettings: saveSettings,
-        exportJson: exportJson, importJson: importJson
+        exportJson: exportJson, importJson: importJson,
+        /* クラウド関連 */
+        isRemote: isRemote,
+        remoteStatus: function () { return remoteStatus; },
+        getRemoteConfig: getRemoteConfig, saveRemoteConfig: saveRemoteConfig,
+        backupLocal: backupLocal, testConnection: testConnection,
+        migrateToCloud: migrateToCloud, verifyCloud: verifyCloud,
+        switchToCloud: switchToCloud, switchToLocal: switchToLocal
     };
 })(window);
