@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ぼぅ 投稿スタジオ</title>
+    <meta name="description" content="マンボウの子・ぼぅのInstagram投稿を「生成→人が確認→採用」で育てる管理画面">
+    <meta name="robots" content="noindex">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/bou.css?v=1">
+</head>
+<body>
+<div class="wrap">
+
+    <header class="bou-header">
+        <!-- ぼぅ（丸いマンボウ・点目・フリルの背びれ） -->
+        <svg width="56" height="56" viewBox="0 0 100 100" aria-hidden="true">
+            <g stroke="#6D7780" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M78 38 q8 -3 6 4 q6 0 3 6 q6 2 1 7 q5 4 -2 6 q3 6 -6 5 q1 6 -7 3"
+                      fill="#8fa0aa"/>
+                <ellipse cx="47" cy="52" rx="33" ry="31" fill="#9DAEB8"/>
+                <path d="M22 62 q25 16 50 0 q-4 14 -25 14 q-21 0 -25 -14z" fill="#F2F2EC" stroke="none"/>
+                <path d="M47 12 q6 8 1 12" fill="#9DAEB8"/>
+                <path d="M14 54 q-6 2 -2 7 q4 4 8 -1" fill="#9DAEB8"/>
+            </g>
+            <circle cx="38" cy="48" r="2.6" fill="#4A525A"/>
+            <circle cx="58" cy="48" r="2.6" fill="#4A525A"/>
+            <path d="M46 57 h5" stroke="#4A525A" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="33" cy="56" r="3.5" fill="#F7C9CD" opacity=".6"/>
+            <circle cx="63" cy="56" r="3.5" fill="#F7C9CD" opacity=".6"/>
+        </svg>
+        <div>
+            <h1>ぼぅ 投稿スタジオ</h1>
+            <div class="sub">がんばってなさそうに見えて、今日もちゃんと生きてる。</div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab-btn active" data-view="dashboard">ダッシュボード</button>
+        <button class="tab-btn" data-view="settings">キャラクター設定</button>
+    </nav>
+
+    <!-- ================= ダッシュボード ================= -->
+    <section id="view-dashboard" class="view active">
+
+        <div class="card generate-area">
+            <button id="generate-btn" class="btn btn-primary">今日のぼぅ投稿を作って</button>
+            <div class="mode-note" id="mode-note"></div>
+            <div class="gen-status" id="gen-status"></div>
+        </div>
+
+        <div class="card">
+            <h2>今日の3案</h2>
+            <p class="hint" id="batch-hint">案が3つ出ます。気に入ったものを1つ選んでください。選ばれなかった案は「不採用」になります（あとで戻せます）。</p>
+            <div class="batch-grid" id="batch-grid" style="margin-top:12px"></div>
+        </div>
+
+        <div class="card">
+            <h2>過去の投稿候補</h2>
+            <div class="filter-row" id="filter-row">
+                <button class="filter-btn active" data-filter="all">すべて</button>
+                <button class="filter-btn" data-filter="draft">下書き</button>
+                <button class="filter-btn" data-filter="selected">採用</button>
+                <button class="filter-btn" data-filter="generated">画像作成済み</button>
+                <button class="filter-btn" data-filter="posted">投稿済み</button>
+                <button class="filter-btn" data-filter="rejected">不採用</button>
+            </div>
+            <div id="post-list"></div>
+        </div>
+
+        <div class="card">
+            <h2>データ</h2>
+            <p class="hint">データはこのブラウザの中だけに保存されます。ときどき書き出してバックアップしてください。</p>
+            <div class="status-actions">
+                <button id="export-btn" class="btn btn-ghost">データの書き出し</button>
+                <button id="import-btn" class="btn btn-ghost">データの読み込み</button>
+                <input type="file" id="import-file" accept="application/json" hidden>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= キャラクター設定 ================= -->
+    <section id="view-settings" class="view">
+
+        <div class="card">
+            <h2>生成モード</h2>
+            <div class="radio-row">
+                <label><input type="radio" name="gen-mode" value="builtin"> 内蔵モード（APIキー不要）</label>
+                <label><input type="radio" name="gen-mode" value="api"> Claude APIモード</label>
+            </div>
+            <div class="field">
+                <label for="api-key">Claude APIキー（このブラウザにだけ保存されます。共有のPCでは使わないでください）</label>
+                <input type="password" id="api-key" placeholder="sk-ant-...">
+            </div>
+            <button id="save-settings-btn" class="btn btn-small">生成モードを保存</button>
+            <p class="hint" style="margin-top:8px">Claude APIモードでは、下の固定設定と過去のフィードバックを毎回参照して3案を作ります。内蔵モードは書き溜めたぼぅの言葉から選びます。</p>
+        </div>
+
+        <div class="card settings-grid">
+            <h2>ぼぅの固定設定</h2>
+            <p class="hint">投稿生成は毎回ここを参照します。「、」区切りや改行区切りのところはそのまま編集できます。</p>
+
+            <div class="field"><label>コンセプト</label><textarea id="ch-concept"></textarea></div>
+            <div class="field"><label>役割</label><textarea id="ch-role"></textarea></div>
+            <div class="field"><label>性格（1行に1つ）</label><textarea id="ch-personality" class="tall"></textarea></div>
+            <div class="field"><label>話し方のルール（1行に1つ）</label><textarea id="ch-rules" class="tall"></textarea></div>
+            <div class="field"><label>口ぐせの例（1行に1つ）</label><textarea id="ch-examples" class="tall"></textarea></div>
+            <div class="field"><label>絶対に使わない表現（1行に1つ）</label><textarea id="ch-ng" class="tall"></textarea></div>
+            <div class="field"><label>投稿テーマ（1行に1つ）</label><textarea id="ch-themes" class="tall"></textarea></div>
+            <div class="field"><label>ハッシュタグ候補（1行に1つ）</label><textarea id="ch-hashtags" class="tall"></textarea></div>
+
+            <div class="field">
+                <label>色のガイド</label>
+                <div class="color-row" id="color-row"></div>
+            </div>
+            <div class="field"><label>見た目の固定設定（1行に1つ）</label><textarea id="ch-visual" class="tall"></textarea></div>
+            <div class="field"><label>見た目の禁止事項（1行に1つ）</label><textarea id="ch-forbidden" class="tall"></textarea></div>
+            <div class="field"><label>画像生成用プロンプト雛形（{scene} にシーンが入ります）</label><textarea id="ch-template" class="tall"></textarea></div>
+
+            <div class="status-actions">
+                <button id="save-character-btn" class="btn btn-select">設定を保存</button>
+                <button id="reset-character-btn" class="btn btn-ghost">初期設定に戻す</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>ぼぅ 投稿スタジオ ｜ 第一段階：生成 → 人が確認 → 採用</footer>
+</div>
+
+<!-- ================= 投稿詳細モーダル ================= -->
+<div class="modal-bg" id="modal-bg">
+    <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-head">
+            <span class="badge" id="m-status">draft</span>
+            <span class="chip" id="m-variant"></span>
+            <span class="chip" id="m-date"></span>
+            <span class="spacer"></span>
+            <button class="modal-close" id="modal-close" aria-label="閉じる">×</button>
+        </div>
+
+        <div id="m-ng-warning" class="chips" style="margin-bottom:10px"></div>
+
+        <div class="field"><label>テーマ</label><input type="text" id="m-theme"></div>
+        <div class="field"><label>画像内メインテキスト（1〜3行）</label><textarea id="m-main"></textarea></div>
+        <div class="field"><label>シーン（ぼぅが何をしているか）</label><input type="text" id="m-scene"></div>
+        <div class="field"><label>Instagramキャプション</label><textarea id="m-caption"></textarea></div>
+        <div class="field"><label>ハッシュタグ（スペース区切り・最大5個）</label><input type="text" id="m-hashtags"></div>
+        <div class="field">
+            <label>画像生成用プロンプト（画像ツールにそのまま貼れます）</label>
+            <div class="with-copy">
+                <textarea id="m-prompt" class="tall"></textarea>
+                <button id="copy-prompt-btn" class="btn btn-small">コピー</button>
+            </div>
+        </div>
+
+        <div class="status-actions" id="m-actions"></div>
+
+        <div class="card" style="margin-bottom:0">
+            <h2>フィードバック</h2>
+            <p class="hint">ここに残した言葉は保存され、次の生成のときに優先して反映されます。</p>
+            <div class="feedback-chips" style="margin-top:8px">
+                <button class="fb-chip" data-fb="これはぼぅっぽい">これはぼぅっぽい</button>
+                <button class="fb-chip" data-fb="これは違う">これは違う</button>
+                <button class="fb-chip" data-fb="もっとゆるく">もっとゆるく</button>
+                <button class="fb-chip" data-fb="言いすぎ">言いすぎ</button>
+                <button class="fb-chip" data-fb="好き">好き</button>
+            </div>
+            <div class="field" style="margin-bottom:8px">
+                <div class="with-copy">
+                    <textarea id="m-feedback" placeholder="自由に書いてもOK" style="min-height:48px"></textarea>
+                    <button id="send-feedback-btn" class="btn btn-small">記録</button>
+                </div>
+            </div>
+            <ul class="fb-log" id="m-fb-log"></ul>
+        </div>
+
+        <div class="status-actions" style="margin-top:14px">
+            <button id="m-save-btn" class="btn btn-select">修正を保存</button>
+            <button id="m-close-btn" class="btn btn-ghost">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="scripts/bou/character.js?v=1"></script>
+<script src="scripts/bou/store.js?v=1"></script>
+<script src="scripts/bou/generator.js?v=1"></script>
+<script src="scripts/bou/app.js?v=1"></script>
+</body>
+</html>
