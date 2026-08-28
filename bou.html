@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/bou.css?v=1">
+    <link rel="stylesheet" href="styles/bou.css?v=2">
 </head>
 <body>
 <div class="wrap">
@@ -143,17 +143,18 @@
         <div id="m-ng-warning" class="chips" style="margin-bottom:10px"></div>
 
         <div class="field"><label>テーマ</label><input type="text" id="m-theme"></div>
-        <div class="field"><label>画像内メインテキスト（1〜3行）</label><textarea id="m-main"></textarea></div>
-        <div class="field"><label>シーン（ぼぅが何をしているか）</label><input type="text" id="m-scene"></div>
-        <div class="field"><label>Instagramキャプション</label><textarea id="m-caption"></textarea></div>
-        <div class="field"><label>ハッシュタグ（スペース区切り・最大5個）</label><input type="text" id="m-hashtags"></div>
-        <div class="field">
-            <label>画像生成用プロンプト（画像ツールにそのまま貼れます）</label>
-            <div class="with-copy">
-                <textarea id="m-prompt" class="tall"></textarea>
-                <button id="copy-prompt-btn" class="btn btn-small">コピー</button>
+
+        <div class="pages-head">
+            <label>カルーセル（3〜5枚の連作。スワイプして読む小さな物語）</label>
+            <div class="status-actions" style="margin:0">
+                <button id="add-page-btn" class="btn btn-small">＋ページを追加</button>
+                <button id="copy-all-prompts-btn" class="btn btn-small">全プロンプトをコピー</button>
             </div>
         </div>
+        <div id="m-pages"></div>
+
+        <div class="field"><label>Instagramキャプション</label><textarea id="m-caption"></textarea></div>
+        <div class="field"><label>ハッシュタグ（スペース区切り・最大5個）</label><input type="text" id="m-hashtags"></div>
 
         <div class="status-actions" id="m-actions"></div>
 
@@ -185,9 +186,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="scripts/bou/character.js?v=1"></script>
-<script src="scripts/bou/store.js?v=1"></script>
-<script src="scripts/bou/generator.js?v=1"></script>
-<script src="scripts/bou/app.js?v=1"></script>
+<script src="scripts/bou/character.js?v=2"></script>
+<script src="scripts/bou/store.js?v=2"></script>
+<script src="scripts/bou/generator.js?v=2"></script>
+<script src="scripts/bou/app.js?v=2"></script>
 </body>
 </html>
