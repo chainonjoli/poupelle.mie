@@ -32,11 +32,40 @@ const gen = require('../scripts/bou/generator.js');
     ok(gen.findNgWords('明日も頑張って生きよう', DEFAULT_CHARACTER).length > 0, 'NGチェッカーが「頑張って」を見逃した');
     ok(gen.findNgWords('まあ、いっか。', DEFAULT_CHARACTER).length === 0, 'NGチェッカーの誤検知');
 
-    /* 3案生成（内蔵モード）: A/B/C・テーマ違い・各案3〜5枚のカルーセル */
+    /* リサーチ初期データ: 30アカウント以上・4Phase・分析とぼぅ変換ルールがある */
+    const research = store.getResearch();
+    ok(research.accounts.length >= 30, '参考アカウントが30件未満（' + research.accounts.length + '件）');
+    ok(research.phases.length === 4, '成長Phaseが4段階でない');
+    ok(research.patterns.growing.length && research.patterns.fatigue.length && research.patterns.notForBou.length,
+        '「伸びる/飽きられる/ぼぅに合わない」の3分類が欠けている');
+    ok(research.conversion.length >= 5, 'ぼぅ向け変換ルールが少なすぎる');
+    ok(research.bouUsable.length && research.bouAvoid.length, 'ぼぅに使える/使わない要素がない');
+    research.accounts.forEach(a => {
+        ['name', 'genre', 'followers', 'formats', 'freq', 'save', 'share', 'follow', 'world', 'series'].forEach(k => {
+            ok(a[k] !== undefined, 'アカウント「' + a.name + '」に ' + k + ' がない');
+        });
+    });
+
+    /* 3案生成（内蔵モード）: A/B/C・テーマ違い・型付き・各案3〜5枚のカルーセル */
     const drafts = await gen.generateBatch(store, 'builtin');
     ok(drafts.length === 3, '3案生成されない（' + drafts.length + '案）');
     ok(new Set(drafts.map(d => d.theme)).size === 3, '3案のテーマが重複している');
     ok(drafts.map(d => d.variant).join('') === 'ABC', 'A/B/C案になっていない');
+    ok(drafts[0].proposal_type === '王道共感型', 'A案が王道共感型でない（' + drafts[0].proposal_type + '）');
+    ok(drafts[1].proposal_type === '本質型', 'B案が本質型でない（' + drafts[1].proposal_type + '）');
+    ok(drafts[2].proposal_type === '保存・シェア型', 'C案が保存・シェア型でない（' + drafts[2].proposal_type + '）');
+    drafts.forEach(d => {
+        ok(d.evaluation && typeof d.evaluation.average === 'number', d.variant + '案に内部評価がない');
+        ok(Object.keys(d.evaluation.scores).length === 10, '評価が10項目でない（' + Object.keys(d.evaluation.scores).length + '項目）');
+        ok(d.evaluation.pass, d.variant + '案が評価基準を満たさないまま出力された: ' + d.evaluation.flags.join('、'));
+    });
+
+    /* 評価チェッカー: 説教・元気すぎ・NG表現を検出して落とすこと */
+    const badPost = { theme: '疲れ', main_text: '前向きに頑張ってみましょう！', caption: '努力すればできる！',
+        pages: [{ text: '前向きに頑張ってみましょう！', scene: 'デスク' }], proposal_type: '王道共感型' };
+    const badEval = gen.evaluatePost(badPost, store, DEFAULT_CHARACTER);
+    ok(!badEval.pass, '説教・NG表現入りの投稿が評価を通ってしまった');
+    ok(badEval.flags.length >= 2, 'NG理由のフラグが立っていない');
     drafts.forEach(d => {
         ['id', 'created_at', 'theme', 'main_text', 'scene', 'image_prompt', 'caption', 'hashtags', 'status', 'pages'].forEach(k => {
             ok(d[k] !== undefined && d[k] !== '', '生成結果に ' + k + ' がない');
@@ -142,6 +171,29 @@ const gen = require('../scripts/bou/generator.js');
     await page.reload();
     await page.waitForSelector('.draft-card');
     ok(await page.locator('.draft-card').count() === 3, 'リロード後に3案が復元されない');
+
+    /* 詳細モーダルに内部評価が出る */
+    await page.locator('.draft-card').first().click();
+    await page.waitForSelector('.modal-bg.open');
+    ok(await page.locator('#m-evaluation .eval-item').count() === 10, 'モーダルに10項目の内部評価が出ない');
+    await page.click('#m-close-btn');
+
+    /* リサーチページ: アカウント一覧・分析・変換ルール */
+    await page.locator('.tab-btn[data-view="research"]').click();
+    ok(await page.locator('#account-table tbody tr').count() >= 30, 'アカウント一覧に30件以上出ない');
+    ok(await page.locator('#pattern-analysis .pattern-block').count() >= 10, 'パターン分析ブロックが出ない');
+    ok(await page.locator('#conversion-rules .conv-row').count() >= 5, '変換ルールが出ない');
+    await page.locator('#account-table tbody tr').first().click();
+    ok(await page.locator('#account-detail [data-acc-field]').count() === 17, 'アカウント詳細に17項目出ない');
+    await page.click('#acc-close-btn');
+
+    /* 投稿戦略ページ: Phase切替と戦略フォーム */
+    await page.locator('.tab-btn[data-view="strategy"]').click();
+    ok(await page.locator('#phase-buttons .filter-btn').count() === 4, 'Phaseボタンが4つ出ない');
+    ok((await page.inputValue('#st-positioning')).length > 10, 'ポジショニングの初期値が出ない');
+    await page.locator('#phase-buttons .filter-btn').nth(1).click();
+    await page.waitForTimeout(150);
+    ok((await page.locator('#phase-detail').textContent()).includes('保存・シェア'), 'Phase 2の詳細が出ない');
 
     /* キャラクター設定画面 */
     await page.locator('.tab-btn[data-view="settings"]').click();
