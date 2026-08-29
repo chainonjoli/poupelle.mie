@@ -24,7 +24,11 @@
     }
 
     var ACCOUNT_FIELDS = [
-        ['name', 'アカウント名'], ['genre', 'ジャンル'], ['followers', 'フォロワー規模（概算）'],
+        ['name', 'アカウント名'], ['genre', 'ジャンル'],
+        ['followers', 'フォロワー数（確認済みの実数のみ。未確認なら「未確認」）'],
+        ['followers_est', '参考推定メモ（未確認の数値・レンジはこちらに分離）'],
+        ['source_name', '出所（source_name）'], ['source_url', '出所URL（source_url）'],
+        ['checked_at', '確認日（checked_at・例 2026-08-29）'],
         ['formats', '主な投稿形式・比率'], ['freq', '投稿頻度'], ['text', '文字量'],
         ['show', 'キャラクターの見せ方'], ['bg', '背景の使い方'], ['themes', '投稿テーマ'],
         ['emotions', 'よく使われる感情'], ['save', '保存されやすい傾向'], ['share', 'シェアされやすい傾向'],
@@ -32,13 +36,26 @@
         ['world', '世界観の統一方法'], ['clarity', '初見で内容が伝わる工夫'], ['series', 'シリーズ化の方法']
     ];
 
+    var DATA_TYPES = [
+        ['verified', '確認済み（実測）'], ['estimated', '推定・未確認'],
+        ['manual', '手動入力'], ['placeholder', '要調査枠']
+    ];
+    var DATA_TYPE_LABEL = { verified: '確認済み', estimated: '未確認・推定', manual: '手動入力', placeholder: '要調査枠' };
+
     var state = { genreFilter: 'all', editingIndex: null };
 
     /* ================= リサーチ：参考アカウント ================= */
 
     function renderResearchNote() {
         var r = store.getResearch();
-        $('research-note').textContent = r.note + '（初期データ ' + r.updated_at + ' 時点・' + r.accounts.length + '件）';
+        var counts = { verified: 0, estimated: 0, manual: 0, placeholder: 0 };
+        r.accounts.forEach(function (a) { counts[a.data_type] = (counts[a.data_type] || 0) + 1; });
+        $('research-note').innerHTML = esc(r.note) +
+            '<span class="chips" style="margin-top:8px;display:flex">' +
+            '<span class="badge-data verified">確認済み ' + counts.verified + '件</span>' +
+            '<span class="badge-data estimated">未確認・推定 ' + counts.estimated + '件</span>' +
+            '<span class="badge-data manual">手動入力 ' + counts.manual + '件</span>' +
+            '<span class="badge-data placeholder">要調査枠 ' + counts.placeholder + '件</span></span>';
     }
 
     function renderGenreFilter() {
@@ -63,7 +80,12 @@
         r.accounts.forEach(function (a, idx) {
             if (state.genreFilter !== 'all' && a.genre !== state.genreFilter) return;
             var tr = document.createElement('tr');
-            tr.innerHTML = '<td>' + esc(a.name) + '</td><td>' + esc(a.genre) + '</td><td>' + esc(a.followers) +
+            if (!a.verified) tr.className = 'row-unverified';
+            var followersCell = a.verified
+                ? esc(a.followers) + (a.checked_at ? '<span class="cell-note">' + esc(a.checked_at) + '時点</span>' : '')
+                : '未確認' + (a.followers_est ? '<span class="cell-note">' + esc(a.followers_est) + '</span>' : '');
+            tr.innerHTML = '<td><span class="badge-data ' + esc(a.data_type) + '">' + (DATA_TYPE_LABEL[a.data_type] || a.data_type) + '</span></td>' +
+                '<td>' + esc(a.name) + '</td><td>' + esc(a.genre) + '</td><td>' + followersCell +
                 '</td><td>' + esc(a.formats) + '</td><td>' + esc(a.freq) + '</td>';
             tr.addEventListener('click', function () { openAccountDetail(idx); });
             tbody.appendChild(tr);
@@ -75,10 +97,18 @@
         var a = index === null ? {} : r.accounts[index];
         state.editingIndex = index;
         var box = $('account-detail');
+        var dataType = a.data_type || (index === null ? 'manual' : 'estimated');
         var html = '<div class="page-card" style="margin-top:12px"><div class="page-card-head">' +
-            '<span class="chip theme">' + (index === null ? '新しいアカウント' : esc(a.name)) + '</span><span class="spacer"></span>' +
+            '<span class="chip theme">' + (index === null ? '新しいアカウント（手動入力）' : esc(a.name)) + '</span>' +
+            '<span class="badge-data ' + esc(dataType) + '">' + (DATA_TYPE_LABEL[dataType] || dataType) + '</span>' +
+            '<span class="spacer"></span>' +
             (index !== null ? '<button class="btn btn-ghost" id="acc-del-btn">削除</button>' : '') +
-            '<button class="btn btn-ghost" id="acc-close-btn">閉じる</button></div>';
+            '<button class="btn btn-ghost" id="acc-close-btn">閉じる</button></div>' +
+            '<p class="hint">傾向欄は観察メモ（実測ではありません）。「確認済み」にするには出所URLと確認日が必要です。</p>' +
+            '<div class="field"><label>データ種別（data_type）</label><select id="acc-data-type">' +
+            DATA_TYPES.map(function (t) {
+                return '<option value="' + t[0] + '"' + (dataType === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
+            }).join('') + '</select></div>';
         ACCOUNT_FIELDS.forEach(function (f) {
             html += '<div class="field"><label>' + f[1] + '</label>' +
                 '<textarea data-acc-field="' + f[0] + '" style="min-height:44px">' + esc(a[f[0]] || '') + '</textarea></div>';
@@ -88,9 +118,22 @@
 
         $('acc-save-btn').addEventListener('click', function () {
             var research = store.getResearch();
-            var record = {};
+            var record = state.editingIndex === null ? {} : research.accounts[state.editingIndex] || {};
             box.querySelectorAll('[data-acc-field]').forEach(function (el) { record[el.dataset.accField] = el.value.trim(); });
+            record.data_type = $('acc-data-type').value;
+            record.verified = (record.data_type === 'verified');
             if (!record.name) { toast('アカウント名を入れてください'); return; }
+            if (record.verified && (!record.source_url || !record.checked_at)) {
+                toast('「確認済み」にするには出所URLと確認日が必要です'); return;
+            }
+            if (!record.verified) {
+                /* 未確認のまま数値を事実として保存しない */
+                if (record.followers && record.followers !== '未確認') {
+                    record.followers_est = record.followers_est || ('参考推定: ' + record.followers);
+                    record.followers = '未確認';
+                }
+                if (!record.followers) record.followers = '未確認';
+            }
             if (state.editingIndex === null) research.accounts.push(record);
             else research.accounts[state.editingIndex] = record;
             store.saveResearch(research);

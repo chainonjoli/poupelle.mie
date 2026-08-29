@@ -41,10 +41,22 @@ const gen = require('../scripts/bou/generator.js');
     ok(research.conversion.length >= 5, 'ぼぅ向け変換ルールが少なすぎる');
     ok(research.bouUsable.length && research.bouAvoid.length, 'ぼぅに使える/使わない要素がない');
     research.accounts.forEach(a => {
-        ['name', 'genre', 'followers', 'formats', 'freq', 'save', 'share', 'follow', 'world', 'series'].forEach(k => {
+        ['name', 'genre', 'followers', 'formats', 'freq', 'save', 'share', 'follow', 'world', 'series',
+         'data_type', 'verified', 'source_url', 'source_name'].forEach(k => {
             ok(a[k] !== undefined, 'アカウント「' + a.name + '」に ' + k + ' がない');
         });
+        ok(a.checked_at !== undefined, 'アカウント「' + a.name + '」に checked_at がない');
+        ok(['verified', 'estimated', 'manual', 'placeholder'].includes(a.data_type),
+            'data_typeが不正: ' + a.name + '=' + a.data_type);
+        ok(a.verified === (a.data_type === 'verified'), 'verifiedフラグとdata_typeが矛盾: ' + a.name);
+        if (a.verified) {
+            ok(a.source_url && a.checked_at, '確認済みなのに出所URL/確認日がない: ' + a.name);
+        } else {
+            ok(a.followers === '未確認', '未確認アカウントの数値が事実として保存されている: ' + a.name + '=' + a.followers);
+        }
     });
+    const verifiedCount = research.accounts.filter(a => a.verified).length;
+    ok(verifiedCount >= 15, '確認済みアカウントが少なすぎる（' + verifiedCount + '件）');
 
     /* 3案生成（内蔵モード）: A/B/C・テーマ違い・型付き・各案3〜5枚のカルーセル */
     const drafts = await gen.generateBatch(store, 'builtin');
@@ -178,13 +190,19 @@ const gen = require('../scripts/bou/generator.js');
     ok(await page.locator('#m-evaluation .eval-item').count() === 10, 'モーダルに10項目の内部評価が出ない');
     await page.click('#m-close-btn');
 
-    /* リサーチページ: アカウント一覧・分析・変換ルール */
+    /* リサーチページ: アカウント一覧・実データ/仮データの区別・分析・変換ルール */
     await page.locator('.tab-btn[data-view="research"]').click();
     ok(await page.locator('#account-table tbody tr').count() >= 30, 'アカウント一覧に30件以上出ない');
+    ok(await page.locator('#account-table tbody .badge-data').count() >= 30, 'データ種別バッジが各行に出ない');
+    ok(await page.locator('#account-table tbody .badge-data.verified').count() >= 15, '確認済みバッジが出ない');
+    ok(await page.locator('#account-table tbody .badge-data.estimated').count() >= 3, '未確認・推定バッジが出ない');
+    ok((await page.locator('#account-table tbody').textContent()).includes('未確認'), '未確認の表示がない');
+    ok(await page.locator('#research-note .badge-data').count() === 4, '概要に4種別の件数バッジが出ない');
     ok(await page.locator('#pattern-analysis .pattern-block').count() >= 10, 'パターン分析ブロックが出ない');
     ok(await page.locator('#conversion-rules .conv-row').count() >= 5, '変換ルールが出ない');
     await page.locator('#account-table tbody tr').first().click();
-    ok(await page.locator('#account-detail [data-acc-field]').count() === 17, 'アカウント詳細に17項目出ない');
+    ok(await page.locator('#account-detail [data-acc-field]').count() === 21, 'アカウント詳細に21項目出ない');
+    ok(await page.locator('#acc-data-type').count() === 1, 'データ種別セレクタが出ない');
     await page.click('#acc-close-btn');
 
     /* 投稿戦略ページ: Phase切替と戦略フォーム */

@@ -169,12 +169,29 @@
             return JSON.parse(JSON.stringify(seed));
         },
 
-        /* 保存済みがなければシードを返す。accountsはユーザー編集分を優先 */
+        /* 保存済みがなければシードを返す。accountsはユーザー編集分を優先。
+         * 旧形式のデータには出所フィールド（data_type等）を補い、未確認の数値を事実扱いしない */
         getResearch: function () {
             var seed = this.getResearchSeed();
             var saved = readJson(KEY_RESEARCH, null);
-            if (!saved) return seed;
-            for (var k in saved) { if (Object.prototype.hasOwnProperty.call(saved, k)) seed[k] = saved[k]; }
+            if (saved) {
+                for (var k in saved) { if (Object.prototype.hasOwnProperty.call(saved, k)) seed[k] = saved[k]; }
+            }
+            (seed.accounts || []).forEach(function (a) {
+                if (!a.data_type) {
+                    a.data_type = /要調査/.test(a.name || '') ? 'placeholder' : 'estimated';
+                }
+                if (a.verified === undefined) a.verified = (a.data_type === 'verified');
+                if (a.source_url === undefined) a.source_url = '';
+                if (a.source_name === undefined) a.source_name = '';
+                if (a.checked_at === undefined) a.checked_at = null;
+                /* 未確認レコードの数値レンジは事実として表示せず、推定メモに退避する */
+                if (!a.verified && a.followers && a.followers !== '未確認' && a.followers !== '要調査') {
+                    if (!a.followers_est) a.followers_est = '参考推定: ' + a.followers;
+                    a.followers = '未確認';
+                }
+                if (a.followers === '要調査') a.followers = '未確認';
+            });
             return seed;
         },
         saveResearch: function (research) { writeJson(KEY_RESEARCH, research); },

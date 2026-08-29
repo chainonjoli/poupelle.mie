@@ -516,7 +516,9 @@
         lines.push(character.themes.join('、'));
 
         lines.push('');
-        lines.push('# 参考にする構造（人気アカウント分析より。表現のコピーは禁止、構造だけ使う）');
+        lines.push('# 参考にする構造（一般的な傾向の観察メモ。表現のコピーは禁止、構造だけ使う）');
+        lines.push('注意: 以下は特定アカウントの実測データではなく、未確認の推定を含む定性的な分析。');
+        lines.push('強い根拠としては扱わず、「ぼぅらしさ」と矛盾する場合は必ずぼぅらしさを優先する。');
         (research.patterns.growing || []).slice(0, 8).forEach(function (g) { lines.push('- ' + g); });
         lines.push('避ける構造: ' + (research.bouAvoid || []).join('／'));
 
