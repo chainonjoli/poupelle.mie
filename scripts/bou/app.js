@@ -176,9 +176,10 @@
         state.openPostId = id;
         $('m-status').textContent = STATUS_LABEL[p.status];
         $('m-status').className = 'badge ' + p.status;
+        /* 案の型と投稿構造が同じ名前のときは重ねて出さない */
         $('m-variant').textContent = (p.variant ? p.variant + '案' : '') +
             (p.proposal_type ? '・' + p.proposal_type : '') +
-            (p.structure_used ? '・構造: ' + p.structure_used : '') +
+            (p.structure_used && p.structure_used !== p.proposal_type ? '・構造: ' + p.structure_used : '') +
             (p.generator === 'api' ? '（API生成）' : '（内蔵生成）');
         $('m-date').textContent = fmtDate(p.created_at);
         renderEvaluation(p);
