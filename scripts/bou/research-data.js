@@ -68,7 +68,34 @@
             { name: 'リール型キャラ（要調査枠）', genre: 'リール型キャラ', followers: '未確認', data_type: 'placeholder', verified: false, source_url: '', source_name: '', checked_at: null, formats: 'リール', freq: '要調査', text: '極少＋音源', show: 'ループ再生前提の短尺', bg: '要調査', themes: 'あるある・ネタ', emotions: '笑い', save: '要調査', share: '音源トレンドに乗せたシェア', comment: '要調査', follow: '要調査', world: '要調査', clarity: '最初の1秒が勝負', series: '同フォーマット反復' },
             { name: '文字カルーセル共感系（要調査枠）', genre: 'カルーセル共感', followers: '未確認', data_type: 'placeholder', verified: false, source_url: '', source_name: '', checked_at: null, formats: '文字カルーセル', freq: '毎日級が多い', text: '中', show: 'キャラなしが多い', bg: '無地＋1色', themes: '人間関係・仕事のしんどさ', emotions: '共感・納得', save: '保存率が高いとされるジャンル', share: '「わかる」の連鎖', comment: '体験談', follow: '悩み解決の期待', world: 'テンプレ統一', clarity: '1枚目が疑問形/言い切りのフック', series: 'ナンバリング連載' },
             { name: '絵本風作家系（要調査枠）', genre: '絵本風', followers: '未確認', data_type: 'placeholder', verified: false, source_url: '', source_name: '', checked_at: null, formats: 'カルーセル', freq: '週1前後', text: '少〜中', show: '見開き絵本風の構成', bg: '水彩・質感重視', themes: '小さな物語', emotions: 'じんわり', save: '読み物としての保存', share: '子どもや友人へ', comment: '感想', follow: '次のお話を待つ', world: '画材の統一', clarity: '表紙ページの明確化', series: 'お話の連載化' }
-            ,{ name: 'ヨハク（共感系キャラ・要確認）', genre: '共感系イラスト', followers: '未確認', followers_est: '検索ではアカウントを特定できず。手動で確認して更新する', data_type: 'placeholder', verified: false, source_url: '', source_name: '', checked_at: null, formats: 'カルーセル共感（と推測）', freq: '要調査', text: '要調査', show: '要調査', bg: '要調査', themes: '人間関係・本音・疲れ（と推測）', emotions: '共感・安心', save: '要調査', share: '要調査', comment: '要調査', follow: '要調査', world: '要調査', clarity: '要調査', series: '要調査' }
+            ,{ name: 'ヨハクさん（@yohakusan_）', genre: '共感系イラスト', followers: '未確認', followers_est: 'Instagramの数値は未確認。Threads側は約4.1万・533投稿を確認（2026-08-29）', data_type: 'estimated', verified: false, source_url: 'https://www.instagram.com/yohakusan_/', source_name: '検索でIG/Threads/TikTokの実在を確認（投稿の中身は未閲覧）', checked_at: '2026-08-29', formats: '未分析（投稿の中身はこの環境から閲覧できない）', freq: '未分析', text: '未分析', show: '未分析', bg: '未分析', themes: 'プロフィールより：抱えきれない気持ちを受け取って心に余白をつくる（現代社会に疲れた人向け）', emotions: '共感・安心（プロフィール由来の推測）', save: '未分析', share: '未分析', comment: '未分析', follow: '未分析', world: '未分析', clarity: '未分析', series: '未分析' }
+        ],
+
+        /* ---- 投稿分析（アカウント研究・手動確認用） ----
+         * 特定アカウントの投稿を「なぜ刺さるか」の教材として分析するメモ。
+         * この環境からInstagramの投稿内容は閲覧できないため、推測で補完せず
+         * status: 'pending_manual'（手動確認待ち）でURLだけ保存する。
+         * ユーザーが投稿を見て分析欄を記入 → 5項目が揃うと「分析済み」になり、
+         * 「構造ライブラリに追加」で生成に反映できる。 */
+        postStudies: [
+            {
+                id: 'study-yohakusan',
+                account: 'ヨハクさん（@yohakusan_）',
+                url: 'https://www.instagram.com/yohakusan_/',
+                status: 'pending_manual',
+                confirmedFacts: [
+                    'Instagram・Threads・TikTokに同名アカウントが実在（2026-08-29 検索で確認）',
+                    'Threadsは約4.1万フォロワー・533投稿。プロフィール「抱えきれない気持ちを受け取って、心に余白をつくる存在」',
+                    'LINEスタンプ「ヨハクさんの日常スタンプ」を展開',
+                    'Instagramのカルーセル投稿の中身はこの環境から閲覧できないため未分析（推測では補完しない）'
+                ],
+                /* ↓分析観点。投稿を実際に見て記入する（空欄＝未確認） */
+                hook: '', carousel: '', textDesign: '', empathy: '', afterFeel: '', charRole: '', scene: '',
+                /* ↓保存する5項目 */
+                features: '', why: '', structure: '', bouConversion: '',
+                doNotCopy: 'デザイン・文章・イラスト・レイアウト・キャラクター造形はコピーしない。参考にするのは「なぜ刺さるか」の構造（フック・展開・着地・余白の作り方）のみ',
+                data_type: 'placeholder'
+            }
         ],
 
         /* ---- 投稿構造ライブラリ（リサーチの本体） ----

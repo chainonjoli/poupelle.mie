@@ -256,6 +256,132 @@
         renderPatterns(); renderConversion();
     });
 
+    /* ================= リサーチ：投稿分析（アカウント研究・手動確認用） ================= */
+
+    var STUDY_AXES = [
+        ['hook', '1. 1枚目のフック（どの言葉で止めるか／言い切り・問いかけ・意外な定義のどれか／「これ私かも」の仕掛け）'],
+        ['carousel', '2. カルーセル構造（枚数／1枚目の提示／理由の積み上げ／着地／余白を残しているか）'],
+        ['textDesign', '3. 文字設計（1枚の文字量／1文の長さ／改行／強い言葉とやわらかい言葉のバランス）'],
+        ['empathy', '4. 共感の作り方（代弁しているか／決めつけていないか／否定せず肯定へ着地／説教になっていないか）'],
+        ['afterFeel', '5. 読後感（安心・共感・保存したい・送りたい・また読みたい のどれが強いか）'],
+        ['charRole', '6. キャラクターの役割（説明役／感情の代弁役／ただそこにいる役／小物やポーズの補い）'],
+        ['scene', '7. シーン（スマホ・布団・ソファ・仕事・一人時間などの使い方）']
+    ];
+    var STUDY_SAVE = [
+        ['features', '元投稿の特徴'], ['why', 'なぜ刺さるか'], ['structure', '抽出した投稿構造'],
+        ['bouConversion', 'ぼぅ向け変換例（表現は使わず構造だけ）'], ['doNotCopy', 'コピーしない要素']
+    ];
+    var STUDY_STATUS = { pending_manual: '手動確認待ち', analyzed: '分析済み' };
+
+    function studyAnalyzed(st) {
+        return !!(st.features && st.why && st.structure && st.bouConversion);
+    }
+
+    function renderStudies() {
+        var r = store.getResearch();
+        var box = $('study-list');
+        box.innerHTML = '';
+        (r.postStudies || []).forEach(function (st, idx) {
+            var analyzed = studyAnalyzed(st);
+            var el = document.createElement('div');
+            el.className = 'structure-card';
+            el.innerHTML =
+                '<div class="chips"><span class="chip theme">' + esc(st.account) + '</span>' +
+                '<span class="badge-data ' + (analyzed ? 'verified' : 'placeholder') + '">' + STUDY_STATUS[analyzed ? 'analyzed' : 'pending_manual'] + '</span></div>' +
+                '<div class="structure-hook"><a href="' + esc(st.url) + '" target="_blank" rel="noopener">' + esc(st.url) + '</a></div>' +
+                (st.confirmedFacts && st.confirmedFacts.length
+                    ? '<ul class="fb-log">' + st.confirmedFacts.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>'
+                    : '') +
+                (analyzed
+                    ? '<div class="structure-flow"><span class="conv-from">' + esc(st.why) + '</span><span class="conv-arrow">→</span><span class="conv-to">' + esc(st.bouConversion) + '</span></div>'
+                    : '<p class="hint">投稿を実際に見て、分析欄を記入してください（タップで開く）。</p>');
+            el.addEventListener('click', function (e) {
+                if (e.target.tagName === 'A') return;
+                openStudyDetail(idx);
+            });
+            box.appendChild(el);
+        });
+        if (!box.children.length) box.innerHTML = '<p class="hint">分析対象はまだありません。</p>';
+    }
+
+    function openStudyDetail(index) {
+        var r = store.getResearch();
+        var st = index === null ? { confirmedFacts: [] } : (r.postStudies || [])[index] || {};
+        var analyzed = studyAnalyzed(st);
+        var box = $('study-detail');
+        var html = '<div class="page-card" style="margin-top:12px"><div class="page-card-head">' +
+            '<span class="chip theme">' + (index === null ? '新しい分析対象' : esc(st.account)) + '</span>' +
+            '<span class="badge-data ' + (analyzed ? 'verified' : 'placeholder') + '">' + STUDY_STATUS[analyzed ? 'analyzed' : 'pending_manual'] + '</span>' +
+            '<span class="spacer"></span>' +
+            (index !== null ? '<button class="btn btn-ghost" id="study-del-btn">削除</button>' : '') +
+            '<button class="btn btn-ghost" id="study-close-btn">閉じる</button></div>' +
+            '<p class="hint">スクリーンショットを見ながら記入してください。事実と感想は分けて、確認していないことは書かないでください。</p>' +
+            '<div class="field"><label>アカウント名</label><textarea data-study-field="account" style="min-height:40px">' + esc(st.account || '') + '</textarea></div>' +
+            '<div class="field"><label>URL（手動確認用）</label><textarea data-study-field="url" style="min-height:40px">' + esc(st.url || '') + '</textarea></div>';
+        STUDY_AXES.forEach(function (f) {
+            html += '<div class="field"><label>' + f[1] + '</label><textarea data-study-field="' + f[0] + '" style="min-height:44px">' + esc(st[f[0]] || '') + '</textarea></div>';
+        });
+        html += '<p class="hint" style="margin:8px 0">▼ 保存する5項目（この4つが埋まると「分析済み」になります）</p>';
+        STUDY_SAVE.forEach(function (f) {
+            html += '<div class="field"><label>' + f[1] + '</label><textarea data-study-field="' + f[0] + '" style="min-height:44px">' + esc(st[f[0]] || '') + '</textarea></div>';
+        });
+        html += '<div class="field"><label>構造ライブラリに追加するときの型</label><select id="study-struct-type">' +
+            (r.structureTypes || []).map(function (t) { return '<option value="' + esc(t) + '">' + esc(t) + '</option>'; }).join('') +
+            '</select></div>' +
+            '<div class="status-actions">' +
+            '<button class="btn btn-select" id="study-save-btn">保存</button>' +
+            '<button class="btn btn-small" id="study-to-lib-btn"' + (analyzed ? '' : ' disabled') + '>構造ライブラリに追加（分析済みのみ）</button>' +
+            '</div></div>';
+        box.innerHTML = html;
+
+        $('study-save-btn').addEventListener('click', function () {
+            var research = store.getResearch();
+            var record = index === null ? { id: 'study-' + Date.now().toString(36), confirmedFacts: [], data_type: 'manual' }
+                : research.postStudies[index];
+            box.querySelectorAll('[data-study-field]').forEach(function (el) { record[el.dataset.studyField] = el.value.trim(); });
+            if (!record.account || !record.url) { toast('アカウント名とURLを入れてください'); return; }
+            record.status = studyAnalyzed(record) ? 'analyzed' : 'pending_manual';
+            if (index === null) research.postStudies.push(record);
+            else research.postStudies[index] = record;
+            store.saveResearch(research);
+            toast(record.status === 'analyzed' ? '保存しました（分析済み）' : '保存しました（手動確認待ち）');
+            box.innerHTML = '';
+            renderStudies();
+        });
+        $('study-close-btn').addEventListener('click', function () { box.innerHTML = ''; });
+        var del = $('study-del-btn');
+        if (del) del.addEventListener('click', function () {
+            if (!confirm('この分析対象を削除しますか？')) return;
+            var research = store.getResearch();
+            research.postStudies.splice(index, 1);
+            store.saveResearch(research);
+            box.innerHTML = '';
+            toast('削除しました');
+            renderStudies();
+        });
+        var toLib = $('study-to-lib-btn');
+        if (toLib) toLib.addEventListener('click', function () {
+            if (!studyAnalyzed(st)) { toast('先に「なぜ刺さるか」等の4項目を記入・保存してください'); return; }
+            var research = store.getResearch();
+            research.structures.push({
+                id: 'st-' + Date.now().toString(36),
+                type: $('study-struct-type').value,
+                theme: st.scene || '', hook: st.hook || st.features,
+                carousel: st.carousel || '', textAmount: st.textDesign || '',
+                empathy: st.empathy || '', afterFeel: st.afterFeel || '',
+                charRole: st.charRole || '', scene: st.scene || '',
+                extraction: st.why, bouConversion: st.bouConversion,
+                source_note: st.account + ' の投稿分析より（' + (st.doNotCopy || '表現はコピーしない') + '）',
+                data_type: 'manual'
+            });
+            store.saveResearch(research);
+            toast('構造ライブラリに追加しました。次の生成から参照されます');
+            box.innerHTML = '';
+            renderStructureFilter(); renderStructureList(); renderStudies();
+        });
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     /* ================= リサーチ：パターン分析 ================= */
 
     function listBlock(title, items, cls) {
@@ -402,11 +528,13 @@
     });
 
     $('add-structure-btn').addEventListener('click', function () { openStructureDetail(null); });
+    $('add-study-btn').addEventListener('click', function () { openStudyDetail(null); });
 
     /* ================= 初期表示 ================= */
     renderResearchNote();
     renderStructureFilter();
     renderStructureList();
+    renderStudies();
     renderGenreFilter();
     renderAccountTable();
     renderPatterns();

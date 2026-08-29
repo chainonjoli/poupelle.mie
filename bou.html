@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/bou.css?v=5">
+    <link rel="stylesheet" href="styles/bou.css?v=6">
 </head>
 <body>
 <div class="wrap">
@@ -99,6 +99,16 @@
                 <button id="add-structure-btn" class="btn btn-small">＋構造を追加</button>
             </div>
             <div id="structure-detail"></div>
+        </div>
+
+        <div class="card">
+            <h2>投稿分析（アカウント研究・手動確認用）</h2>
+            <p class="hint">特定アカウントの投稿を「なぜ刺さるか」の教材として分析するメモ。この環境からは投稿の中身を閲覧できないため、推測では補完せずURLを保存しています。実際に投稿を見て分析欄を記入すると「分析済み」になり、「構造ライブラリに追加」で次の生成から反映されます。表現・デザインのコピーは禁止、抽出するのは構造のみ。</p>
+            <div id="study-list" style="margin-top:10px"></div>
+            <div class="status-actions">
+                <button id="add-study-btn" class="btn btn-small">＋分析対象を追加</button>
+            </div>
+            <div id="study-detail"></div>
         </div>
 
         <div class="card">
@@ -273,11 +283,11 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="scripts/bou/character.js?v=5"></script>
-<script src="scripts/bou/research-data.js?v=5"></script>
-<script src="scripts/bou/store.js?v=5"></script>
-<script src="scripts/bou/generator.js?v=5"></script>
-<script src="scripts/bou/app.js?v=5"></script>
-<script src="scripts/bou/insights.js?v=5"></script>
+<script src="scripts/bou/character.js?v=6"></script>
+<script src="scripts/bou/research-data.js?v=6"></script>
+<script src="scripts/bou/store.js?v=6"></script>
+<script src="scripts/bou/generator.js?v=6"></script>
+<script src="scripts/bou/app.js?v=6"></script>
+<script src="scripts/bou/insights.js?v=6"></script>
 </body>
 </html>

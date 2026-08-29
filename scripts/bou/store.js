@@ -192,10 +192,15 @@
                 }
                 if (a.followers === '要調査') a.followers = '未確認';
             });
-            /* 構造ライブラリが旧保存データに無い場合はシードから補う */
+            /* 構造ライブラリ・投稿分析が旧保存データに無い場合はシードから補う */
             var freshSeed = this.getResearchSeed();
             if (!seed.structures || !seed.structures.length) seed.structures = freshSeed.structures;
             if (!seed.structureTypes || !seed.structureTypes.length) seed.structureTypes = freshSeed.structureTypes;
+            if (!seed.postStudies) seed.postStudies = freshSeed.postStudies;
+            (seed.postStudies || []).forEach(function (st) {
+                if (!st.status) st.status = 'pending_manual';
+                if (!st.doNotCopy) st.doNotCopy = 'デザイン・文章・イラスト・レイアウトはコピーしない。構造のみ参考にする';
+            });
             (seed.structures || []).forEach(function (s) {
                 if (!s.data_type) s.data_type = 'manual';
                 if (!s.id) s.id = 'st-' + Math.random().toString(36).slice(2, 8);

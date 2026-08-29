@@ -28,6 +28,21 @@ const gen = require('../scripts/bou/generator.js');
     });
     ok(gen.CORPUS.length >= 14, '投稿テーマが14種類ない（' + gen.CORPUS.length + '種類）');
 
+    /* 投稿分析（手動確認用）: yohakusan_ が推測なしで登録されている */
+    const researchForStudies = store.getResearch();
+    ok(researchForStudies.postStudies && researchForStudies.postStudies.length >= 1, '投稿分析の対象がない');
+    const yohaku = researchForStudies.postStudies.find(s => (s.url || '').includes('yohakusan_'));
+    ok(!!yohaku, 'yohakusan_ が投稿分析対象に登録されていない');
+    if (yohaku) {
+        ok(yohaku.status === 'pending_manual', 'yohakusan_ が手動確認待ちになっていない（' + yohaku.status + '）');
+        ok(yohaku.confirmedFacts.length >= 3, '確認済み事実が記録されていない');
+        ['hook', 'carousel', 'textDesign', 'empathy', 'afterFeel', 'charRole', 'scene',
+         'features', 'why', 'structure', 'bouConversion'].forEach(k => {
+            ok(yohaku[k] === '', '未確認の分析欄が推測で埋められている: ' + k + '=' + yohaku[k]);
+        });
+        ok(yohaku.doNotCopy && yohaku.doNotCopy.includes('コピーしない'), 'コピーしない要素が明記されていない');
+    }
+
     /* NGチェッカー自体の動作 */
     ok(gen.findNgWords('明日も頑張って生きよう', DEFAULT_CHARACTER).length > 0, 'NGチェッカーが「頑張って」を見逃した');
     ok(gen.findNgWords('まあ、いっか。', DEFAULT_CHARACTER).length === 0, 'NGチェッカーの誤検知');
@@ -212,6 +227,14 @@ const gen = require('../scripts/bou/generator.js');
     ok(await page.locator('#structure-detail [data-struct-field]').count() === 11, '構造編集フォームに11項目出ない');
     ok(await page.locator('#struct-type option').count() === 8, '構造の型セレクタに8択出ない');
     await page.click('#struct-close-btn');
+
+    /* 投稿分析カード: 手動確認待ちバッジ・14項目フォーム・追加ボタンは分析前は無効 */
+    ok(await page.locator('#study-list .structure-card').count() >= 1, '投稿分析カードが出ない');
+    ok((await page.locator('#study-list').textContent()).includes('手動確認待ち'), '手動確認待ちの表示がない');
+    await page.locator('#study-list .structure-card').first().click();
+    ok(await page.locator('#study-detail [data-study-field]').count() === 14, '分析フォームに14項目出ない（アカウント/URL+7観点+5項目）');
+    ok(await page.locator('#study-to-lib-btn[disabled]').count() === 1, '未分析なのに構造ライブラリ追加が有効になっている');
+    await page.click('#study-close-btn');
 
     /* リサーチページ: アカウント一覧・実データ/仮データの区別・分析・変換ルール */
     ok(await page.locator('#account-table tbody tr').count() >= 30, 'アカウント一覧に30件以上出ない');
