@@ -205,6 +205,34 @@
         ] }
     ];
 
+    /* ---- 3案の型（A=王道共感 / B=本質 / C=保存・シェア）----
+     * コーパスの各話に型を割り当てる（テーマごとに [1話目, 2話目] の順） */
+    var TYPE_LABEL = { empathy: '王道共感型', essence: '本質型', share: '保存・シェア型' };
+    var TYPE_BY_THEME = {
+        '疲れ': ['empathy', 'share'], '仕事': ['share', 'essence'], '人間関係': ['empathy', 'essence'],
+        'SNS': ['empathy', 'essence'], '返信': ['empathy', 'share'], '予定': ['essence', 'empathy'],
+        '休息': ['share', 'empathy'], '自己肯定': ['empathy', 'essence'], 'ひとり時間': ['empathy', 'essence'],
+        '考えすぎ': ['empathy', 'share'], 'やる気が出ない日': ['empathy', 'share'],
+        '何もしたくない日': ['share', 'empathy'], '比べてしまう日': ['essence', 'share'],
+        '明日に回したいこと': ['empathy', 'share']
+    };
+    /* 各話が使っている「投稿構造」（リサーチの構造ライブラリの8型に対応） */
+    var STRUCTURE_BY_THEME = {
+        '疲れ': ['王道共感型', '保存したい一言型'], '仕事': ['保存したい一言型', '本音代弁型'],
+        '人間関係': ['王道共感型', '人間関係の本質型'], 'SNS': ['日常あるある型', '意外な視点型'],
+        '返信': ['本音代弁型', '誰かに送りたい型'], '予定': ['意外な視点型', '日常あるある型'],
+        '休息': ['保存したい一言型', '疲れた日の癒し型'], '自己肯定': ['王道共感型', '意外な視点型'],
+        'ひとり時間': ['王道共感型', '疲れた日の癒し型'], '考えすぎ': ['日常あるある型', '誰かに送りたい型'],
+        'やる気が出ない日': ['本音代弁型', '保存したい一言型'], '何もしたくない日': ['保存したい一言型', '日常あるある型'],
+        '比べてしまう日': ['意外な視点型', '誰かに送りたい型'], '明日に回したいこと': ['日常あるある型', '保存したい一言型']
+    };
+    CORPUS.forEach(function (t) {
+        t.items.forEach(function (it, i) {
+            it.type = (TYPE_BY_THEME[t.theme] || ['empathy', 'empathy'])[i] || 'empathy';
+            it.structure = (STRUCTURE_BY_THEME[t.theme] || [])[i] || '王道共感型';
+        });
+    });
+
     /* ================= 共通ユーティリティ ================= */
 
     function findNgWords(text, character) {
@@ -244,7 +272,7 @@
     }
 
     /* pages（{text, scene, image_prompt}[]）から投稿レコードを組み立てる */
-    function makeDraft(store, character, batchId, variant, theme, pages, caption, generator) {
+    function makeDraft(store, character, batchId, variant, theme, pages, caption, generator, proposalType, structureUsed) {
         var cover = pages[0] || {};
         return {
             id: store.makeId('p'),
@@ -253,6 +281,8 @@
             batch_id: batchId,
             variant: variant,
             theme: theme,
+            proposal_type: TYPE_LABEL[proposalType] || proposalType || '',
+            structure_used: structureUsed || '',
             main_text: cover.text || '',
             scene: cover.scene || '',
             image_prompt: cover.image_prompt || '',
@@ -265,52 +295,163 @@
         };
     }
 
-    /* ================= 内蔵モード ================= */
+    /* ================= 投稿候補の内部評価（10項目・10点満点） =================
+     * 説教・ポジティブ押しつけ・長すぎ・元気すぎ・既視感などを検出し、
+     * 基準を下回る案は自動で再生成の対象にする。 */
+
+    function bigrams(s) {
+        var t = (s || '').replace(/\s/g, '');
+        var set = {};
+        for (var i = 0; i < t.length - 1; i++) set[t.slice(i, i + 2)] = true;
+        return set;
+    }
+    function similarity(a, b) {
+        var A = bigrams(a), B = bigrams(b), inter = 0, union = 0, k;
+        for (k in A) { union++; if (B[k]) inter++; }
+        for (k in B) { if (!A[k]) union++; }
+        return union ? inter / union : 0;
+    }
+
+    function evaluatePost(post, store, character) {
+        var usage = store.getUsageStats();
+        var strategy = store.getStrategy();
+        var pages = post.pages && post.pages.length ? post.pages : [{ text: post.main_text, scene: post.scene }];
+        var texts = pages.map(function (pg) { return pg.text || ''; });
+        var all = texts.join('\n') + '\n' + (post.caption || '');
+        var cover = (texts[0] || '').replace(/\n/g, '');
+        var flags = [];
+        function clamp(n) { return Math.max(0, Math.min(10, Math.round(n))); }
+
+        /* ぼぅらしさ・元気すぎ */
+        var bou = 10;
+        var ng = findNgWords(all, character);
+        if (ng.length) { bou -= 4 * ng.length; flags.push('使わない表現: ' + ng.join('、')); }
+        var genki = (all.match(/[！!]|✨|最高|やった[ー〜]|ワクワク|元気出/g) || []).length;
+        if (genki) { bou -= 2 * genki; flags.push('ぼぅが元気すぎる'); }
+
+        /* 言いすぎ・説教・自己啓発 */
+        var restraint = 10;
+        if (/しましょう|すべき|しなさい|した方がいい/.test(all)) { restraint -= 5; flags.push('説教っぽい表現'); }
+        if (/前向きに|プラスに|自分次第|変わろう|行動しよう/.test(all)) { restraint -= 4; flags.push('自己啓発・ポジティブの押しつけ'); }
+        var longPages = texts.filter(function (t) { return t.replace(/\n/g, '').length > 32; }).length;
+        if (longPages) { restraint -= 2 * longPages; flags.push('文章が長すぎるページがある'); }
+
+        /* 新鮮さ・既視感（直近30件との文章類似） */
+        var recent = store.getPosts().slice(0, 30).filter(function (p) { return p.id !== post.id; });
+        var maxSim = 0;
+        recent.forEach(function (p) { maxSim = Math.max(maxSim, similarity(post.main_text, p.main_text)); });
+        var fresh = clamp(10 - maxSim * 12);
+        if (fresh <= 3) flags.push('過去の投稿と似すぎている');
+
+        /* 差別化（同テーマ・同シーンの連続） */
+        var diff = usage.recentThemes.indexOf(post.theme) === -1 ? 9 : 4;
+        if (diff <= 4) flags.push('同じテーマが続いている');
+        var sceneWord = ((pages[0] || {}).scene || '').match(/布団|ソファ|スマホ|お風呂|デスク|窓|海|水面|電車|マグ|枕/);
+        var sceneOveruse = sceneWord && usage.overusedScenes.some(function (s) { return s.key === sceneWord[0]; });
+        var kishikan = clamp(fresh - (sceneOveruse ? 2 : 0));
+        if (sceneOveruse) flags.push('同じ小物・構図が続いている（' + sceneWord[0] + '）');
+
+        /* 共感度・保存・シェア・フォロー・世界観 */
+        var empathy = clamp(6 + (cover.length <= 20 ? 2 : 0) + (/た。$|ない。$|へん。$|てる。$/.test(cover) ? 1 : 0) + (ng.length ? -3 : 0));
+        var totalChars = all.replace(/\s/g, '').length;
+        var save = clamp(7 + (totalChars <= 90 ? 2 : totalChars <= 140 ? 0 : -2) + (post.proposal_type === TYPE_LABEL.share ? 1 : 0));
+        var share = clamp(6 + (cover.length <= 15 ? 2 : 0) + (/あなた|きみ|お前/.test(all) ? -2 : 1));
+        var follow = clamp(6 + (pages.length >= 3 && pages.length <= 5 ? 2 : -2) + ((strategy.growThemes || '').indexOf(post.theme) !== -1 ? 1 : 0));
+        var world = clamp(8 - (ng.length ? 4 : 0) - (genki ? 2 : 0) + (pages.length >= 3 && pages.length <= 5 ? 1 : -2));
+
+        var scores = {
+            'ぼぅらしさ': clamp(bou), '共感度': empathy, '新鮮さ': fresh,
+            '保存されやすさ': save, 'シェアされやすさ': share, 'フォロー期待': follow,
+            '過去投稿との差別化': diff, '既視感の少なさ': kishikan,
+            '言いすぎていないか': clamp(restraint), '世界観の一貫性': world
+        };
+        var sum = 0, n = 0;
+        for (var k in scores) { sum += scores[k]; n++; }
+        var avg = Math.round((sum / n) * 10) / 10;
+        var pass = scores['ぼぅらしさ'] >= 6 && scores['言いすぎていないか'] >= 6 &&
+            scores['新鮮さ'] >= 4 && avg >= 6 && ng.length === 0;
+        return { scores: scores, average: avg, flags: flags, pass: pass };
+    }
+
+    /* ================= 内蔵モード =================
+     * A案=王道共感型 / B案=本質型 / C案=保存・シェア型 をそれぞれの型のコーパスから選ぶ。
+     * 直近のテーマ・文章・使いすぎシーンを避け、評価が低い案は選び直す。 */
+
+    function itemToDraft(store, character, batchId, variant, theme, item) {
+        var total = item.pages.length;
+        var pages = item.pages.map(function (pg, idx) {
+            return {
+                text: pg.text,
+                scene: pg.sceneJa,
+                image_prompt: buildImagePrompt(character, pg.sceneEn, idx + 1, total)
+            };
+        });
+        return makeDraft(store, character, batchId, variant, theme, pages, item.caption, 'builtin', item.type, item.structure);
+    }
 
     function generateBuiltin(character, store) {
         var rng = Math.random;
         var learning = store.getLearningContext();
+        var usage = store.getUsageStats();
         var posts = store.getPosts();
 
-        var recentThemes = {};
         var recentTexts = {};
-        for (var i = 0; i < Math.min(posts.length, 12); i++) {
-            recentThemes[posts[i].theme] = true;
-            recentTexts[posts[i].main_text] = true;
-        }
+        for (var i = 0; i < Math.min(posts.length, 12); i++) recentTexts[posts[i].main_text] = true;
 
         /* フィードバックに「ゆるく」「言いすぎ」が多いときは枚数少なめの話を優先する */
         var preferShort = learning.recentComments.filter(function (c) {
             return /ゆるく|言いすぎ|いいすぎ|強い/.test(c.text || '');
         }).length >= 2;
 
-        var fresh = CORPUS.filter(function (t) { return !recentThemes[t.theme]; });
-        var sourcePool = (fresh.length >= 3 ? fresh : CORPUS).slice();
+        /* 反応されやすかった構造を優先し、直近で使った構造・テーマ・文章を避ける */
+        var structurePref = store.getStructurePreference();
 
-        var variants = ['A', 'B', 'C'];
+        /* 型ごとの候補リスト（{theme, item}） */
+        function candidatesOf(type, usedThemes) {
+            var list = [];
+            CORPUS.forEach(function (t) {
+                t.items.forEach(function (it) {
+                    if (it.type !== type) return;
+                    if (usedThemes.indexOf(t.theme) !== -1) return;
+                    var penalty = (recentTexts[it.pages[0].text] ? 2 : 0) +
+                        (usage.recentThemes.indexOf(t.theme) !== -1 ? 1 : 0) +
+                        (usage.recentStructures.indexOf(it.structure) !== -1 ? 1 : 0) -
+                        (structurePref[it.structure] || 0); /* 採用実績のある構造を優先 */
+                    list.push({ theme: t.theme, item: it, penalty: penalty });
+                });
+            });
+            list.sort(function (a, b) { return (a.penalty - b.penalty) || (rng() - 0.5); });
+            if (preferShort) list.sort(function (a, b) { return (a.penalty - b.penalty) || (a.item.pages.length - b.item.pages.length); });
+            return list;
+        }
+
+        var plan = [
+            { variant: 'A', type: 'empathy' },
+            { variant: 'B', type: 'essence' },
+            { variant: 'C', type: 'share' }
+        ];
         var batchId = store.makeId('b');
         var drafts = [];
+        var usedThemes = [];
 
-        for (var v = 0; v < 3 && sourcePool.length; v++) {
-            var themeEntry = sourcePool.splice(Math.floor(rng() * sourcePool.length), 1)[0];
-            var items = themeEntry.items.filter(function (it) { return !recentTexts[it.pages[0].text]; });
-            if (!items.length) items = themeEntry.items;
-            if (preferShort) {
-                items = items.slice().sort(function (a, b) { return a.pages.length - b.pages.length; });
-                items = items.slice(0, Math.max(1, Math.ceil(items.length / 2)));
+        plan.forEach(function (p) {
+            var cands = candidatesOf(p.type, usedThemes);
+            if (!cands.length) cands = candidatesOf(p.type, []);
+            /* 評価が通る候補を上から探す（最大4候補）。通らなければ最高評価を採用 */
+            var best = null, bestEval = null;
+            for (var c = 0; c < Math.min(cands.length, 4); c++) {
+                var draft = itemToDraft(store, character, batchId, p.variant, cands[c].theme, cands[c].item);
+                var ev = evaluatePost(draft, store, character);
+                if (!best || ev.average > bestEval.average) { best = draft; bestEval = ev; best._cand = cands[c]; }
+                if (ev.pass) { best = draft; bestEval = ev; best._cand = cands[c]; break; }
             }
-            var item = items[Math.floor(rng() * items.length)];
-
-            var total = item.pages.length;
-            var pages = item.pages.map(function (pg, idx) {
-                return {
-                    text: pg.text,
-                    scene: pg.sceneJa,
-                    image_prompt: buildImagePrompt(character, pg.sceneEn, idx + 1, total)
-                };
-            });
-            drafts.push(makeDraft(store, character, batchId, variants[v], themeEntry.theme, pages, item.caption, 'builtin'));
-        }
+            if (best) {
+                usedThemes.push(best._cand.theme);
+                delete best._cand;
+                best.evaluation = bestEval;
+                drafts.push(best);
+            }
+        });
         return Promise.resolve(drafts);
     }
 
@@ -329,9 +470,10 @@
                 items: {
                     type: 'object',
                     additionalProperties: false,
-                    required: ['theme', 'pages', 'caption', 'hashtags'],
+                    required: ['theme', 'structure', 'pages', 'caption', 'hashtags'],
                     properties: {
                         theme: { type: 'string' },
+                        structure: { type: 'string', description: '今回使った投稿構造。次のいずれか: 王道共感型 / 本音代弁型 / 意外な視点型 / 保存したい一言型 / 誰かに送りたい型 / 疲れた日の癒し型 / 人間関係の本質型 / 日常あるある型' },
                         pages: {
                             type: 'array', minItems: 3, maxItems: 5,
                             description: 'カルーセルの各ページ。1枚目=共感の入り口、中間=小さな展開、最後=力の抜けるゆるい着地',
@@ -354,7 +496,12 @@
         }
     };
 
-    function buildSystemPrompt(character, learning) {
+    function buildSystemPrompt(character, learning, store) {
+        var research = store.getResearch();
+        var strategy = store.getStrategy();
+        var usage = store.getUsageStats();
+        var phase = (research.phases || []).filter(function (p) { return p.id === strategy.phase; })[0];
+
         var lines = [];
         lines.push('あなたはオリジナルキャラクター「' + character.name + '」（' + character.motif + '）のInstagram投稿を作る専属ライターです。');
         lines.push('');
@@ -365,10 +512,16 @@
         lines.push('');
         lines.push('# 投稿の形式（カルーセル）');
         lines.push('- 1投稿 = 3〜5枚の連作画像。スワイプして読む小さな物語。');
-        lines.push('- 1枚目: 共感の入り口。「これ私やん」と手が止まる短い一言。');
+        lines.push('- 1枚目: 共感の入り口。「これ私やん」と手が止まる短い一言（20文字以内）。');
         lines.push('- 中間: 小さな展開。オチを急がない。1枚に情報を詰めない。');
         lines.push('- 最後: 力の抜けるゆるい着地。解決しない。説教しない。');
         lines.push('- 各ページの文は1〜2行。無言のページがあってもよい。');
+        lines.push('');
+        lines.push('# 3案の役割（この順で1案ずつ作る）');
+        lines.push('- A案（王道共感型）: 最も多くの人が「これ私」と感じる内容。');
+        lines.push('- B案（本質型）: 少し核心をつく。静かだけど、あとからじわっと残る内容。');
+        lines.push('- C案（保存・シェア型）: 短く、誰かに送りたくなる・保存してお守りにしたくなる言葉。');
+        lines.push('3案とも「ぼぅらしさ」（急がない・解決しない・励まさない）を最優先する。');
         lines.push('');
         lines.push('# 話し方のルール');
         for (var i = 0; i < character.speech.rules.length; i++) lines.push('- ' + character.speech.rules[i]);
@@ -376,10 +529,59 @@
         lines.push('');
         lines.push('# 絶対に使わない表現');
         lines.push(character.ngWords.join('、'));
+        lines.push('説教・ポジティブの押しつけ・自己啓発表現・感動の押し売りも禁止。');
         lines.push('「役に立つ情報」より「これ私やん」という共感を優先する。1投稿につき1テーマ。');
         lines.push('');
         lines.push('# 投稿テーマの候補');
         lines.push(character.themes.join('、'));
+
+        lines.push('');
+        lines.push('# 投稿構造ライブラリ（最重要の参考情報。表現のコピーは禁止、構造だけ使う）');
+        lines.push('毎回ランダムに書くのではなく、以下の構造から各案に合うものを選んで組み立て、');
+        lines.push('使った構造名を structure フィールドに記録すること。');
+        lines.push('ぼぅらしさと矛盾する場合は必ずぼぅらしさを優先する。');
+        (research.structures || []).forEach(function (s) {
+            lines.push('');
+            lines.push('## ' + s.type);
+            lines.push('フック: ' + s.hook);
+            lines.push('カルーセル: ' + s.carousel);
+            lines.push('共感の作り方: ' + s.empathy);
+            lines.push('読後感: ' + s.afterFeel + '／キャラの役割: ' + s.charRole + '／シーン例: ' + s.scene);
+            lines.push('なぜ刺さるか: ' + s.extraction);
+            lines.push(s.bouConversion);
+        });
+
+        var structPref = store.getStructurePreference();
+        var liked = Object.keys(structPref).filter(function (k) { return structPref[k] > 0; });
+        var disliked = Object.keys(structPref).filter(function (k) { return structPref[k] < 0; });
+        if (liked.length) lines.push('\n過去に採用されやすかった構造（優先する）: ' + liked.join('、'));
+        if (disliked.length) lines.push('過去に不採用が多い構造（頻度を落とす）: ' + disliked.join('、'));
+        if (usage.recentStructures && usage.recentStructures.length) {
+            lines.push('直近で使った構造（連続を避ける）: ' + usage.recentStructures.join('→'));
+        }
+
+        lines.push('');
+        lines.push('# 一般的な傾向の観察メモ（未確認の推定を含む・強い根拠にしない）');
+        (research.patterns.growing || []).slice(0, 8).forEach(function (g) { lines.push('- ' + g); });
+        lines.push('避ける構造: ' + (research.bouAvoid || []).join('／'));
+
+        lines.push('');
+        lines.push('# 現在の投稿戦略');
+        if (phase) lines.push('Phase ' + phase.id + '（' + phase.range + 'フォロワー）: ' + phase.goal);
+        if (strategy.growThemes) lines.push('伸ばしたいテーマ: ' + strategy.growThemes);
+        if (strategy.holdThemes) lines.push('控えるテーマ: ' + strategy.holdThemes);
+        if (strategy.weeklyPolicy) lines.push('今週の方針: ' + strategy.weeklyPolicy);
+
+        if (usage.overusedThemes.length || usage.overusedScenes.length || usage.overusedEndings.length) {
+            lines.push('');
+            lines.push('# 最近使いすぎているもの（今回は避けるか、頻度を落とす）');
+            if (usage.overusedThemes.length) lines.push('テーマ: ' + usage.overusedThemes.map(function (t) { return t.key + '（' + t.count + '回）'; }).join('、'));
+            if (usage.overusedScenes.length) lines.push('シーン・小物: ' + usage.overusedScenes.map(function (s) { return s.key + '（' + s.count + '回）'; }).join('、'));
+            if (usage.overusedEndings.length) lines.push('語尾: ' + usage.overusedEndings.map(function (e) { return '「' + e.key + '」（' + e.count + '回）'; }).join('、'));
+        }
+        if (usage.recentThemes.length) {
+            lines.push('直近のテーマ（連続を避ける）: ' + usage.recentThemes.join('→'));
+        }
 
         if (learning.goodExamples.length) {
             lines.push('');
@@ -406,12 +608,14 @@
         return lines.join('\n');
     }
 
-    function generateApi(character, store, apiKey) {
+    function callApi(character, store, apiKey, extraNote) {
         var learning = store.getLearningContext();
         var userMsg = '今日のぼぅ投稿の案を3つ作ってください。' +
+            '1つ目=A案（王道共感型）、2つ目=B案（本質型）、3つ目=C案（保存・シェア型）。' +
             '各案は3〜5枚のカルーセル（連作）で、案ごとに枚数を変えてもかまいません。' +
             '3案はテーマ・文章・シーンを少しずつ変えること。' +
-            'ハッシュタグは最大5個で、次の候補から選ぶか近い雰囲気で: ' + character.hashtagPool.join(' ');
+            'ハッシュタグは最大5個で、次の候補から選ぶか近い雰囲気で: ' + character.hashtagPool.join(' ') +
+            (extraNote ? '\n\n前回の案は次の理由で基準を満たしませんでした。修正して作り直してください:\n' + extraNote : '');
 
         return fetch(API_URL, {
             method: 'POST',
@@ -424,7 +628,7 @@
             body: JSON.stringify({
                 model: API_MODEL,
                 max_tokens: 16000,
-                system: buildSystemPrompt(character, learning),
+                system: buildSystemPrompt(character, learning, store),
                 output_config: { format: { type: 'json_schema', schema: PROPOSAL_SCHEMA } },
                 messages: [{ role: 'user', content: userMsg }]
             })
@@ -446,6 +650,7 @@
             }
             var parsed = JSON.parse(text.replace(/^```json\s*|```\s*$/g, ''));
             var variants = ['A', 'B', 'C'];
+            var types = ['empathy', 'essence', 'share'];
             var batchId = store.makeId('b');
             return parsed.proposals.slice(0, 3).map(function (p, idx) {
                 var total = p.pages.length;
@@ -456,9 +661,35 @@
                         image_prompt: buildImagePrompt(character, pg.scene_en, pi + 1, total)
                     };
                 });
-                var draft = makeDraft(store, character, batchId, variants[idx], p.theme, pages, p.caption, 'api');
+                var structTypes = store.getResearch().structureTypes || [];
+                var structUsed = (structTypes.indexOf(p.structure) !== -1) ? p.structure : (p.structure || '');
+                var draft = makeDraft(store, character, batchId, variants[idx], p.theme, pages, p.caption, 'api', types[idx], structUsed);
                 if (p.hashtags && p.hashtags.length) draft.hashtags = p.hashtags.slice(0, 5);
                 return draft;
+            });
+        });
+    }
+
+    /* 評価が低い案があれば、理由を伝えて1回だけ作り直す */
+    function generateApi(character, store, apiKey) {
+        function evaluated(drafts) {
+            drafts.forEach(function (d) { d.evaluation = evaluatePost(d, store, character); });
+            return drafts;
+        }
+        return callApi(character, store, apiKey).then(function (drafts) {
+            evaluated(drafts);
+            var failed = drafts.filter(function (d) { return !d.evaluation.pass; });
+            if (!failed.length) return drafts;
+            var note = failed.map(function (d) {
+                return d.variant + '案「' + (d.main_text || '').replace(/\n/g, '／') + '」: ' + (d.evaluation.flags.join('、') || '評価基準を下回った');
+            }).join('\n');
+            return callApi(character, store, apiKey, note).then(function (retry) {
+                evaluated(retry);
+                /* 再生成でも通らない案は、初回と再生成の良い方を残す */
+                return retry.map(function (d, i) {
+                    var prev = drafts[i];
+                    return (d.evaluation.pass || !prev || d.evaluation.average >= prev.evaluation.average) ? d : prev;
+                });
             });
         });
     }
@@ -469,9 +700,11 @@
 
     var BouGenerator = {
         CORPUS: CORPUS,
+        TYPE_LABEL: TYPE_LABEL,
         findNgWords: findNgWords,
         checkPost: checkPost,
         buildImagePrompt: buildImagePrompt,
+        evaluatePost: evaluatePost,
 
         /* 3案生成。mode未指定時は設定に従う。返り値: Promise<Post[]>（保存はしない） */
         generateBatch: function (store, mode, apiKey) {

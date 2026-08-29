@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/bou.css?v=2">
+    <link rel="stylesheet" href="styles/bou.css?v=6">
 </head>
 <body>
 <div class="wrap">
@@ -39,7 +39,9 @@
 
     <nav class="tabs">
         <button class="tab-btn active" data-view="dashboard">ダッシュボード</button>
-        <button class="tab-btn" data-view="settings">キャラクター設定</button>
+        <button class="tab-btn" data-view="research">リサーチ</button>
+        <button class="tab-btn" data-view="strategy">投稿戦略</button>
+        <button class="tab-btn" data-view="settings">キャラ設定</button>
     </nav>
 
     <!-- ================= ダッシュボード ================= -->
@@ -78,6 +80,100 @@
                 <button id="import-btn" class="btn btn-ghost">データの読み込み</button>
                 <input type="file" id="import-file" accept="application/json" hidden>
             </div>
+        </div>
+    </section>
+
+    <!-- ================= リサーチ ================= -->
+    <section id="view-research" class="view">
+        <div class="card">
+            <h2>リサーチについて</h2>
+            <p class="hint" id="research-note"></p>
+        </div>
+
+        <div class="card">
+            <h2>投稿構造ライブラリ（生成が参照する本体）</h2>
+            <p class="hint">「なぜ刺さるか」の構造だけを抽出して、ぼぅの世界観に変換したもの。「今日のぼぅ投稿を作って」はここの型＋過去の採用実績＋最近使っていないテーマを組み合わせ、各案に使った構造を記録します。刺さる投稿を見つけたら構造を追加してください。</p>
+            <div class="filter-row" id="structure-filter" style="margin-top:10px"></div>
+            <div id="structure-list" style="margin-top:6px"></div>
+            <div class="status-actions">
+                <button id="add-structure-btn" class="btn btn-small">＋構造を追加</button>
+            </div>
+            <div id="structure-detail"></div>
+        </div>
+
+        <div class="card">
+            <h2>投稿分析（アカウント研究・手動確認用）</h2>
+            <p class="hint">特定アカウントの投稿を「なぜ刺さるか」の教材として分析するメモ。この環境からは投稿の中身を閲覧できないため、推測では補完せずURLを保存しています。実際に投稿を見て分析欄を記入すると「分析済み」になり、「構造ライブラリに追加」で次の生成から反映されます。表現・デザインのコピーは禁止、抽出するのは構造のみ。</p>
+            <div id="study-list" style="margin-top:10px"></div>
+            <div class="status-actions">
+                <button id="add-study-btn" class="btn btn-small">＋分析対象を追加</button>
+            </div>
+            <div id="study-detail"></div>
+        </div>
+
+        <div class="card">
+            <h2>人気投稿パターンの分析</h2>
+            <div id="pattern-analysis"></div>
+        </div>
+
+        <div class="card">
+            <h2>ぼぅ向け変換ルール</h2>
+            <p class="hint">人気の構造をそのまま使わず、ぼぅの世界観（急がない・解決しない・励まさない）に変換する。</p>
+            <div id="conversion-rules" style="margin-top:10px"></div>
+        </div>
+
+        <div class="card">
+            <h2>参考アカウント一覧（参考値）</h2>
+            <p class="hint">フォロワー数は参考値で、投稿生成の判断根拠には使いません。観察して見つけた「刺さる構造」は上の構造ライブラリに追加してください。行をタップで詳細・編集。</p>
+            <div class="filter-row" id="genre-filter" style="margin-top:10px"></div>
+            <div class="table-wrap">
+                <table class="research-table" id="account-table">
+                    <thead><tr><th>データ</th><th>アカウント</th><th>ジャンル</th><th>フォロワー</th><th>主な形式</th><th>頻度</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="status-actions">
+                <button id="add-account-btn" class="btn btn-small">＋アカウントを追加</button>
+                <button id="reset-research-btn" class="btn btn-ghost">初期データに戻す</button>
+            </div>
+            <div id="account-detail"></div>
+        </div>
+
+        <div class="card">
+            <h2>定期リサーチの記録</h2>
+            <p class="hint">月1回など、手動で再調査した内容と前回との差分をここに残します（自動調査は行いません）。</p>
+            <div class="field" style="margin-top:10px"><label>今回の調査メモ</label><textarea id="rlog-note" placeholder="例：文字カルーセル系で「無言1枚目」が増えている"></textarea></div>
+            <div class="field"><label>前回分析との差分・戦略への反映</label><textarea id="rlog-diff" placeholder="例：C案の1枚目を無言にする実験を今月の実験テーマに追加"></textarea></div>
+            <button id="rlog-add-btn" class="btn btn-small">記録する</button>
+            <ul class="fb-log" id="rlog-list" style="margin-top:12px"></ul>
+        </div>
+    </section>
+
+    <!-- ================= 投稿戦略 ================= -->
+    <section id="view-strategy" class="view">
+        <div class="card">
+            <h2>成長段階（Phase）</h2>
+            <p class="hint">現在のフォロワー段階を選ぶと、生成時の方針に反映されます。</p>
+            <div class="filter-row" id="phase-buttons" style="margin-top:10px"></div>
+            <div id="phase-detail"></div>
+        </div>
+
+        <div class="card">
+            <h2>ぼぅの投稿戦略</h2>
+            <div class="field"><label>現在のポジショニング</label><textarea id="st-positioning"></textarea></div>
+            <div class="field"><label>狙う読者</label><textarea id="st-audience"></textarea></div>
+            <div class="field"><label>フォローされる理由</label><textarea id="st-followReasons"></textarea></div>
+            <div class="field"><label>伸ばしたいテーマ</label><textarea id="st-growThemes"></textarea></div>
+            <div class="field"><label>控えるテーマ</label><textarea id="st-holdThemes"></textarea></div>
+            <div class="field"><label>次に試す投稿フォーマット</label><textarea id="st-nextFormats"></textarea></div>
+            <div class="field"><label>今週の投稿方針</label><textarea id="st-weeklyPolicy"></textarea></div>
+            <div class="field"><label>今月の実験テーマ</label><textarea id="st-monthlyExperiment"></textarea></div>
+            <button id="save-strategy-btn" class="btn btn-select">戦略を保存</button>
+        </div>
+
+        <div class="card">
+            <h2>投稿の実績と使いすぎ注意</h2>
+            <div id="strategy-stats"></div>
         </div>
     </section>
 
@@ -141,6 +237,7 @@
         </div>
 
         <div id="m-ng-warning" class="chips" style="margin-bottom:10px"></div>
+        <div id="m-evaluation" style="margin-bottom:12px"></div>
 
         <div class="field"><label>テーマ</label><input type="text" id="m-theme"></div>
 
@@ -186,9 +283,11 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="scripts/bou/character.js?v=2"></script>
-<script src="scripts/bou/store.js?v=2"></script>
-<script src="scripts/bou/generator.js?v=2"></script>
-<script src="scripts/bou/app.js?v=2"></script>
+<script src="scripts/bou/character.js?v=6"></script>
+<script src="scripts/bou/research-data.js?v=6"></script>
+<script src="scripts/bou/store.js?v=6"></script>
+<script src="scripts/bou/generator.js?v=6"></script>
+<script src="scripts/bou/app.js?v=6"></script>
+<script src="scripts/bou/insights.js?v=6"></script>
 </body>
 </html>

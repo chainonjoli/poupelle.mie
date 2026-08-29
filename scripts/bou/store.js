@@ -10,6 +10,9 @@
     var KEY_POSTS = 'bou.posts';
     var KEY_CHARACTER = 'bou.character';
     var KEY_SETTINGS = 'bou.settings';
+    var KEY_RESEARCH = 'bou.research';
+    var KEY_STRATEGY = 'bou.strategy';
+    var KEY_RESEARCH_LOG = 'bou.researchLog';
 
     var memory = {};
     function rawGet(key) {
@@ -158,12 +161,153 @@
         getSettings: function () { return readJson(KEY_SETTINGS, { mode: 'builtin', apiKey: '' }); },
         saveSettings: function (settings) { writeJson(KEY_SETTINGS, settings); },
 
+        /* ---- リサーチ（参考アカウント調査・分析） ---- */
+        getResearchSeed: function () {
+            var seed = (typeof window !== 'undefined' && window.BouResearchSeed)
+                ? window.BouResearchSeed.SEED
+                : require('./research-data.js').SEED;
+            return JSON.parse(JSON.stringify(seed));
+        },
+
+        /* 保存済みがなければシードを返す。accountsはユーザー編集分を優先。
+         * 旧形式のデータには出所フィールド（data_type等）を補い、未確認の数値を事実扱いしない */
+        getResearch: function () {
+            var seed = this.getResearchSeed();
+            var saved = readJson(KEY_RESEARCH, null);
+            if (saved) {
+                for (var k in saved) { if (Object.prototype.hasOwnProperty.call(saved, k)) seed[k] = saved[k]; }
+            }
+            (seed.accounts || []).forEach(function (a) {
+                if (!a.data_type) {
+                    a.data_type = /要調査/.test(a.name || '') ? 'placeholder' : 'estimated';
+                }
+                if (a.verified === undefined) a.verified = (a.data_type === 'verified');
+                if (a.source_url === undefined) a.source_url = '';
+                if (a.source_name === undefined) a.source_name = '';
+                if (a.checked_at === undefined) a.checked_at = null;
+                /* 未確認レコードの数値レンジは事実として表示せず、推定メモに退避する */
+                if (!a.verified && a.followers && a.followers !== '未確認' && a.followers !== '要調査') {
+                    if (!a.followers_est) a.followers_est = '参考推定: ' + a.followers;
+                    a.followers = '未確認';
+                }
+                if (a.followers === '要調査') a.followers = '未確認';
+            });
+            /* 構造ライブラリ・投稿分析が旧保存データに無い場合はシードから補う */
+            var freshSeed = this.getResearchSeed();
+            if (!seed.structures || !seed.structures.length) seed.structures = freshSeed.structures;
+            if (!seed.structureTypes || !seed.structureTypes.length) seed.structureTypes = freshSeed.structureTypes;
+            if (!seed.postStudies) seed.postStudies = freshSeed.postStudies;
+            (seed.postStudies || []).forEach(function (st) {
+                if (!st.status) st.status = 'pending_manual';
+                if (!st.doNotCopy) st.doNotCopy = 'デザイン・文章・イラスト・レイアウトはコピーしない。構造のみ参考にする';
+            });
+            (seed.structures || []).forEach(function (s) {
+                if (!s.data_type) s.data_type = 'manual';
+                if (!s.id) s.id = 'st-' + Math.random().toString(36).slice(2, 8);
+            });
+            return seed;
+        },
+        saveResearch: function (research) { writeJson(KEY_RESEARCH, research); },
+        resetResearch: function () {
+            try { localStorage.removeItem(KEY_RESEARCH); } catch (e) { delete memory[KEY_RESEARCH]; }
+        },
+
+        /* 定期リサーチのログ（月1回などの手動再調査を追記型で記録） */
+        getResearchLog: function () { return readJson(KEY_RESEARCH_LOG, []); },
+        addResearchLog: function (entry) {
+            var log = this.getResearchLog();
+            log.unshift({ at: nowIso(), note: entry.note || '', diff: entry.diff || '' });
+            writeJson(KEY_RESEARCH_LOG, log);
+            return log;
+        },
+
+        /* ---- 投稿戦略（Phase・方針） ---- */
+        getStrategy: function () {
+            var seed = this.getResearchSeed();
+            var defaults = { phase: 1 };
+            for (var k in seed.strategyDefaults) {
+                if (Object.prototype.hasOwnProperty.call(seed.strategyDefaults, k)) defaults[k] = seed.strategyDefaults[k];
+            }
+            var saved = readJson(KEY_STRATEGY, null);
+            if (!saved) return defaults;
+            for (var s in saved) { if (Object.prototype.hasOwnProperty.call(saved, s)) defaults[s] = saved[s]; }
+            return defaults;
+        },
+        saveStrategy: function (strategy) { writeJson(KEY_STRATEGY, strategy); },
+
+        /* ---- 使いすぎ検出（直近30件のテーマ・シーン・語尾） ---- */
+        getUsageStats: function () {
+            var posts = this.getPosts().slice(0, 30);
+            var themes = {}, scenes = {}, endings = {};
+            function bump(map, key) { if (key) map[key] = (map[key] || 0) + 1; }
+            function endingOf(text) {
+                var t = (text || '').trim().replace(/[。．…]+$/, '');
+                return t ? t.slice(-2) : '';
+            }
+            posts.forEach(function (p) {
+                bump(themes, p.theme);
+                var pages = p.pages && p.pages.length ? p.pages : [{ text: p.main_text, scene: p.scene }];
+                pages.forEach(function (pg) {
+                    bump(endings, endingOf(pg.text));
+                    /* シーンは代表語（布団・ソファ・スマホ等）で数える */
+                    var m = (pg.scene || '').match(/布団|ソファ|スマホ|お風呂|デスク|窓|海|水面|電車|マグ|枕|カレンダー|鏡|台所/);
+                    bump(scenes, m ? m[0] : null);
+                });
+            });
+            function top(map, min) {
+                return Object.keys(map)
+                    .filter(function (k) { return map[k] >= (min || 3); })
+                    .sort(function (a, b) { return map[b] - map[a]; })
+                    .map(function (k) { return { key: k, count: map[k] }; });
+            }
+            return {
+                sampleSize: posts.length,
+                overusedThemes: top(themes, 3), overusedScenes: top(scenes, 4), overusedEndings: top(endings, 5),
+                recentThemes: posts.slice(0, 6).map(function (p) { return p.theme; }),
+                recentStructures: posts.slice(0, 6).map(function (p) { return p.structure_used; }).filter(Boolean),
+                allThemes: themes
+            };
+        },
+
+        /* ---- 採用/不採用の傾向（戦略ページ用） ---- */
+        getAdoptionStats: function () {
+            var posts = this.getPosts();
+            var byTheme = {}, byType = {}, byStructure = {};
+            posts.forEach(function (p) {
+                var adopted = (p.status === 'selected' || p.status === 'generated' || p.status === 'posted');
+                var rejected = (p.status === 'rejected');
+                if (!adopted && !rejected) return;
+                var t = p.theme || '（不明）';
+                byTheme[t] = byTheme[t] || { adopted: 0, rejected: 0 };
+                if (adopted) byTheme[t].adopted++; else byTheme[t].rejected++;
+                var ty = p.proposal_type || '（型なし）';
+                byType[ty] = byType[ty] || { adopted: 0, rejected: 0 };
+                if (adopted) byType[ty].adopted++; else byType[ty].rejected++;
+                if (p.structure_used) {
+                    byStructure[p.structure_used] = byStructure[p.structure_used] || { adopted: 0, rejected: 0 };
+                    if (adopted) byStructure[p.structure_used].adopted++; else byStructure[p.structure_used].rejected++;
+                }
+            });
+            return { byTheme: byTheme, byType: byType, byStructure: byStructure };
+        },
+
+        /* 過去の採用実績から「反応されやすい構造」の優先度を返す（採用-不採用） */
+        getStructurePreference: function () {
+            var byStructure = this.getAdoptionStats().byStructure;
+            var pref = {};
+            for (var k in byStructure) { pref[k] = byStructure[k].adopted - byStructure[k].rejected; }
+            return pref;
+        },
+
         /* ---- バックアップ ---- */
         exportAll: function () {
             return JSON.stringify({
                 exported_at: nowIso(),
                 posts: this.getPosts(),
-                character: readJson(KEY_CHARACTER, null)
+                character: readJson(KEY_CHARACTER, null),
+                research: readJson(KEY_RESEARCH, null),
+                strategy: readJson(KEY_STRATEGY, null),
+                researchLog: readJson(KEY_RESEARCH_LOG, null)
             }, null, 2);
         },
 
@@ -172,6 +316,9 @@
             if (!data || !Array.isArray(data.posts)) throw new Error('投稿データが見つかりません');
             this.savePosts(data.posts);
             if (data.character) this.saveCharacter(data.character);
+            if (data.research) this.saveResearch(data.research);
+            if (data.strategy) this.saveStrategy(data.strategy);
+            if (data.researchLog) writeJson(KEY_RESEARCH_LOG, data.researchLog);
             return data.posts.length;
         },
 
