@@ -12,14 +12,18 @@ const store = require('../scripts/bou/store.js');
 const gen = require('../scripts/bou/generator.js');
 
 (async () => {
-    /* コーパス全文がNG表現を含まないこと（ぼぅの約束） */
+    /* コーパス: 全話が3〜5枚のカルーセルで、NG表現を含まないこと（ぼぅの約束） */
     gen.CORPUS.forEach(t => {
         ok(DEFAULT_CHARACTER.themes.includes(t.theme), 'コーパスのテーマが固定設定にない: ' + t.theme);
         t.items.forEach(it => {
-            const hits = gen.findNgWords(it.text + '\n' + it.caption, DEFAULT_CHARACTER);
-            ok(hits.length === 0, 'コーパスにNG表現: 「' + it.text.replace(/\n/g, '／') + '」 → ' + hits.join('、'));
-            ok(it.text.split('\n').length <= 3, 'メインテキストが3行を超えている: ' + it.text);
-            ok(it.sceneEn && it.sceneJa, 'シーンが欠けている: ' + it.text);
+            ok(it.pages.length >= 3 && it.pages.length <= 5, 'カルーセルが3〜5枚でない（' + it.pages.length + '枚）: ' + it.pages[0].text);
+            const allText = it.pages.map(pg => pg.text).join('\n') + '\n' + it.caption;
+            const hits = gen.findNgWords(allText, DEFAULT_CHARACTER);
+            ok(hits.length === 0, 'コーパスにNG表現: 「' + it.pages[0].text.replace(/\n/g, '／') + '」 → ' + hits.join('、'));
+            it.pages.forEach((pg, i) => {
+                ok(pg.text.split('\n').length <= 2, 'ページの文が2行を超えている: ' + pg.text);
+                ok(pg.sceneEn && pg.sceneJa, 'シーンが欠けている（' + (i + 1) + '枚目）: ' + it.pages[0].text);
+            });
         });
     });
     ok(gen.CORPUS.length >= 14, '投稿テーマが14種類ない（' + gen.CORPUS.length + '種類）');
@@ -28,20 +32,27 @@ const gen = require('../scripts/bou/generator.js');
     ok(gen.findNgWords('明日も頑張って生きよう', DEFAULT_CHARACTER).length > 0, 'NGチェッカーが「頑張って」を見逃した');
     ok(gen.findNgWords('まあ、いっか。', DEFAULT_CHARACTER).length === 0, 'NGチェッカーの誤検知');
 
-    /* 3案生成（内蔵モード）: A/B/C・テーマ違い・全項目あり */
+    /* 3案生成（内蔵モード）: A/B/C・テーマ違い・各案3〜5枚のカルーセル */
     const drafts = await gen.generateBatch(store, 'builtin');
     ok(drafts.length === 3, '3案生成されない（' + drafts.length + '案）');
     ok(new Set(drafts.map(d => d.theme)).size === 3, '3案のテーマが重複している');
     ok(drafts.map(d => d.variant).join('') === 'ABC', 'A/B/C案になっていない');
     drafts.forEach(d => {
-        ['id', 'created_at', 'theme', 'main_text', 'scene', 'image_prompt', 'caption', 'hashtags', 'status'].forEach(k => {
+        ['id', 'created_at', 'theme', 'main_text', 'scene', 'image_prompt', 'caption', 'hashtags', 'status', 'pages'].forEach(k => {
             ok(d[k] !== undefined && d[k] !== '', '生成結果に ' + k + ' がない');
         });
         ok(d.status === 'draft', '生成直後のstatusがdraftでない: ' + d.status);
+        ok(d.pages.length >= 3 && d.pages.length <= 5, 'カルーセルが3〜5枚でない（' + d.pages.length + '枚）');
+        ok(d.main_text === d.pages[0].text, 'main_textが1枚目のテキストと一致しない');
+        d.pages.forEach((pg, i) => {
+            ok(pg.image_prompt && pg.image_prompt.includes('#9DAEB8') && pg.image_prompt.includes('mola mola'),
+                (i + 1) + '枚目の画像プロンプトに固定デザインが入っていない');
+            ok(!pg.image_prompt.includes('{scene}'), (i + 1) + '枚目の画像プロンプトにシーンが差し込まれていない');
+            ok(pg.image_prompt.includes('image ' + (i + 1) + ' of ' + d.pages.length),
+                (i + 1) + '枚目の画像プロンプトに連作の一貫性指示がない');
+        });
         ok(d.hashtags.length <= 5, 'ハッシュタグが5個を超えている');
         ok(d.hashtags.includes('#ぼぅ'), 'ハッシュタグに #ぼぅ がない');
-        ok(d.image_prompt.includes('#9DAEB8') && d.image_prompt.includes('mola mola'), '画像プロンプトに固定デザインが入っていない');
-        ok(!d.image_prompt.includes('{scene}'), '画像プロンプトにシーンが差し込まれていない');
         ok(gen.checkPost(d, DEFAULT_CHARACTER).length === 0, '生成結果にNG表現');
     });
 
@@ -88,10 +99,12 @@ const gen = require('../scripts/bou/generator.js');
     await page.goto('file://' + path.resolve(__dirname, '../bou.html'));
     ok(await page.locator('.bou-header h1').textContent() === 'ぼぅ 投稿スタジオ', 'ヘッダーが表示されない');
 
-    /* 生成 → 3案表示 */
+    /* 生成 → 3案表示（枚数チップとページドット付き） */
     await page.click('#generate-btn');
     await page.waitForSelector('.draft-card', { timeout: 5000 });
     ok(await page.locator('.draft-card').count() === 3, 'ダッシュボードに3案表示されない');
+    const firstDots = await page.locator('.draft-card').first().locator('.page-dot').count();
+    ok(firstDots >= 3 && firstDots <= 5, 'カードのページドットが3〜5個でない（' + firstDots + '個）');
 
     /* 1案採用 → 残りが不採用表示 */
     await page.locator('.draft-card .btn-select').first().click();
@@ -99,11 +112,22 @@ const gen = require('../scripts/bou/generator.js');
     ok(await page.locator('.draft-card.is-selected').count() === 1, '採用カードの表示がない');
     ok(await page.locator('.draft-card.is-rejected').count() === 2, '不採用カードの表示がない');
 
-    /* 詳細モーダル: 画像プロンプト・フィードバック */
+    /* 詳細モーダル: ページごとの編集欄・プロンプト・フィードバック */
     await page.locator('.draft-card').first().click();
     await page.waitForSelector('.modal-bg.open');
-    ok((await page.inputValue('#m-prompt')).includes('mola mola'), 'モーダルに画像生成プロンプトが出ない');
+    const pageCards = await page.locator('#m-pages .page-card').count();
+    ok(pageCards === firstDots, 'モーダルのページ数がカードの枚数と一致しない（' + pageCards + '/' + firstDots + '）');
+    ok((await page.locator('#m-pages .page-prompt').first().inputValue()).includes('mola mola'), 'モーダルに画像生成プロンプトが出ない');
     ok((await page.inputValue('#m-hashtags')).includes('#ぼぅ'), 'モーダルにハッシュタグが出ない');
+
+    /* ページの追加と削除 */
+    if (pageCards < 5) {
+        await page.click('#add-page-btn');
+        ok(await page.locator('#m-pages .page-card').count() === pageCards + 1, 'ページが追加できない');
+        await page.locator('#m-pages .page-del').last().click();
+        ok(await page.locator('#m-pages .page-card').count() === pageCards, 'ページが削除できない');
+    }
+
     await page.locator('.fb-chip[data-fb="もっとゆるく"]').click();
     await page.waitForTimeout(200);
     ok((await page.locator('#m-fb-log li').count()) >= 1, 'フィードバックがログに出ない');

@@ -10,6 +10,8 @@
         posted: '投稿済み', rejected: '不採用'
     };
 
+    var MAX_PAGES = 5;
+
     var state = { filter: 'all', openPostId: null };
 
     function $(id) { return document.getElementById(id); }
@@ -28,6 +30,14 @@
         return (d.getMonth() + 1) + '/' + d.getDate();
     }
 
+    /* カルーセル対応前の投稿（pagesなし）も1枚ものとして扱えるようにする */
+    function ensurePages(p) {
+        if (!p.pages || !p.pages.length) {
+            p.pages = [{ text: p.main_text || '', scene: p.scene || '', image_prompt: p.image_prompt || '' }];
+        }
+        return p;
+    }
+
     /* ================= タブ ================= */
     document.querySelectorAll('.tab-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -41,9 +51,10 @@
     /* ================= 生成 ================= */
     function renderModeNote() {
         var s = store.getSettings();
-        $('mode-note').textContent = s.mode === 'api'
+        $('mode-note').textContent = (s.mode === 'api'
             ? '生成モード: Claude API（固定設定＋過去のフィードバックを参照します）'
-            : '生成モード: 内蔵（書き溜めたぼぅの言葉から選びます・APIキー不要）';
+            : '生成モード: 内蔵（書き溜めたぼぅの言葉から選びます・APIキー不要）') +
+            '｜1投稿 = 3〜5枚のカルーセル';
     }
 
     $('generate-btn').addEventListener('click', function () {
@@ -79,6 +90,7 @@
             return;
         }
         batch.forEach(function (p) {
+            ensurePages(p);
             var card = document.createElement('div');
             card.className = 'draft-card' +
                 (p.status === 'selected' || p.status === 'generated' || p.status === 'posted' ? ' is-selected' : '') +
@@ -87,10 +99,14 @@
             card.innerHTML =
                 '<span class="variant">' + p.variant + '案</span>' +
                 '<div class="chips"><span class="chip theme">' + esc(p.theme) + '</span>' +
+                '<span class="chip">' + p.pages.length + '枚</span>' +
                 '<span class="badge ' + p.status + '">' + STATUS_LABEL[p.status] + '</span>' +
                 (ng.length ? '<span class="chip ng">NG表現: ' + esc(ng.join('、')) + '</span>' : '') +
                 '</div>' +
                 '<div class="draft-main">' + esc(p.main_text) + '</div>' +
+                '<div class="page-strip">' + p.pages.map(function (pg, i) {
+                    return '<span class="page-dot" title="' + esc((pg.text || '（無言）').replace(/\n/g, ' ')) + '">' + (i + 1) + '</span>';
+                }).join('') + '</div>' +
                 '<div class="hint">' + esc(p.scene || '') + '</div>' +
                 '<div class="draft-actions"></div>';
             var actions = card.querySelector('.draft-actions');
@@ -136,11 +152,13 @@
             return;
         }
         posts.forEach(function (p) {
+            ensurePages(p);
             var row = document.createElement('div');
             row.className = 'post-row';
             row.innerHTML =
                 '<span class="badge ' + p.status + '">' + STATUS_LABEL[p.status] + '</span>' +
                 '<span class="text">' + esc((p.main_text || '').replace(/\n/g, '　')) + '</span>' +
+                '<span class="chip">' + p.pages.length + '枚</span>' +
                 '<span class="chip theme">' + esc(p.theme || '') + '</span>' +
                 '<span class="date">' + fmtDate(p.created_at) + '</span>';
             row.addEventListener('click', function () { openModal(p.id); });
@@ -152,18 +170,17 @@
     function openModal(id) {
         var p = store.getPost(id);
         if (!p) return;
+        ensurePages(p);
         state.openPostId = id;
         $('m-status').textContent = STATUS_LABEL[p.status];
         $('m-status').className = 'badge ' + p.status;
         $('m-variant').textContent = (p.variant ? p.variant + '案' : '') + (p.generator === 'api' ? '（API生成）' : '（内蔵生成）');
         $('m-date').textContent = fmtDate(p.created_at);
         $('m-theme').value = p.theme || '';
-        $('m-main').value = p.main_text || '';
-        $('m-scene').value = p.scene || '';
         $('m-caption').value = p.caption || '';
         $('m-hashtags').value = (p.hashtags || []).join(' ');
-        $('m-prompt').value = p.image_prompt || '';
         $('m-feedback').value = '';
+        renderPagesEditor(p.pages);
         renderNgWarning(p);
         renderFeedbackLog(p);
         renderStatusActions(p);
@@ -175,6 +192,74 @@
         $('modal-bg').classList.remove('open');
         renderBatch(); renderPostList();
     }
+
+    /* ---- ページ（カルーセル）編集 ---- */
+    function renderPagesEditor(pages) {
+        var box = $('m-pages');
+        box.innerHTML = '';
+        pages.forEach(function (pg, i) {
+            var el = document.createElement('div');
+            el.className = 'page-card';
+            el.innerHTML =
+                '<div class="page-card-head">' +
+                    '<span class="chip theme">' + (i + 1) + '枚目' + (i === 0 ? '（表紙）' : (i === pages.length - 1 ? '（着地）' : '')) + '</span>' +
+                    '<span class="spacer"></span>' +
+                    '<button class="btn btn-ghost page-del">削除</button>' +
+                '</div>' +
+                '<div class="field"><label>画像内テキスト（1〜2行。無言でもOK）</label><textarea class="page-text"></textarea></div>' +
+                '<div class="field"><label>シーン</label><input type="text" class="page-scene"></div>' +
+                '<div class="field"><label>画像生成用プロンプト</label>' +
+                    '<div class="with-copy"><textarea class="page-prompt tall"></textarea>' +
+                    '<button class="btn btn-small page-copy">コピー</button></div></div>';
+            el.querySelector('.page-text').value = pg.text || '';
+            el.querySelector('.page-scene').value = pg.scene || '';
+            el.querySelector('.page-prompt').value = pg.image_prompt || '';
+            el.querySelector('.page-copy').addEventListener('click', function () {
+                copyText(el.querySelector('.page-prompt').value);
+                toast((i + 1) + '枚目のプロンプトをコピーしました');
+            });
+            el.querySelector('.page-del').addEventListener('click', function () {
+                var current = collectPages();
+                if (current.length <= 1) { toast('最後の1枚は消せません'); return; }
+                current.splice(i, 1);
+                renderPagesEditor(current);
+            });
+            box.appendChild(el);
+        });
+    }
+
+    function collectPages() {
+        var pages = [];
+        document.querySelectorAll('#m-pages .page-card').forEach(function (el) {
+            pages.push({
+                text: el.querySelector('.page-text').value,
+                scene: el.querySelector('.page-scene').value.trim(),
+                image_prompt: el.querySelector('.page-prompt').value
+            });
+        });
+        return pages;
+    }
+
+    $('add-page-btn').addEventListener('click', function () {
+        var current = collectPages();
+        if (current.length >= MAX_PAGES) { toast('カルーセルは最大' + MAX_PAGES + '枚です'); return; }
+        var character = store.getCharacter();
+        current.push({
+            text: '',
+            scene: '',
+            image_prompt: gen.buildImagePrompt(character, '(scene here)', current.length + 1, current.length + 1)
+        });
+        renderPagesEditor(current);
+    });
+
+    $('copy-all-prompts-btn').addEventListener('click', function () {
+        var pages = collectPages();
+        var all = pages.map(function (pg, i) {
+            return '--- ' + (i + 1) + '/' + pages.length + ' ---\n' + pg.image_prompt;
+        }).join('\n\n');
+        copyText(all);
+        toast('全' + pages.length + '枚分のプロンプトをコピーしました');
+    });
 
     function renderNgWarning(p) {
         var box = $('m-ng-warning');
@@ -228,26 +313,27 @@
     $('m-save-btn').addEventListener('click', function () {
         if (!state.openPostId) return;
         var tags = $('m-hashtags').value.split(/[\s,、]+/).filter(Boolean).slice(0, 5);
+        var pages = collectPages();
+        var cover = pages[0] || { text: '', scene: '', image_prompt: '' };
         store.updatePost(state.openPostId, {
             theme: $('m-theme').value.trim(),
-            main_text: $('m-main').value,
-            scene: $('m-scene').value.trim(),
+            pages: pages,
+            main_text: cover.text,
+            scene: cover.scene,
+            image_prompt: cover.image_prompt,
             caption: $('m-caption').value,
-            hashtags: tags,
-            image_prompt: $('m-prompt').value
+            hashtags: tags
         });
         toast('修正を保存しました');
         renderNgWarning(store.getPost(state.openPostId));
         renderBatch(); renderPostList();
     });
 
-    $('copy-prompt-btn').addEventListener('click', function () {
-        var text = $('m-prompt').value;
-        function done() { toast('画像生成用プロンプトをコピーしました'); }
+    function copyText(text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
-        } else { fallbackCopy(text); done(); }
-    });
+            navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+        } else { fallbackCopy(text); }
+    }
 
     function fallbackCopy(text) {
         var ta = document.createElement('textarea');

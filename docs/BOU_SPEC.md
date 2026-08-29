@@ -59,7 +59,13 @@ bou.html（管理画面・1ページ）
   "main_text": "返信しようとは、思ってる。",
   "scene": "ソファでスマホを見ている",
   "image_prompt": "A soft hand-drawn watercolor illustration of ...",
-  "caption": "思ってるだけの日も、ある。",
+  "pages": [
+    { "text": "返信しようとは、\n思ってる。", "scene": "ソファでスマホを見る", "image_prompt": "... image 1 of 4 ..." },
+    { "text": "文面も、\n半分できてる。", "scene": "打ちかけで止まっている", "image_prompt": "... image 2 of 4 ..." },
+    { "text": "あとは、送るだけ。", "scene": "送信ボタンの前で固まる", "image_prompt": "... image 3 of 4 ..." },
+    { "text": "…明日、送る。", "scene": "スマホを置いて寝る", "image_prompt": "... image 4 of 4 ..." }
+  ],
+  "caption": "気持ちは、もう届いてると思う。たぶん。",
   "hashtags": ["#ぼぅ", "#マンボウ", "#ゆるいイラスト", "#おつかれさま", "#今日はここまで"],
   "status": "draft",
   "generator": "api",
@@ -69,6 +75,10 @@ bou.html（管理画面・1ページ）
 }
 ```
 
+- 1投稿は **3〜5枚のカルーセル**。`pages[]` に各ページの文（1〜2行）・シーン・画像生成プロンプトを持つ。
+  1枚目=共感の入り口（表紙）、中間=小さな展開、最後=力の抜けるゆるい着地。
+  `main_text` / `scene` / `image_prompt` は1枚目（表紙）の複製（一覧表示と旧データ互換のため）。
+- 各ページの画像プロンプトには「連作で同じデザイン・画風を保つ」指示（image N of M）が自動で付く。
 - `status` : `draft`（生成直後）→ `selected`（採用）→ `generated`（画像作成済み）→ `posted`（投稿済み）。不採用は `rejected`。
 - `batch_id` / `variant`（A/B/C）で「同じ日の3案」をひとまとめに管理。
 - 1案を選ぶと、同じバッチの残り2案は自動で `rejected` になる（あとから戻せる）。
