@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/bou.css?v=4">
+    <link rel="stylesheet" href="styles/bou.css?v=5">
 </head>
 <body>
 <div class="wrap">
@@ -91,8 +91,30 @@
         </div>
 
         <div class="card">
-            <h2>参考アカウント一覧</h2>
-            <p class="hint">模倣ではなく「なぜ見られる・保存される・フォローされるか」の構造を観察するためのリスト。行をタップで詳細・編集。</p>
+            <h2>投稿構造ライブラリ（生成が参照する本体）</h2>
+            <p class="hint">「なぜ刺さるか」の構造だけを抽出して、ぼぅの世界観に変換したもの。「今日のぼぅ投稿を作って」はここの型＋過去の採用実績＋最近使っていないテーマを組み合わせ、各案に使った構造を記録します。刺さる投稿を見つけたら構造を追加してください。</p>
+            <div class="filter-row" id="structure-filter" style="margin-top:10px"></div>
+            <div id="structure-list" style="margin-top:6px"></div>
+            <div class="status-actions">
+                <button id="add-structure-btn" class="btn btn-small">＋構造を追加</button>
+            </div>
+            <div id="structure-detail"></div>
+        </div>
+
+        <div class="card">
+            <h2>人気投稿パターンの分析</h2>
+            <div id="pattern-analysis"></div>
+        </div>
+
+        <div class="card">
+            <h2>ぼぅ向け変換ルール</h2>
+            <p class="hint">人気の構造をそのまま使わず、ぼぅの世界観（急がない・解決しない・励まさない）に変換する。</p>
+            <div id="conversion-rules" style="margin-top:10px"></div>
+        </div>
+
+        <div class="card">
+            <h2>参考アカウント一覧（参考値）</h2>
+            <p class="hint">フォロワー数は参考値で、投稿生成の判断根拠には使いません。観察して見つけた「刺さる構造」は上の構造ライブラリに追加してください。行をタップで詳細・編集。</p>
             <div class="filter-row" id="genre-filter" style="margin-top:10px"></div>
             <div class="table-wrap">
                 <table class="research-table" id="account-table">
@@ -105,17 +127,6 @@
                 <button id="reset-research-btn" class="btn btn-ghost">初期データに戻す</button>
             </div>
             <div id="account-detail"></div>
-        </div>
-
-        <div class="card">
-            <h2>人気投稿パターンの分析</h2>
-            <div id="pattern-analysis"></div>
-        </div>
-
-        <div class="card">
-            <h2>ぼぅ向け変換ルール</h2>
-            <p class="hint">人気の構造をそのまま使わず、ぼぅの世界観（急がない・解決しない・励まさない）に変換する。</p>
-            <div id="conversion-rules" style="margin-top:10px"></div>
         </div>
 
         <div class="card">
@@ -262,11 +273,11 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="scripts/bou/character.js?v=4"></script>
-<script src="scripts/bou/research-data.js?v=4"></script>
-<script src="scripts/bou/store.js?v=4"></script>
-<script src="scripts/bou/generator.js?v=4"></script>
-<script src="scripts/bou/app.js?v=4"></script>
-<script src="scripts/bou/insights.js?v=4"></script>
+<script src="scripts/bou/character.js?v=5"></script>
+<script src="scripts/bou/research-data.js?v=5"></script>
+<script src="scripts/bou/store.js?v=5"></script>
+<script src="scripts/bou/generator.js?v=5"></script>
+<script src="scripts/bou/app.js?v=5"></script>
+<script src="scripts/bou/insights.js?v=5"></script>
 </body>
 </html>

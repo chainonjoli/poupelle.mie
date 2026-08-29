@@ -216,6 +216,16 @@ body {
 .stat-h { font-size: .86rem; font-weight: 500; color: var(--bou-line); margin: 14px 0 6px; }
 .stat-h:first-child { margin-top: 0; }
 
+/* ---- 投稿構造ライブラリ ---- */
+.structure-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: box-shadow .15s;
+}
+.structure-card:hover { box-shadow: 0 3px 12px rgba(109, 119, 128, .12); }
+.structure-hook { font-size: .84rem; margin: 6px 0 4px; }
+.structure-flow { display: flex; gap: 8px; align-items: flex-start; font-size: .78rem; color: var(--ink-soft); }
+.structure-flow .conv-to { color: var(--ink); }
+
 /* ---- データ出所バッジ（実データと仮データの区別） ---- */
 .badge-data {
     display: inline-block; font-size: .68rem; border-radius: 999px; padding: 2px 10px;

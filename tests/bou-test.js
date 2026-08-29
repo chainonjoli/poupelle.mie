@@ -58,6 +58,19 @@ const gen = require('../scripts/bou/generator.js');
     const verifiedCount = research.accounts.filter(a => a.verified).length;
     ok(verifiedCount >= 15, '確認済みアカウントが少なすぎる（' + verifiedCount + '件）');
 
+    /* 投稿構造ライブラリ: 8つの型があり、各構造に10項目の分析軸と「抽出→ぼぅ変換」がある */
+    ok(research.structureTypes.length === 8, '投稿の型が8種類でない（' + research.structureTypes.length + '）');
+    ok(research.structures.length >= 8, '構造ライブラリが8件未満（' + research.structures.length + '件）');
+    research.structures.forEach(s => {
+        ['type', 'theme', 'hook', 'carousel', 'textAmount', 'empathy', 'afterFeel', 'charRole', 'scene',
+         'extraction', 'bouConversion'].forEach(k => {
+            ok(s[k], '構造「' + s.type + '」に ' + k + ' がない');
+        });
+        ok(research.structureTypes.includes(s.type), '構造の型が8分類にない: ' + s.type);
+        const hits = gen.findNgWords(s.bouConversion, DEFAULT_CHARACTER);
+        ok(hits.length === 0, '構造のぼぅ変換例にNG表現: ' + s.type + ' → ' + hits.join('、'));
+    });
+
     /* 3案生成（内蔵モード）: A/B/C・テーマ違い・型付き・各案3〜5枚のカルーセル */
     const drafts = await gen.generateBatch(store, 'builtin');
     ok(drafts.length === 3, '3案生成されない（' + drafts.length + '案）');
@@ -70,6 +83,8 @@ const gen = require('../scripts/bou/generator.js');
         ok(d.evaluation && typeof d.evaluation.average === 'number', d.variant + '案に内部評価がない');
         ok(Object.keys(d.evaluation.scores).length === 10, '評価が10項目でない（' + Object.keys(d.evaluation.scores).length + '項目）');
         ok(d.evaluation.pass, d.variant + '案が評価基準を満たさないまま出力された: ' + d.evaluation.flags.join('、'));
+        ok(research.structureTypes.includes(d.structure_used),
+            d.variant + '案に使った投稿構造が記録されていない（' + d.structure_used + '）');
     });
 
     /* 評価チェッカー: 説教・元気すぎ・NG表現を検出して落とすこと */
@@ -190,8 +205,15 @@ const gen = require('../scripts/bou/generator.js');
     ok(await page.locator('#m-evaluation .eval-item').count() === 10, 'モーダルに10項目の内部評価が出ない');
     await page.click('#m-close-btn');
 
-    /* リサーチページ: アカウント一覧・実データ/仮データの区別・分析・変換ルール */
+    /* リサーチページ: 投稿構造ライブラリが本体として表示・編集できる */
     await page.locator('.tab-btn[data-view="research"]').click();
+    ok(await page.locator('#structure-list .structure-card').count() >= 8, '構造ライブラリのカードが8件以上出ない');
+    await page.locator('#structure-list .structure-card').first().click();
+    ok(await page.locator('#structure-detail [data-struct-field]').count() === 11, '構造編集フォームに11項目出ない');
+    ok(await page.locator('#struct-type option').count() === 8, '構造の型セレクタに8択出ない');
+    await page.click('#struct-close-btn');
+
+    /* リサーチページ: アカウント一覧・実データ/仮データの区別・分析・変換ルール */
     ok(await page.locator('#account-table tbody tr').count() >= 30, 'アカウント一覧に30件以上出ない');
     ok(await page.locator('#account-table tbody .badge-data').count() >= 30, 'データ種別バッジが各行に出ない');
     ok(await page.locator('#account-table tbody .badge-data.verified').count() >= 15, '確認済みバッジが出ない');

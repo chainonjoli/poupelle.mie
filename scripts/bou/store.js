@@ -192,6 +192,14 @@
                 }
                 if (a.followers === '要調査') a.followers = '未確認';
             });
+            /* 構造ライブラリが旧保存データに無い場合はシードから補う */
+            var freshSeed = this.getResearchSeed();
+            if (!seed.structures || !seed.structures.length) seed.structures = freshSeed.structures;
+            if (!seed.structureTypes || !seed.structureTypes.length) seed.structureTypes = freshSeed.structureTypes;
+            (seed.structures || []).forEach(function (s) {
+                if (!s.data_type) s.data_type = 'manual';
+                if (!s.id) s.id = 'st-' + Math.random().toString(36).slice(2, 8);
+            });
             return seed;
         },
         saveResearch: function (research) { writeJson(KEY_RESEARCH, research); },
@@ -251,6 +259,7 @@
                 sampleSize: posts.length,
                 overusedThemes: top(themes, 3), overusedScenes: top(scenes, 4), overusedEndings: top(endings, 5),
                 recentThemes: posts.slice(0, 6).map(function (p) { return p.theme; }),
+                recentStructures: posts.slice(0, 6).map(function (p) { return p.structure_used; }).filter(Boolean),
                 allThemes: themes
             };
         },
@@ -258,7 +267,7 @@
         /* ---- 採用/不採用の傾向（戦略ページ用） ---- */
         getAdoptionStats: function () {
             var posts = this.getPosts();
-            var byTheme = {}, byType = {};
+            var byTheme = {}, byType = {}, byStructure = {};
             posts.forEach(function (p) {
                 var adopted = (p.status === 'selected' || p.status === 'generated' || p.status === 'posted');
                 var rejected = (p.status === 'rejected');
@@ -269,8 +278,20 @@
                 var ty = p.proposal_type || '（型なし）';
                 byType[ty] = byType[ty] || { adopted: 0, rejected: 0 };
                 if (adopted) byType[ty].adopted++; else byType[ty].rejected++;
+                if (p.structure_used) {
+                    byStructure[p.structure_used] = byStructure[p.structure_used] || { adopted: 0, rejected: 0 };
+                    if (adopted) byStructure[p.structure_used].adopted++; else byStructure[p.structure_used].rejected++;
+                }
             });
-            return { byTheme: byTheme, byType: byType };
+            return { byTheme: byTheme, byType: byType, byStructure: byStructure };
+        },
+
+        /* 過去の採用実績から「反応されやすい構造」の優先度を返す（採用-不採用） */
+        getStructurePreference: function () {
+            var byStructure = this.getAdoptionStats().byStructure;
+            var pref = {};
+            for (var k in byStructure) { pref[k] = byStructure[k].adopted - byStructure[k].rejected; }
+            return pref;
         },
 
         /* ---- バックアップ ---- */

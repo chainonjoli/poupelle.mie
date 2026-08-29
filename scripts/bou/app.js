@@ -99,7 +99,8 @@
             card.innerHTML =
                 '<span class="variant">' + p.variant + '案</span>' +
                 '<div class="chips"><span class="chip theme">' + esc(p.theme) + '</span>' +
-                (p.proposal_type ? '<span class="chip">' + esc(p.proposal_type) + '</span>' : '') +
+                (p.structure_used ? '<span class="chip">' + esc(p.structure_used) + '</span>' :
+                    (p.proposal_type ? '<span class="chip">' + esc(p.proposal_type) + '</span>' : '')) +
                 '<span class="chip">' + p.pages.length + '枚</span>' +
                 '<span class="badge ' + p.status + '">' + STATUS_LABEL[p.status] + '</span>' +
                 (ng.length ? '<span class="chip ng">NG表現: ' + esc(ng.join('、')) + '</span>' : '') +
@@ -176,7 +177,9 @@
         $('m-status').textContent = STATUS_LABEL[p.status];
         $('m-status').className = 'badge ' + p.status;
         $('m-variant').textContent = (p.variant ? p.variant + '案' : '') +
-            (p.proposal_type ? '・' + p.proposal_type : '') + (p.generator === 'api' ? '（API生成）' : '（内蔵生成）');
+            (p.proposal_type ? '・' + p.proposal_type : '') +
+            (p.structure_used ? '・構造: ' + p.structure_used : '') +
+            (p.generator === 'api' ? '（API生成）' : '（内蔵生成）');
         $('m-date').textContent = fmtDate(p.created_at);
         renderEvaluation(p);
         $('m-theme').value = p.theme || '';

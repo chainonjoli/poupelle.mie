@@ -216,9 +216,20 @@
         '何もしたくない日': ['share', 'empathy'], '比べてしまう日': ['essence', 'share'],
         '明日に回したいこと': ['empathy', 'share']
     };
+    /* 各話が使っている「投稿構造」（リサーチの構造ライブラリの8型に対応） */
+    var STRUCTURE_BY_THEME = {
+        '疲れ': ['王道共感型', '保存したい一言型'], '仕事': ['保存したい一言型', '本音代弁型'],
+        '人間関係': ['王道共感型', '人間関係の本質型'], 'SNS': ['日常あるある型', '意外な視点型'],
+        '返信': ['本音代弁型', '誰かに送りたい型'], '予定': ['意外な視点型', '日常あるある型'],
+        '休息': ['保存したい一言型', '疲れた日の癒し型'], '自己肯定': ['王道共感型', '意外な視点型'],
+        'ひとり時間': ['王道共感型', '疲れた日の癒し型'], '考えすぎ': ['日常あるある型', '誰かに送りたい型'],
+        'やる気が出ない日': ['本音代弁型', '保存したい一言型'], '何もしたくない日': ['保存したい一言型', '日常あるある型'],
+        '比べてしまう日': ['意外な視点型', '誰かに送りたい型'], '明日に回したいこと': ['日常あるある型', '保存したい一言型']
+    };
     CORPUS.forEach(function (t) {
         t.items.forEach(function (it, i) {
             it.type = (TYPE_BY_THEME[t.theme] || ['empathy', 'empathy'])[i] || 'empathy';
+            it.structure = (STRUCTURE_BY_THEME[t.theme] || [])[i] || '王道共感型';
         });
     });
 
@@ -261,7 +272,7 @@
     }
 
     /* pages（{text, scene, image_prompt}[]）から投稿レコードを組み立てる */
-    function makeDraft(store, character, batchId, variant, theme, pages, caption, generator, proposalType) {
+    function makeDraft(store, character, batchId, variant, theme, pages, caption, generator, proposalType, structureUsed) {
         var cover = pages[0] || {};
         return {
             id: store.makeId('p'),
@@ -271,6 +282,7 @@
             variant: variant,
             theme: theme,
             proposal_type: TYPE_LABEL[proposalType] || proposalType || '',
+            structure_used: structureUsed || '',
             main_text: cover.text || '',
             scene: cover.scene || '',
             image_prompt: cover.image_prompt || '',
@@ -374,7 +386,7 @@
                 image_prompt: buildImagePrompt(character, pg.sceneEn, idx + 1, total)
             };
         });
-        return makeDraft(store, character, batchId, variant, theme, pages, item.caption, 'builtin', item.type);
+        return makeDraft(store, character, batchId, variant, theme, pages, item.caption, 'builtin', item.type, item.structure);
     }
 
     function generateBuiltin(character, store) {
@@ -391,6 +403,9 @@
             return /ゆるく|言いすぎ|いいすぎ|強い/.test(c.text || '');
         }).length >= 2;
 
+        /* 反応されやすかった構造を優先し、直近で使った構造・テーマ・文章を避ける */
+        var structurePref = store.getStructurePreference();
+
         /* 型ごとの候補リスト（{theme, item}） */
         function candidatesOf(type, usedThemes) {
             var list = [];
@@ -398,7 +413,11 @@
                 t.items.forEach(function (it) {
                     if (it.type !== type) return;
                     if (usedThemes.indexOf(t.theme) !== -1) return;
-                    list.push({ theme: t.theme, item: it, penalty: (recentTexts[it.pages[0].text] ? 2 : 0) + (usage.recentThemes.indexOf(t.theme) !== -1 ? 1 : 0) });
+                    var penalty = (recentTexts[it.pages[0].text] ? 2 : 0) +
+                        (usage.recentThemes.indexOf(t.theme) !== -1 ? 1 : 0) +
+                        (usage.recentStructures.indexOf(it.structure) !== -1 ? 1 : 0) -
+                        (structurePref[it.structure] || 0); /* 採用実績のある構造を優先 */
+                    list.push({ theme: t.theme, item: it, penalty: penalty });
                 });
             });
             list.sort(function (a, b) { return (a.penalty - b.penalty) || (rng() - 0.5); });
@@ -451,9 +470,10 @@
                 items: {
                     type: 'object',
                     additionalProperties: false,
-                    required: ['theme', 'pages', 'caption', 'hashtags'],
+                    required: ['theme', 'structure', 'pages', 'caption', 'hashtags'],
                     properties: {
                         theme: { type: 'string' },
+                        structure: { type: 'string', description: '今回使った投稿構造。次のいずれか: 王道共感型 / 本音代弁型 / 意外な視点型 / 保存したい一言型 / 誰かに送りたい型 / 疲れた日の癒し型 / 人間関係の本質型 / 日常あるある型' },
                         pages: {
                             type: 'array', minItems: 3, maxItems: 5,
                             description: 'カルーセルの各ページ。1枚目=共感の入り口、中間=小さな展開、最後=力の抜けるゆるい着地',
@@ -516,9 +536,32 @@
         lines.push(character.themes.join('、'));
 
         lines.push('');
-        lines.push('# 参考にする構造（一般的な傾向の観察メモ。表現のコピーは禁止、構造だけ使う）');
-        lines.push('注意: 以下は特定アカウントの実測データではなく、未確認の推定を含む定性的な分析。');
-        lines.push('強い根拠としては扱わず、「ぼぅらしさ」と矛盾する場合は必ずぼぅらしさを優先する。');
+        lines.push('# 投稿構造ライブラリ（最重要の参考情報。表現のコピーは禁止、構造だけ使う）');
+        lines.push('毎回ランダムに書くのではなく、以下の構造から各案に合うものを選んで組み立て、');
+        lines.push('使った構造名を structure フィールドに記録すること。');
+        lines.push('ぼぅらしさと矛盾する場合は必ずぼぅらしさを優先する。');
+        (research.structures || []).forEach(function (s) {
+            lines.push('');
+            lines.push('## ' + s.type);
+            lines.push('フック: ' + s.hook);
+            lines.push('カルーセル: ' + s.carousel);
+            lines.push('共感の作り方: ' + s.empathy);
+            lines.push('読後感: ' + s.afterFeel + '／キャラの役割: ' + s.charRole + '／シーン例: ' + s.scene);
+            lines.push('なぜ刺さるか: ' + s.extraction);
+            lines.push(s.bouConversion);
+        });
+
+        var structPref = store.getStructurePreference();
+        var liked = Object.keys(structPref).filter(function (k) { return structPref[k] > 0; });
+        var disliked = Object.keys(structPref).filter(function (k) { return structPref[k] < 0; });
+        if (liked.length) lines.push('\n過去に採用されやすかった構造（優先する）: ' + liked.join('、'));
+        if (disliked.length) lines.push('過去に不採用が多い構造（頻度を落とす）: ' + disliked.join('、'));
+        if (usage.recentStructures && usage.recentStructures.length) {
+            lines.push('直近で使った構造（連続を避ける）: ' + usage.recentStructures.join('→'));
+        }
+
+        lines.push('');
+        lines.push('# 一般的な傾向の観察メモ（未確認の推定を含む・強い根拠にしない）');
         (research.patterns.growing || []).slice(0, 8).forEach(function (g) { lines.push('- ' + g); });
         lines.push('避ける構造: ' + (research.bouAvoid || []).join('／'));
 
@@ -618,7 +661,9 @@
                         image_prompt: buildImagePrompt(character, pg.scene_en, pi + 1, total)
                     };
                 });
-                var draft = makeDraft(store, character, batchId, variants[idx], p.theme, pages, p.caption, 'api', types[idx]);
+                var structTypes = store.getResearch().structureTypes || [];
+                var structUsed = (structTypes.indexOf(p.structure) !== -1) ? p.structure : (p.structure || '');
+                var draft = makeDraft(store, character, batchId, variants[idx], p.theme, pages, p.caption, 'api', types[idx], structUsed);
                 if (p.hashtags && p.hashtags.length) draft.hashtags = p.hashtags.slice(0, 5);
                 return draft;
             });

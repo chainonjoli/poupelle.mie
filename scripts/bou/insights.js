@@ -42,7 +42,99 @@
     ];
     var DATA_TYPE_LABEL = { verified: '確認済み', estimated: '未確認・推定', manual: '手動入力', placeholder: '要調査枠' };
 
-    var state = { genreFilter: 'all', editingIndex: null };
+    var STRUCTURE_FIELDS = [
+        ['theme', 'よく合う投稿テーマ'], ['hook', '1枚目のフック（どう止めるか）'],
+        ['carousel', 'カルーセル構造（枚数・展開・着地）'], ['textAmount', '文章量（文字数・改行・強弱）'],
+        ['empathy', '共感の作り方（断定しない・代弁・教訓化しない）'], ['afterFeel', '読後感'],
+        ['charRole', 'キャラクターの役割'], ['scene', 'シーン'],
+        ['extraction', 'なぜ刺さるか（構造抽出）'], ['bouConversion', 'ぼぅへの変換例（構造だけ使う）'],
+        ['source_note', '参考元メモ（表現はコピーしない）']
+    ];
+
+    var state = { genreFilter: 'all', editingIndex: null, structFilter: 'all', editingStructIndex: null };
+
+    /* ================= リサーチ：投稿構造ライブラリ ================= */
+
+    function renderStructureFilter() {
+        var r = store.getResearch();
+        var box = $('structure-filter');
+        box.innerHTML = '';
+        ['all'].concat(r.structureTypes || []).forEach(function (t) {
+            var b = document.createElement('button');
+            b.className = 'filter-btn' + (state.structFilter === t ? ' active' : '');
+            b.textContent = t === 'all' ? 'すべて' : t;
+            b.addEventListener('click', function () { state.structFilter = t; renderStructureFilter(); renderStructureList(); });
+            box.appendChild(b);
+        });
+    }
+
+    function renderStructureList() {
+        var r = store.getResearch();
+        var box = $('structure-list');
+        box.innerHTML = '';
+        (r.structures || []).forEach(function (s, idx) {
+            if (state.structFilter !== 'all' && s.type !== state.structFilter) return;
+            var el = document.createElement('div');
+            el.className = 'structure-card';
+            el.innerHTML =
+                '<div class="chips"><span class="chip theme">' + esc(s.type) + '</span>' +
+                '<span class="badge-data ' + esc(s.data_type || 'manual') + '">' + (DATA_TYPE_LABEL[s.data_type] || '手動入力') + '</span></div>' +
+                '<div class="structure-hook">' + esc(s.hook || '') + '</div>' +
+                '<div class="structure-flow"><span class="conv-from">' + esc(s.extraction || '') + '</span>' +
+                '<span class="conv-arrow">→</span><span class="conv-to">' + esc(s.bouConversion || '') + '</span></div>';
+            el.addEventListener('click', function () { openStructureDetail(idx); });
+            box.appendChild(el);
+        });
+        if (!box.children.length) box.innerHTML = '<p class="hint">この型の構造はまだありません。</p>';
+    }
+
+    function openStructureDetail(index) {
+        var r = store.getResearch();
+        var s = index === null ? {} : (r.structures || [])[index] || {};
+        state.editingStructIndex = index;
+        var box = $('structure-detail');
+        var html = '<div class="page-card" style="margin-top:12px"><div class="page-card-head">' +
+            '<span class="chip theme">' + (index === null ? '新しい構造' : esc(s.type || '')) + '</span><span class="spacer"></span>' +
+            (index !== null ? '<button class="btn btn-ghost" id="struct-del-btn">削除</button>' : '') +
+            '<button class="btn btn-ghost" id="struct-close-btn">閉じる</button></div>' +
+            '<div class="field"><label>投稿の型</label><select id="struct-type">' +
+            (r.structureTypes || []).map(function (t) {
+                return '<option value="' + esc(t) + '"' + (s.type === t ? ' selected' : '') + '>' + esc(t) + '</option>';
+            }).join('') + '</select></div>';
+        STRUCTURE_FIELDS.forEach(function (f) {
+            html += '<div class="field"><label>' + f[1] + '</label>' +
+                '<textarea data-struct-field="' + f[0] + '" style="min-height:44px">' + esc(s[f[0]] || '') + '</textarea></div>';
+        });
+        html += '<button class="btn btn-select" id="struct-save-btn">保存</button></div>';
+        box.innerHTML = html;
+
+        $('struct-save-btn').addEventListener('click', function () {
+            var research = store.getResearch();
+            var record = state.editingStructIndex === null ? { data_type: 'manual', id: 'st-' + Date.now().toString(36) }
+                : research.structures[state.editingStructIndex];
+            box.querySelectorAll('[data-struct-field]').forEach(function (el) { record[el.dataset.structField] = el.value.trim(); });
+            record.type = $('struct-type').value;
+            if (!record.extraction || !record.bouConversion) { toast('「なぜ刺さるか」と「ぼぅへの変換例」は必須です'); return; }
+            if (state.editingStructIndex === null) research.structures.push(record);
+            else research.structures[state.editingStructIndex] = record;
+            store.saveResearch(research);
+            toast('構造を保存しました。次の生成から参照されます');
+            box.innerHTML = '';
+            renderStructureFilter(); renderStructureList();
+        });
+        $('struct-close-btn').addEventListener('click', function () { box.innerHTML = ''; });
+        var del = $('struct-del-btn');
+        if (del) del.addEventListener('click', function () {
+            if (!confirm('この構造をライブラリから削除しますか？')) return;
+            var research = store.getResearch();
+            research.structures.splice(state.editingStructIndex, 1);
+            store.saveResearch(research);
+            box.innerHTML = '';
+            toast('削除しました');
+            renderStructureFilter(); renderStructureList();
+        });
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 
     /* ================= リサーチ：参考アカウント ================= */
 
@@ -287,7 +379,8 @@
     function renderStrategyStats() {
         var adoption = store.getAdoptionStats();
         var usage = store.getUsageStats();
-        var html = '<h3 class="stat-h">投稿タイプ別（A=王道共感/B=本質/C=保存・シェア）</h3>' + statRows(adoption.byType) +
+        var html = '<h3 class="stat-h">投稿構造別（反応されやすい構造を生成で優先します）</h3>' + statRows(adoption.byStructure) +
+            '<h3 class="stat-h">案タイプ別（A=王道共感/B=本質/C=保存・シェア）</h3>' + statRows(adoption.byType) +
             '<h3 class="stat-h">テーマ別</h3>' + statRows(adoption.byTheme);
         html += '<h3 class="stat-h">使いすぎ注意（直近' + usage.sampleSize + '件）</h3>';
         var warn = [];
@@ -308,8 +401,12 @@
         });
     });
 
+    $('add-structure-btn').addEventListener('click', function () { openStructureDetail(null); });
+
     /* ================= 初期表示 ================= */
     renderResearchNote();
+    renderStructureFilter();
+    renderStructureList();
     renderGenreFilter();
     renderAccountTable();
     renderPatterns();
