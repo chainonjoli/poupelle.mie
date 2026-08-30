@@ -28,6 +28,34 @@ const gen = require('../scripts/bou/generator.js');
     });
     ok(gen.CORPUS.length >= 14, '投稿テーマが14種類ない（' + gen.CORPUS.length + '種類）');
 
+    /* ぼぅの言葉づかい: 関西弁・一人称・会社員言葉がコーパスに残っていないこと */
+    const KANSAI = /(ええか|ええよ|ええね|やんな|やねん|せやから|しはる|とく。|おった|あかん|ちゃうか|やなあ|へん。)/;
+    const FIRST_PERSON = /(ぼくは|ぼくも|ぼくの|僕|わたしは|わたしの|私は|私の)/;
+    gen.CORPUS.forEach(t => t.items.forEach(it => {
+        const allText = it.pages.map(pg => pg.text).join('\n') + '\n' + it.caption;
+        ok(!KANSAI.test(allText), 'コーパスに関西弁が残っている: ' + allText.replace(/\n/g, '／'));
+        ok(!FIRST_PERSON.test(allText), 'コーパスに一人称が残っている: ' + allText.replace(/\n/g, '／'));
+        it.pages.forEach(pg => {
+            ok(!/(手を振|指折|手をつな|腕|足で)/.test(pg.sceneJa), 'シーンが人間化している: ' + pg.sceneJa);
+        });
+    }));
+    /* 成功基準例（休むことへの罪悪感）がコーパスに入っていること */
+    const restTheme = gen.CORPUS.find(t => t.theme === '休息');
+    ok(!!restTheme && restTheme.items[0].pages.length === 4 &&
+        restTheme.items[0].pages[0].text.indexOf('休むのも') === 0, '成功基準例の4枚構成がコーパスにない');
+
+    /* キャラクター設定: 投稿ルール・使わない言い回し・人間化禁止が入っていること */
+    ok(DEFAULT_CHARACTER.version >= 2, 'キャラクター設定のバージョンが上がっていない');
+    ok(DEFAULT_CHARACTER.postRules.carousel.length >= 5 && DEFAULT_CHARACTER.postRules.caption.length >= 3,
+        'カルーセル/キャプションのルールが登録されていない');
+    ok(DEFAULT_CHARACTER.speech.avoid.length >= 4, '使わない言い回しが登録されていない');
+    ok(DEFAULT_CHARACTER.softAvoidWords.length >= 8, '関西弁の検査語が登録されていない');
+    ok(DEFAULT_CHARACTER.imagePromptTemplate.includes('never humanized'), '画像プロンプトに人間化禁止がない');
+    ok(DEFAULT_CHARACTER.imagePromptTemplate.includes('#EAF4F8'), '画像プロンプトに背景色の指定がない');
+    ['業務', 'タスク', '実績', 'ぼくは', '私は'].forEach(w => {
+        ok(DEFAULT_CHARACTER.ngWords.includes(w), 'NG語に ' + w + ' がない');
+    });
+
     /* 投稿分析（手動確認用）: yohakusan_ が推測なしで登録されている */
     const researchForStudies = store.getResearch();
     ok(researchForStudies.postStudies && researchForStudies.postStudies.length >= 1, '投稿分析の対象がない');
@@ -74,8 +102,17 @@ const gen = require('../scripts/bou/generator.js');
     ok(verifiedCount >= 15, '確認済みアカウントが少なすぎる（' + verifiedCount + '件）');
 
     /* 投稿構造ライブラリ: 8つの型があり、各構造に10項目の分析軸と「抽出→ぼぅ変換」がある */
-    ok(research.structureTypes.length === 8, '投稿の型が8種類でない（' + research.structureTypes.length + '）');
-    ok(research.structures.length >= 8, '構造ライブラリが8件未満（' + research.structures.length + '件）');
+    ok(research.structureTypes.length === 9, '投稿の型が9種類（8型＋成功基準例）でない（' + research.structureTypes.length + '）');
+    ok(research.structures.length >= 9, '構造ライブラリが9件未満（' + research.structures.length + '件）');
+    /* 成功基準例（休息の4枚構成）が生成の基準として登録されていること */
+    const baseline = research.structures.filter(s => s.isBaseline);
+    ok(baseline.length === 1, 'ぼぅらしい投稿の成功基準例が登録されていない（' + baseline.length + '件）');
+    if (baseline.length) {
+        ok(/小さな価値観の転換.*小さな行動.*深める.*静かな終了/.test(baseline[0].extraction),
+            '成功基準例から抽出する構造が記録されていない: ' + baseline[0].extraction);
+        ok(baseline[0].data_type === 'manual' && baseline[0].verified === true,
+            '成功基準例の出所がユーザー登録として記録されていない');
+    }
     research.structures.forEach(s => {
         ['type', 'theme', 'hook', 'carousel', 'textAmount', 'empathy', 'afterFeel', 'charRole', 'scene',
          'extraction', 'bouConversion'].forEach(k => {
@@ -96,7 +133,9 @@ const gen = require('../scripts/bou/generator.js');
     ok(drafts[2].proposal_type === '保存・シェア型', 'C案が保存・シェア型でない（' + drafts[2].proposal_type + '）');
     drafts.forEach(d => {
         ok(d.evaluation && typeof d.evaluation.average === 'number', d.variant + '案に内部評価がない');
-        ok(Object.keys(d.evaluation.scores).length === 10, '評価が10項目でない（' + Object.keys(d.evaluation.scores).length + '項目）');
+        ok(Object.keys(d.evaluation.scores).length === 12, '評価が12項目でない（' + Object.keys(d.evaluation.scores).length + '項目）');
+        ['ぼぅの言葉づかい', '名言っぽくないか', '会社員言葉でないか', '言いすぎていないか', '最後の余白',
+         'キャラクターが主役'].forEach(k => ok(d.evaluation.scores[k] !== undefined, '自己検査項目がない: ' + k));
         ok(d.evaluation.pass, d.variant + '案が評価基準を満たさないまま出力された: ' + d.evaluation.flags.join('、'));
         ok(research.structureTypes.includes(d.structure_used),
             d.variant + '案に使った投稿構造が記録されていない（' + d.structure_used + '）');
@@ -108,6 +147,27 @@ const gen = require('../scripts/bou/generator.js');
     const badEval = gen.evaluatePost(badPost, store, DEFAULT_CHARACTER);
     ok(!badEval.pass, '説教・NG表現入りの投稿が評価を通ってしまった');
     ok(badEval.flags.length >= 2, 'NG理由のフラグが立っていない');
+
+    /* 自己検査: 会社員言葉・名言化・教訓オチをそれぞれ落とすこと */
+    const officePost = { theme: '仕事', main_text: '本日の業務、終了。', caption: '実績はゼロ。',
+        pages: [{ text: '本日の業務、終了。', scene: 'デスク' }], proposal_type: '王道共感型' };
+    ok(!gen.evaluatePost(officePost, store, DEFAULT_CHARACTER).pass, '会社員言葉の投稿が評価を通ってしまった');
+
+    const lessonPost = { theme: '休息', main_text: '休むことも、大切なこと。',
+        caption: '大事なのは、自分を大切にするということ。',
+        pages: [{ text: '休むことも、大切なこと。', scene: '布団' },
+                { text: '無理をしないことが、いちばん大切なこと。', scene: '布団' },
+                { text: 'それが、生きるということ。', scene: '布団' }], proposal_type: '王道共感型' };
+    const lessonEval = gen.evaluatePost(lessonPost, store, DEFAULT_CHARACTER);
+    ok(!lessonEval.pass, '名言・教訓オチの投稿が評価を通ってしまった');
+    ok(lessonEval.flags.join('／').includes('名言') || lessonEval.flags.join('／').includes('教訓'),
+        '名言・教訓のフラグが立っていない: ' + lessonEval.flags.join('／'));
+
+    const kansaiPost = { theme: '疲れ', main_text: 'もう、あかん。', caption: 'ええか、今日はここまでにしとく。',
+        pages: [{ text: 'もう、あかん。', scene: 'ソファ' }, { text: 'ちゃうか。', scene: 'ソファ' },
+                { text: 'まあ、ええか。', scene: 'ソファ' }], proposal_type: '王道共感型' };
+    const kansaiEval = gen.evaluatePost(kansaiPost, store, DEFAULT_CHARACTER);
+    ok(kansaiEval.flags.join('／').includes('関西弁'), '関西弁の出しすぎが検出されない: ' + kansaiEval.flags.join('／'));
     drafts.forEach(d => {
         ['id', 'created_at', 'theme', 'main_text', 'scene', 'image_prompt', 'caption', 'hashtags', 'status', 'pages'].forEach(k => {
             ok(d[k] !== undefined && d[k] !== '', '生成結果に ' + k + ' がない');
@@ -157,6 +217,46 @@ const gen = require('../scripts/bou/generator.js');
     ok(threw, '不正な画像アダプタが登録できてしまう');
     gen.registerImageAdapter({ name: 'test', generate: async () => ({}) });
     ok(gen.getImageAdapter().name === 'test', '画像アダプタが登録できない');
+
+    /* フィードバックの仕分け: 見た目の指摘は画像プロンプトへ、それ以外は文章学習へ */
+    ok(store.classifyFeedback('色が違う') === 'visual', '色の指摘が見た目に分類されない');
+    ok(store.classifyFeedback('キャラが崩れている') === 'visual', 'キャラ崩れが見た目に分類されない');
+    ok(store.classifyFeedback('人間っぽすぎる') === 'visual', '人間化の指摘が見た目に分類されない');
+    ok(store.classifyFeedback('名言っぽい') === 'text', '文章の指摘が見た目に分類されてしまう');
+
+    const fbDrafts = await gen.generateBatch(store, 'builtin');
+    store.addPosts(fbDrafts);
+    store.addFeedback(fbDrafts[0].id, '色が違う');
+    const visualNotes = store.getVisualFeedback();
+    ok(visualNotes.length >= 1, '見た目のフィードバックが取り出せない');
+    const ctx = store.getLearningContext();
+    ok(!ctx.recentComments.some(c => (c.text || '').includes('色が違う')), '見た目の指摘が文章学習に混ざっている');
+    ok(ctx.visualComments.some(c => (c.text || '').includes('色が違う')), '見た目の指摘が画像側に渡っていない');
+    const afterFb = await gen.generateBatch(store, 'builtin');
+    ok(afterFb[0].pages[0].image_prompt.includes('Color reminder'),
+        '色の指摘が次の画像生成プロンプトに反映されていない');
+
+    /* 生成プロンプト: 成功基準例・カルーセル/キャプションのルール・自己検査が入っていること */
+    const sysPrompt = gen.buildSystemPrompt(store.getCharacter(), store.getLearningContext(), store);
+    ['# 投稿の形式（カルーセル）', '# ぼぅらしい投稿の成功基準例', '抽出する構造: 小さな価値観の転換',
+     '# キャプションの作り方', '出す前の自己検査', '関西弁キャラではない',
+     '# 投稿構造ライブラリ'].forEach(k => {
+        ok(sysPrompt.includes(k), '生成プロンプトに「' + k + '」がない');
+    });
+    ok((sysPrompt.match(/## ぼぅらしい投稿の成功基準例/g) || []).length === 0,
+        '成功基準例が構造ライブラリ側にも重複して出ている');
+
+    /* キャラクター設定の移行: 古い保存データでも新ルールが効き、ユーザー独自の設定は残す */
+    store.saveCharacter({ version: 1, name: 'ぼぅ', concept: 'ユーザーが書き換えたコンセプト',
+        speech: { rules: ['古いルール'], examples: ['まあ、いっか。'] }, ngWords: ['頑張って'],
+        themes: ['疲れ'], imagePromptTemplate: '古いプロンプト' });
+    const migrated = store.getCharacter();
+    ok(migrated.version >= 2, 'キャラクター設定が移行されない（' + migrated.version + '）');
+    ok(migrated.ngWords.includes('業務'), '移行後に新しいNG語が入らない');
+    ok(migrated.imagePromptTemplate.includes('mola mola'), '移行後に新しい画像プロンプトが入らない');
+    ok(migrated.concept === 'ユーザーが書き換えたコンセプト', '移行でユーザー独自の設定が消えている');
+    ok(migrated.speech.examples.includes('まあ、いっか。'), '移行でユーザーの口ぐせが消えている');
+    store.resetCharacter();
 
     console.log('ロジックテスト: ' + (errors.length ? 'NG' : 'OK'));
 
@@ -217,15 +317,16 @@ const gen = require('../scripts/bou/generator.js');
     /* 詳細モーダルに内部評価が出る */
     await page.locator('.draft-card').first().click();
     await page.waitForSelector('.modal-bg.open');
-    ok(await page.locator('#m-evaluation .eval-item').count() === 10, 'モーダルに10項目の内部評価が出ない');
+    ok(await page.locator('#m-evaluation .eval-item').count() === 12, 'モーダルに12項目の内部評価が出ない');
     await page.click('#m-close-btn');
 
     /* リサーチページ: 投稿構造ライブラリが本体として表示・編集できる */
     await page.locator('.tab-btn[data-view="research"]').click();
-    ok(await page.locator('#structure-list .structure-card').count() >= 8, '構造ライブラリのカードが8件以上出ない');
+    ok(await page.locator('#structure-list .structure-card').count() >= 9, '構造ライブラリのカードが9件以上出ない');
+    ok((await page.locator('#structure-list').textContent()).includes('生成の基準にする'), '成功基準例のバッジが出ない');
     await page.locator('#structure-list .structure-card').first().click();
     ok(await page.locator('#structure-detail [data-struct-field]').count() === 11, '構造編集フォームに11項目出ない');
-    ok(await page.locator('#struct-type option').count() === 8, '構造の型セレクタに8択出ない');
+    ok(await page.locator('#struct-type option').count() === 9, '構造の型セレクタに9択出ない');
     await page.click('#struct-close-btn');
 
     /* 投稿分析カード: 手動確認待ちバッジ・14項目フォーム・追加ボタンは分析前は無効 */

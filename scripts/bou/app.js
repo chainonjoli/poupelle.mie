@@ -297,8 +297,9 @@
         var log = $('m-fb-log');
         log.innerHTML = '';
         (p.user_feedback || []).slice().reverse().forEach(function (f) {
+            var kind = f.kind || store.classifyFeedback(f.text);
             var li = document.createElement('li');
-            li.textContent = f.text + '（' + fmtDate(f.at) + '）';
+            li.textContent = (kind === 'visual' ? '［見た目］' : '') + f.text + '（' + fmtDate(f.at) + '）';
             log.appendChild(li);
         });
     }

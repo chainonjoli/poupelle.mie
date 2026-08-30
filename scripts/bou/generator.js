@@ -18,189 +18,199 @@
      * caption: Instagramキャプション（画像内の文章を繰り返しすぎない） */
     var CORPUS = [
         { theme: '疲れ', items: [
-            { caption: '記憶にない労働、いちばん疲れる。', pages: [
+            { caption: '覚えてない疲れも、疲れ。', pages: [
                 { text: '何もしてないのに、\n疲れた。', sceneJa: 'ソファに沈んでいる', sceneEn: 'sinking deep into a soft sofa, completely still' },
-                { text: 'いや、たぶん\n何かは してた。', sceneJa: '天井を見ている', sceneEn: 'lying on its back, staring blankly at the ceiling' },
-                { text: '思い出せんだけで。', sceneJa: 'お茶を持って考えている', sceneEn: 'holding a warm mug, thinking with a blank face' },
-                { text: '思い出すのも疲れるから、\nやめた。', sceneJa: 'ぺたんと伸びている', sceneEn: 'lying completely flat and relaxed like a melted mochi' }
+                { text: 'たぶん、\n何かはしてた。', sceneJa: '天井をぼんやり見ている', sceneEn: 'lying on its back, gazing blankly at the ceiling' },
+                { text: '思い出せないだけで。', sceneJa: 'ゆっくりまばたきする', sceneEn: 'blinking slowly, eyes half closed, very calm' },
+                { text: '今日はもう、\n数えない。', sceneJa: 'ぺたんと伸びている', sceneEn: 'lying flat and relaxed, softly melted into the cushion' }
             ] },
-            { caption: 'おやすみは、最強の充電器。', pages: [
-                { text: '今日の電池、\nのこり1%。', sceneJa: '薄暗い部屋でぼんやり', sceneEn: 'sitting in a dim cozy room, drooping a little' },
-                { text: '省エネモードで\n生きてる。', sceneJa: 'ゆっくり漂っている', sceneEn: 'drifting very slowly in calm water, half-closed eyes' },
-                { text: '動かんのも、\n電池にやさしい。', sceneJa: 'じっと浮いている', sceneEn: 'floating perfectly still in quiet water' },
-                { text: '充電は、寝るだけ。', sceneJa: '布団で眠る', sceneEn: 'sleeping peacefully in a fluffy white futon' }
+            { caption: '言葉にしない分は、休ませておく。', pages: [
+                { text: '疲れたって言うのも、\n疲れる。', sceneJa: '枕に顔を半分うずめている', sceneEn: 'half burying its face into a big soft pillow' },
+                { text: 'だから、言わないでおく。', sceneJa: '布団に沈んでいる', sceneEn: 'sinking quietly into a fluffy futon' },
+                { text: '言わなくても、\n疲れてはいる。', sceneJa: 'じっとしている', sceneEn: 'perfectly still, only the eyes visible' },
+                { text: 'それで、いい。', sceneJa: '目を閉じる', sceneEn: 'eyes gently closed, peaceful face' }
             ] }
         ] },
         { theme: '仕事', items: [
-            { caption: '明日のぼく、頼んだ。', pages: [
-                { text: '今日は、ここまで。', sceneJa: 'デスクでノートPCを閉じる', sceneEn: 'gently closing a laptop at a small desk' },
-                { text: 'まだ途中やけど。', sceneJa: '机に書類が残っている', sceneEn: 'looking sideways at a small stack of papers left on the desk' },
-                { text: '途中まで\nやったってこと。', sceneJa: 'のびをしている', sceneEn: 'stretching its round body with a relieved face' },
-                { text: 'つづきは、\n明日のぼくが強い。', sceneJa: 'デスクを離れる', sceneEn: 'drifting away from the desk toward a warm lamp light' }
+            { caption: '終わってなくても、終わりにしていい時間がある。', pages: [
+                { text: '今日は、ここまで。', sceneJa: 'ノートパソコンを閉じる', sceneEn: 'gently closing a laptop at a small desk' },
+                { text: 'まだ途中だけど。', sceneJa: '机に残った紙を横目に見る', sceneEn: 'glancing sideways at a few papers left on the desk' },
+                { text: '途中まで、やった。', sceneJa: 'のびをしている', sceneEn: 'stretching its round body slowly, relieved' },
+                { text: 'つづきは、明日。', sceneJa: '机を離れていく', sceneEn: 'drifting away from the desk toward a warm lamp light' }
             ] },
-            { caption: '出席点、大事。', pages: [
-                { text: 'がんばった感は、\nない。', sceneJa: 'デスクでぼーっとする', sceneEn: 'sitting blankly at the corner of a desk' },
-                { text: 'でも席には、\nおった。', sceneJa: '椅子にちょこんと座る', sceneEn: 'sitting quietly on a chair, small and round' },
-                { text: 'おるのも、仕事。', sceneJa: 'ゆっくりうなずく', sceneEn: 'nodding slowly to itself with tiny dot eyes' }
+            { caption: '座っていただけの日にも、重さはある。', pages: [
+                { text: 'がんばった感は、ない。', sceneJa: '机の隅でぼーっとする', sceneEn: 'sitting blankly at the corner of a desk' },
+                { text: 'でも、ここにはいた。', sceneJa: '椅子にちょこんといる', sceneEn: 'resting small and round on a desk chair' },
+                { text: 'いるのも、\nしんどい日がある。', sceneJa: '窓のほうを見ている', sceneEn: 'looking toward a window with soft daylight' },
+                { text: '今日は、それだけで。', sceneJa: 'ゆっくりうなずく', sceneEn: 'nodding slowly with tiny dot eyes' }
             ] }
         ] },
         { theme: '人間関係', items: [
-            { caption: 'ひとり反省会、閉会。', pages: [
-                { text: 'あの一言、\nまだ考えてる。', sceneJa: '夕方の窓の外を見る', sceneEn: 'gazing out of a window at the soft evening light' },
-                { text: 'たぶん相手は、\nもう忘れてる。', sceneJa: '夜の月を見上げる', sceneEn: 'looking up at a pale round moon in the night sky' },
-                { text: 'ぼくだけの、\n延長戦やった。', sceneJa: 'お風呂に浸かる', sceneEn: 'soaking in a warm bath, small bubbles around' },
-                { text: 'ぼくも、忘れよ。', sceneJa: '湯気と一緒にとける', sceneEn: 'relaxing deeper into the bath as soft steam rises' }
+            { caption: '終わった話を、ひとりで続けてしまう日。', pages: [
+                { text: 'あの一言、\nまだ考えてる。', sceneJa: '夕方の窓の外を見る', sceneEn: 'gazing out of a window at soft evening light' },
+                { text: '相手は、\nもう忘れてる。', sceneJa: '夜の月を見上げる', sceneEn: 'looking up at a pale round moon in the night sky' },
+                { text: '考えてるのは、\nこっちだけ。', sceneJa: 'お風呂に浸かっている', sceneEn: 'soaking in a warm bath, small bubbles floating' },
+                { text: '今日はもう、\nやめておく。', sceneJa: '湯気の中でとける', sceneEn: 'relaxing deeper into the bath as soft steam rises' }
             ] },
-            { caption: '閉店日も、あるんよ。', pages: [
-                { text: '会いたい人は、おる。\n今日じゃないだけ。', sceneJa: '布団から目だけ出す', sceneEn: 'peeking only its eyes out from under a blanket' },
-                { text: '気持ちの玄関が、\n今日は閉まってる。', sceneJa: '閉まったドアのそば', sceneEn: 'resting beside a small closed wooden door' },
-                { text: 'また開く日に、\n会いに行く。', sceneJa: '小さく手を振る', sceneEn: 'giving a tiny gentle wave with a small fin' }
+            { caption: '会いたい気持ちと、会える日は、別のこと。', pages: [
+                { text: 'きらいじゃない。\n今日は会えないだけ。', sceneJa: '布団から目だけ出している', sceneEn: 'peeking only its eyes out from under a blanket' },
+                { text: '気持ちの入口が、\n閉まっている。', sceneJa: '閉まった小さなドアのそば', sceneEn: 'resting beside a small closed wooden door' },
+                { text: '無理に開けると、\nあとで疲れる。', sceneJa: 'ドアをじっと見ている', sceneEn: 'quietly looking at the closed door, still' },
+                { text: '開く日に、また。', sceneJa: '小さくヒレを振る', sceneEn: 'giving a tiny gentle wave with a small fin' }
             ] }
         ] },
         { theme: 'SNS', items: [
-            { caption: '親指だけ、フルマラソン。', pages: [
-                { text: '5分だけ、\nのつもりが', sceneJa: 'ソファでスマホを見る', sceneEn: 'lying on a sofa looking at a smartphone' },
+            { caption: 'どこにも行ってないのに、けっこう疲れてる。', pages: [
+                { text: '5分だけ、\nのつもりが。', sceneJa: 'ソファでスマホを見ている', sceneEn: 'lying on a sofa looking at a smartphone' },
                 { text: '気づいたら、夜。', sceneJa: '暗い部屋でスマホの光', sceneEn: 'in a dark room, face lit softly by a smartphone glow' },
-                { text: 'スマホの中、\n一日ぶん旅した。', sceneJa: 'ちょっと目が回っている', sceneEn: 'slightly dizzy with tiny swirl marks above its head' },
-                { text: '現実のぼくは、\n1歩も動いてない。', sceneJa: '同じ場所に沈んでいる', sceneEn: 'still in the exact same spot on the sofa' },
-                { text: 'それはそれで、\nすごい。', sceneJa: '妙に納得している', sceneEn: 'nodding once with a calm blank face' }
+                { text: '画面の中だけ、\n遠くまで行った。', sceneJa: '少し目が回っている', sceneEn: 'slightly dizzy with tiny swirl marks above its head' },
+                { text: '体は、ここにいる。', sceneJa: '同じ場所に沈んでいる', sceneEn: 'still in the exact same spot on the sofa' }
             ] },
-            { caption: 'まぶしい日は、日陰で浮く。', pages: [
-                { text: 'キラキラした投稿、\n見すぎた。', sceneJa: 'スマホをスクロール', sceneEn: 'scrolling a smartphone with a blank stare' },
-                { text: 'まぶしいときは、', sceneJa: '目を閉じる', sceneEn: 'closing its eyes gently, face calm' },
-                { text: '画面を伏せて、\n浮いとく。', sceneJa: 'スマホを裏返して浮く', sceneEn: 'floating peacefully beside a phone placed face-down' }
+            { caption: '見ないことにした夜も、ちゃんと過ぎていく。', pages: [
+                { text: 'まぶしい投稿ばかり、\n流れてくる。', sceneJa: 'スマホをスクロールする', sceneEn: 'scrolling a smartphone with a blank stare' },
+                { text: 'まぶしいときは、\n目を閉じていい。', sceneJa: '目を閉じる', sceneEn: 'closing its eyes gently, calm face' },
+                { text: '見なくても、\n減るものはない。', sceneJa: 'スマホを裏返して置く', sceneEn: 'placing a smartphone face-down on a table' },
+                { text: '今日は、伏せておく。', sceneJa: '裏返したスマホの横で浮く', sceneEn: 'floating peacefully beside the face-down phone' }
             ] }
         ] },
         { theme: '返信', items: [
-            { caption: '気持ちは、もう届いてると思う。たぶん。', pages: [
-                { text: '返信しようとは、\n思ってる。', sceneJa: 'ソファでスマホを見る', sceneEn: 'holding a smartphone on a sofa, staring at it' },
-                { text: '文面も、\n半分できてる。', sceneJa: '打ちかけで止まっている', sceneEn: 'paused mid-typing, fin hovering over the phone' },
-                { text: 'あとは、送るだけ。', sceneJa: '送信ボタンの前で固まる', sceneEn: 'frozen still, staring at the phone screen up close' },
-                { text: '…明日、送る。', sceneJa: 'スマホを置いて寝る', sceneEn: 'putting the phone down and curling up to sleep' }
+            { caption: '思ってはいる、というところで止まる日。', pages: [
+                { text: '返信しようとは、\n思ってる。', sceneJa: 'ソファでスマホを持っている', sceneEn: 'holding a smartphone on a sofa, staring at it' },
+                { text: '文面も、\n半分できてる。', sceneJa: '打ちかけで止まっている', sceneEn: 'paused mid-typing, a fin hovering over the phone' },
+                { text: 'あとは、送るだけ。', sceneJa: '画面の前で固まる', sceneEn: 'frozen still, looking closely at the phone screen' },
+                { text: '…明日、送る。', sceneJa: 'スマホを置いて眠る', sceneEn: 'putting the phone down and curling up to sleep' }
             ] },
-            { caption: '実質、既読返信。', pages: [
-                { text: '「あとで返す」って\n言うたやつ。', sceneJa: '通知を見つめる', sceneEn: 'looking at a phone notification with round dot eyes' },
-                { text: 'あとでは、\nまだ来てない。', sceneJa: '時計を見ている', sceneEn: 'watching a small wall clock tick' },
-                { text: 'でも、ずっと\n気にはしてる。', sceneJa: 'スマホを抱えている', sceneEn: 'hugging the smartphone gently against its belly' },
-                { text: '気にしてる分、\nもう半分返してる。', sceneJa: '自分に納得する', sceneEn: 'nodding slowly, convincing itself' }
+            { caption: '返せてないけど、忘れてはいない人へ。', pages: [
+                { text: '「あとで返す」の\nあとが、まだ来ない。', sceneJa: '通知をじっと見る', sceneEn: 'looking at a phone notification with round dot eyes' },
+                { text: '忘れてはいない。', sceneJa: '時計を見ている', sceneEn: 'watching a small wall clock tick quietly' },
+                { text: 'ずっと、気にはしてる。', sceneJa: 'スマホを抱えている', sceneEn: 'hugging the smartphone gently against its belly' },
+                { text: '気にしてる分は、\n届いてることにする。', sceneJa: 'ゆっくり目を閉じる', sceneEn: 'closing its eyes slowly, softly at ease' }
             ] }
         ] },
         { theme: '予定', items: [
-            { caption: '急がへん日の、ごほうび。', pages: [
-                { text: '急ぐ用事、\nなかった。', sceneJa: '駅のホームに立つ', sceneEn: 'standing alone on a quiet train platform' },
-                { text: '電車、一本\n見送ってみた。', sceneJa: '電車が通り過ぎる', sceneEn: 'watching a soft-colored train pass by gently' },
-                { text: 'ホームの風、\nちょっと良かった。', sceneJa: '風に吹かれている', sceneEn: 'fins swaying slightly in a gentle platform breeze, eyes closed' }
+            { caption: '急がなくても、だいたい間に合う。', pages: [
+                { text: '急ぐ用事、なかった。', sceneJa: '駅のホームに立っている', sceneEn: 'waiting alone on a quiet train platform' },
+                { text: '一本、見送ってみる。', sceneJa: '電車が通り過ぎる', sceneEn: 'watching a soft-colored train pass by gently' },
+                { text: '誰も、困らなかった。', sceneJa: '風に吹かれている', sceneEn: 'fins swaying slightly in a gentle breeze, eyes closed' },
+                { text: '次のに、乗る。', sceneJa: 'ホームで静かに待つ', sceneEn: 'waiting calmly on the empty platform' }
             ] },
-            { caption: '無計画も、計画のうち。', pages: [
-                { text: '今日の予定：なし。', sceneJa: '真っ白なカレンダー', sceneEn: 'looking at a blank white calendar on the wall' },
-                { text: 'なので、浮く。', sceneJa: 'ぷかぷか浮く', sceneEn: 'floating weightlessly in calm pale blue water' },
-                { text: '予定どおり、\n何もせんかった。', sceneJa: '夕方もまだ浮いている', sceneEn: 'still floating as the light turns warm and dim' },
-                { text: '皆勤賞。', sceneJa: 'ちいさな星がひとつ', sceneEn: 'a single tiny star twinkling above its head' }
+            { caption: '何もしない予定を、ちゃんと守った日。', pages: [
+                { text: '今日の予定は、なし。', sceneJa: '真っ白なカレンダーを見る', sceneEn: 'looking at a blank white calendar on the wall' },
+                { text: 'なので、浮く。', sceneJa: 'ぷかぷか浮いている', sceneEn: 'floating weightlessly in calm pale blue water' },
+                { text: '予定どおり、\n何もしなかった。', sceneJa: '夕方もまだ浮いている', sceneEn: 'still floating as the light turns warm and dim' },
+                { text: 'これで、いい。', sceneJa: 'ちいさな星がひとつ', sceneEn: 'a single tiny star twinkling softly above' }
             ] }
         ] },
         { theme: '休息', items: [
-            { caption: 'おつかれさま、ぼく。', pages: [
+            { caption: '何もできなかった日、じゃなくて。\n今日は、休むことをした日。', pages: [
                 { text: '休むのも、\n今日のやること。', sceneJa: '布団に入っていく', sceneEn: 'crawling into a fluffy white futon' },
                 { text: 'ちゃんと、横になる。', sceneJa: '布団に横たわる', sceneEn: 'lying down neatly in the futon' },
-                { text: 'ちゃんと、目を閉じる。', sceneJa: '目を閉じる', sceneEn: 'eyes closed peacefully, tucked in the futon' },
-                { text: '本日の業務、終了。', sceneJa: 'すやすや眠る', sceneEn: 'sleeping soundly with a tiny sleep bubble' }
+                { text: 'ちゃんと、目を閉じる。', sceneJa: '目を閉じている', sceneEn: 'eyes closed peacefully, tucked in the futon' },
+                { text: '今日はもう、\nここまで。', sceneJa: 'すやすや眠る', sceneEn: 'sleeping soundly with a tiny sleep bubble' }
             ] },
-            { caption: '呼吸が趣味って、平和。', pages: [
-                { text: 'ほっと一息。', sceneJa: 'マグカップを持つ', sceneEn: 'holding a warm mug with both fins, steam rising' },
-                { text: '二息目。', sceneJa: 'もう一口', sceneEn: 'taking another slow sip, shoulders relaxed' },
-                { text: '三息目からは、\nもう趣味。', sceneJa: 'すっかりくつろぐ', sceneEn: 'completely relaxed, melting into a cushion with the mug' }
+            { caption: '何も進まない時間も、過ぎてはいる。', pages: [
+                { text: 'ほっと一息。', sceneJa: 'マグカップを持っている', sceneEn: 'holding a warm mug with both fins, steam rising' },
+                { text: '二息目も、いる。', sceneJa: 'もう一口飲む', sceneEn: 'taking another slow sip, shoulders relaxed' },
+                { text: '息をしてるだけの時間。', sceneJa: 'クッションでくつろぐ', sceneEn: 'completely relaxed, resting against a soft cushion' },
+                { text: 'それも、時間。', sceneJa: 'ゆっくり目を閉じる', sceneEn: 'eyes closing slowly, mug set down beside it' }
             ] }
         ] },
         { theme: '自己肯定', items: [
-            { caption: 'ハードル低めが、続くコツ。', pages: [
+            { caption: '少ないけど、ゼロではない日。', pages: [
                 { text: '今日できたこと、\n数えてみる。', sceneJa: '窓辺でノートを開く', sceneEn: 'opening a small notebook by a window' },
-                { text: '起きた。食べた。', sceneJa: '指折り数える', sceneEn: 'counting slowly on its small fins' },
-                { text: '生きてた。', sceneJa: 'おだやかに浮く', sceneEn: 'floating calmly in soft light' },
-                { text: '…けっこう\nあるやん。', sceneJa: 'ちいさくうなずく', sceneEn: 'giving a small satisfied nod' }
+                { text: '起きた。食べた。', sceneJa: 'ヒレで数えてみる', sceneEn: 'counting slowly on its small fins' },
+                { text: 'それだけ。', sceneJa: 'おだやかに浮いている', sceneEn: 'floating calmly in soft morning light' },
+                { text: 'それだけ、ある。', sceneJa: 'ちいさくうなずく', sceneEn: 'giving a small quiet nod' }
             ] },
-            { caption: '本日も、ぼくでした。', pages: [
-                { text: 'ぼくはぼくを、\nやっている。', sceneJa: '鏡の前でぼーっとする', sceneEn: 'looking blankly at itself in a small round mirror' },
-                { text: '誰にも代われへん\n仕事やから。', sceneJa: '鏡と向き合う', sceneEn: 'facing the mirror quietly, calm expression' },
-                { text: '今日も無事、\nぼくでした。', sceneJa: 'ぺこりとおじぎ', sceneEn: 'giving a tiny polite bow' }
+            { caption: '動かなかった日にも、消耗はある。', pages: [
+                { text: '何もしてない日に、\nいちばん疲れてることもある。', sceneJa: 'ソファでじっとしている', sceneEn: 'sitting motionless on a sofa, blank face' },
+                { text: '動かないぶん、\n頭が動いてる。', sceneJa: 'もやもやが浮かんでいる', sceneEn: 'a small fuzzy thought cloud floating above its head' },
+                { text: 'それも、疲れる。', sceneJa: 'ぼんやりしている', sceneEn: 'staring into space, very still' },
+                { text: '今日は、\n休んだことにする。', sceneJa: '布団のほうへ向かう', sceneEn: 'drifting slowly toward a soft futon' }
             ] }
         ] },
         { theme: 'ひとり時間', items: [
-            { caption: '定休日、大事。', pages: [
-                { text: '誰にも会わん日。', sceneJa: '静かな部屋にいる', sceneEn: 'resting in a quiet cozy room with soft light' },
-                { text: '顔が、休みの日。', sceneJa: '表情がゆるむ', sceneEn: 'face completely relaxed, eyes half closed' },
-                { text: '声も、休みの日。', sceneJa: 'しんとしている', sceneEn: 'in complete peaceful silence, tiny bubbles floating' },
-                { text: '心が、\n営業再開する日。', sceneJa: 'ちいさな灯りがともる', sceneEn: 'a small warm light glowing softly beside it' }
+            { caption: 'しゃべらない日も、必要な日。', pages: [
+                { text: '誰にも会わない日。', sceneJa: '静かな部屋にいる', sceneEn: 'resting in a quiet cozy room with soft light' },
+                { text: '顔が、休んでる。', sceneJa: '表情がゆるむ', sceneEn: 'face completely relaxed, eyes half closed' },
+                { text: '声も、休んでる。', sceneJa: 'しんとしている', sceneEn: 'in complete peaceful silence, tiny bubbles floating' },
+                { text: '明日の分を、\nためている。', sceneJa: 'ちいさな灯りがともる', sceneEn: 'a small warm light glowing softly beside it' }
             ] },
-            { caption: '湯船は、ちいさな海。', pages: [
+            { caption: 'お湯の中でだけ、静かになれる日がある。', pages: [
                 { text: 'お風呂で、\n今日をゆるめる。', sceneJa: 'お風呂に入る', sceneEn: 'slipping into a warm bath' },
                 { text: '肩まで、沈む。', sceneJa: '肩まで浸かる', sceneEn: 'sinking into the bath up to its fins, very relaxed' },
-                { text: '今日のいろいろ、\nお湯に溶けてった。', sceneJa: '泡がのぼっていく', sceneEn: 'tiny bubbles rising gently around its round body' }
+                { text: '考えごとも、少し浮く。', sceneJa: '泡がのぼっていく', sceneEn: 'tiny bubbles rising gently around its round body' },
+                { text: '今日は、ここで終わり。', sceneJa: '湯気の中で目を閉じる', sceneEn: 'eyes closed in the warm steam, at peace' }
             ] }
         ] },
         { theme: '考えすぎ', items: [
-            { caption: '夜の会議は、だいたい延びる。', pages: [
-                { text: '頭の中の会議、\nまだやってる。', sceneJa: '夜、枕に沈む', sceneEn: 'sinking into a soft pillow at night' },
-                { text: '議題：さっきの\n自分のひとこと', sceneJa: 'もやもやが浮かぶ', sceneEn: 'a small fuzzy thought cloud floating above its head' },
-                { text: '結論、出ず。', sceneJa: '寝返りをうつ', sceneEn: 'rolling over slowly in the futon' },
-                { text: '散会。また明日。', sceneJa: '眠りに落ちる', sceneEn: 'finally asleep, the thought cloud drifting away' }
+            { caption: '夜に考えると、だいたい長引く。', pages: [
+                { text: '頭の中が、\nまだ終わらない。', sceneJa: '夜、枕に沈む', sceneEn: 'sinking into a soft pillow at night' },
+                { text: '答えの出ないことばかり。', sceneJa: 'もやもやが浮かぶ', sceneEn: 'a small fuzzy thought cloud floating above its head' },
+                { text: '今日は、出ない。', sceneJa: '寝返りをうつ', sceneEn: 'rolling over slowly in the futon' },
+                { text: 'つづきは、明日。', sceneJa: '眠りに落ちる', sceneEn: 'finally asleep, the thought cloud drifting away' }
             ] },
-            { caption: '実績のある作戦です。', pages: [
-                { text: '考えるん、\n明日でもええか。', sceneJa: '布団で天井を見る', sceneEn: 'lying in a futon looking at the ceiling' },
-                { text: '明日のぼくは、\n今日より賢い。', sceneJa: 'ちょっと期待の顔', sceneEn: 'a faint hopeful look on its tiny face' },
+            { caption: '夜に決めないほうが、うまくいく。', pages: [
+                { text: '考えるのは、\n明日でもいい。', sceneJa: '布団で天井を見る', sceneEn: 'lying in a futon looking at the ceiling' },
+                { text: '明日のほうが、\n少し元気。', sceneJa: 'ちょっと期待している顔', sceneEn: 'a faint hopeful look on its tiny face' },
                 { text: '根拠は、ない。', sceneJa: '真顔に戻る', sceneEn: 'back to a completely blank face' },
-                { text: 'でも寝たら、だいたい\n何とかなってる。', sceneJa: 'すやすや眠る', sceneEn: 'sleeping soundly, wrapped snugly in the futon' }
+                { text: 'でも、だいたいそう。', sceneJa: 'すやすや眠る', sceneEn: 'sleeping soundly, wrapped snugly in the futon' }
             ] }
         ] },
         { theme: 'やる気が出ない日', items: [
-            { caption: 'また今度、おいでや。', pages: [
-                { text: 'やる気、待ってた。', sceneJa: 'ソファで待っている', sceneEn: 'sitting on a sofa, waiting patiently' },
-                { text: '来んかった。', sceneJa: '窓の外を見る', sceneEn: 'looking out the window at drifting clouds' },
-                { text: 'たぶん、道に\n迷ってる。', sceneJa: '玄関のほうを見る', sceneEn: 'glancing toward a small front door' },
-                { text: '今日は留守に\nしとこ。', sceneJa: '毛布にくるまる', sceneEn: 'wrapping itself in a soft blanket like a cocoon' }
+            { caption: '待っても来ないものは、待たない。', pages: [
+                { text: 'やる気を、待っていた。', sceneJa: 'ソファで待っている', sceneEn: 'sitting on a sofa, waiting patiently' },
+                { text: '来なかった。', sceneJa: '窓の外を見る', sceneEn: 'looking out the window at drifting clouds' },
+                { text: '来ない日も、ある。', sceneJa: '玄関のほうを見る', sceneEn: 'glancing toward a small front door' },
+                { text: '今日は、留守にする。', sceneJa: '毛布にくるまる', sceneEn: 'wrapping itself in a soft blanket like a cocoon' }
             ] },
-            { caption: '採点、甘めでいこ。', pages: [
+            { caption: '一歩じゃなくて、半歩の日。', pages: [
                 { text: 'とりあえず、\n座ってみた。', sceneJa: '椅子に向かう', sceneEn: 'approaching a desk chair slowly' },
-                { text: '座れた。', sceneJa: '椅子に座る', sceneEn: 'sitting on the chair, round and still' },
-                { text: '今日はそれで、\n合格とする。', sceneJa: '自分にはなまる', sceneEn: 'a soft pink flower mark floating above its head' }
+                { text: '座れた。', sceneJa: '椅子にいる', sceneEn: 'resting on the chair, round and still' },
+                { text: 'そのあとは、なにもない。', sceneJa: 'じっと座っている', sceneEn: 'sitting quietly, doing nothing at all' },
+                { text: 'それでも、座った。', sceneJa: 'ふわりと浮く', sceneEn: 'floating up softly from the chair, calm' }
             ] }
         ] },
         { theme: '何もしたくない日', items: [
-            { caption: '呼吸、続けてこ。', pages: [
+            { caption: '決めてしまうと、少し楽になる。', pages: [
                 { text: '何もしたくない日。', sceneJa: '布団にくるまる', sceneEn: 'completely wrapped in a fluffy futon like a cocoon' },
-                { text: 'なので、何もせん。', sceneJa: 'じっとしている', sceneEn: 'perfectly still, only eyes visible' },
-                { text: '今日の実績：呼吸。', sceneJa: '静かに息をする', sceneEn: 'tiny gentle breath bubbles rising slowly' },
-                { text: '満点。', sceneJa: '眠っている', sceneEn: 'sound asleep with a peaceful face' }
+                { text: 'なので、何もしない。', sceneJa: 'じっとしている', sceneEn: 'perfectly still, only eyes visible' },
+                { text: 'それを、決めた。', sceneJa: '静かに息をする', sceneEn: 'tiny gentle breath bubbles rising slowly' },
+                { text: '決めたなら、休める。', sceneJa: '眠っている', sceneEn: 'sound asleep with a peaceful face' }
             ] },
-            { caption: '無為も、案外テクニカル。', pages: [
-                { text: '「なにもしない」を\nしてた。', sceneJa: 'クッションと一体化', sceneEn: 'merging with a big round cushion on a sofa' },
-                { text: 'これが意外と、\n忙しい。', sceneJa: 'もぞもぞ動く', sceneEn: 'shifting position slightly to get comfier' },
-                { text: 'ヒレの置き場とか、\n考えることが多い。', sceneJa: 'ヒレの位置を直す', sceneEn: 'carefully adjusting where its little fins rest' }
+            { caption: 'なにもしない日にも、それなりに手間はある。', pages: [
+                { text: '「なにもしない」を\nしていた。', sceneJa: 'クッションと一体化', sceneEn: 'merging with a big round cushion on a sofa' },
+                { text: 'これが、意外と長い。', sceneJa: 'もぞもぞ動く', sceneEn: 'shifting position slightly to get comfier' },
+                { text: 'ヒレの置き場も、\nなかなか決まらない。', sceneJa: 'ヒレの位置を直す', sceneEn: 'carefully adjusting where its little fins rest' },
+                { text: 'やっと、決まった。', sceneJa: '落ち着いて沈む', sceneEn: 'finally settled deep into the cushion, content' }
             ] }
         ] },
         { theme: '比べてしまう日', items: [
-            { caption: '水深は、人それぞれ。', pages: [
-                { text: 'よその光、\nまぶしい日。', sceneJa: '水面の光を見上げる', sceneEn: 'looking up from underwater at glittering light on the surface' },
-                { text: 'ぼくも上がろうかと\n思ったけど', sceneJa: '少し浮上しかける', sceneEn: 'rising slightly toward the bright surface' },
-                { text: 'ぼくはこの深さが、\n息しやすい。', sceneJa: '静かな深さに戻る', sceneEn: 'settling back into calm deeper blue water' },
-                { text: 'ここで、浮いとく。', sceneJa: 'おだやかに漂う', sceneEn: 'drifting peacefully in its own quiet depth' }
+            { caption: 'まぶしいところが、いい場所とはかぎらない。', pages: [
+                { text: 'よその光が、\nまぶしい日。', sceneJa: '水面の光を見上げる', sceneEn: 'looking up from underwater at glittering light on the surface' },
+                { text: '上がろうかと、思ったけど。', sceneJa: '少し浮上しかける', sceneEn: 'rising slightly toward the bright surface' },
+                { text: 'この深さのほうが、\n息がしやすい。', sceneJa: '静かな深さに戻る', sceneEn: 'settling back into calm deeper blue water' },
+                { text: 'ここに、いる。', sceneJa: 'おだやかに漂う', sceneEn: 'drifting peacefully in its own quiet depth' }
             ] },
-            { caption: '海は広いから、渋滞せえへん。', pages: [
-                { text: '速い魚、\n見送った。', sceneJa: '魚の群れが通り過ぎる', sceneEn: 'watching a school of small quick fish swim past' },
-                { text: '追いかけへん。', sceneJa: 'その場にとどまる', sceneEn: 'staying still as the fish disappear into the distance' },
-                { text: 'マンボウは、\nマンボウのペース。', sceneJa: 'ゆっくり漂う', sceneEn: 'drifting slowly and contentedly at its own pace' }
+            { caption: '同じ海にいても、速さは違う。', pages: [
+                { text: '速い魚が、\n通り過ぎていく。', sceneJa: '魚の群れが通り過ぎる', sceneEn: 'watching a school of small quick fish swim past' },
+                { text: '追いかけない。', sceneJa: 'その場にとどまる', sceneEn: 'staying still as the fish disappear into the distance' },
+                { text: '追いつく用事も、ない。', sceneJa: 'ゆっくり漂う', sceneEn: 'drifting slowly and contentedly at its own pace' },
+                { text: '海は、広い。', sceneJa: '静かな海に浮かぶ', sceneEn: 'floating alone in a wide calm pale sea' }
             ] }
         ] },
         { theme: '明日に回したいこと', items: [
-            { caption: '対話って、大事。', pages: [
-                { text: '洗いものと、\n話し合いをした。', sceneJa: '台所を横目に見る', sceneEn: 'glancing sideways at a small kitchen sink' },
-                { text: '「明日でええよな」', sceneJa: 'シンクの前に立つ', sceneEn: 'standing before the sink with a few cups in it' },
-                { text: '「ええよ」', sceneJa: 'うなずき合う（気がする）', sceneEn: 'nodding once, as if the dishes agreed' },
-                { text: '円満に、先送り。', sceneJa: '台所をあとにする', sceneEn: 'drifting away from the kitchen, satisfied' }
+            { caption: '先にやることが、今日は眠ることだっただけ。', pages: [
+                { text: '洗いものが、\nまだそこにある。', sceneJa: '台所を横目に見る', sceneEn: 'glancing sideways at a small kitchen sink' },
+                { text: '見なかったことにする。', sceneJa: '通り過ぎる', sceneEn: 'drifting past the kitchen, looking away' },
+                { text: '明日の順番に、してある。', sceneJa: '布団のほうへ向かう', sceneEn: 'heading toward the futon, leaving the desk behind' },
+                { text: '今日は、おしまい。', sceneJa: '眠りにつく', sceneEn: 'falling asleep, wrapped in the soft futon' }
             ] },
-            { caption: '明日のぼく、いつもありがとう。', pages: [
-                { text: 'それ、明日のぼくに\nお願いした。', sceneJa: 'メモを机に置く', sceneEn: 'leaving a tiny note on the desk' },
-                { text: '明日のぼくは、\n引き受けてくれる。', sceneJa: '布団に向かう', sceneEn: 'heading toward the futon, leaving the desk behind' },
-                { text: 'やさしいやつ\nなんよ。', sceneJa: '感謝しながら眠る', sceneEn: 'falling asleep with a faint grateful look' }
+            { caption: '毎日ちょっとずつ、明日に預けている。', pages: [
+                { text: 'それは、\n明日のぼぅに頼んだ。', sceneJa: 'メモを机に置く', sceneEn: 'leaving a tiny note on the desk' },
+                { text: '明日のぼぅは、\n引き受けてくれる。', sceneJa: '布団に向かう', sceneEn: 'drifting toward the futon in dim warm light' },
+                { text: 'いつも、そう。', sceneJa: '静かに息をする', sceneEn: 'breathing quietly, eyes almost closed' },
+                { text: '今日は、おやすみ。', sceneJa: '灯りを消すところ', sceneEn: 'reaching to turn off a small warm lamp at night' }
             ] }
         ] }
     ];
@@ -251,12 +261,28 @@
         return findNgWords(parts.join('\n'), character);
     }
 
-    /* pageIndex/pageTotal を渡すと連作の一貫性指示を足す */
-    function buildImagePrompt(character, sceneEn, pageIndex, pageTotal) {
+    /* pageIndex/pageTotal を渡すと連作の一貫性指示を足す。
+     * 1投稿の中では顔・体型・目・口・ヒレ・色・線の太さ・水彩の質感・背景トーンを固定し、
+     * 変えるのはシーンだけ、という指定を毎回必ず入れる。 */
+    function buildImagePrompt(character, sceneEn, pageIndex, pageTotal, visualNotes) {
         var prompt = character.imagePromptTemplate.replace('{scene}', sceneEn);
+        /* 「色が違う」「形が違う」等の指摘が出ていたら、その点を重ねて念押しする */
+        var notes = visualNotes || [];
+        var joined = notes.map(function (n) { return n.text || n; }).join('／');
+        if (/色|カラー|背景/.test(joined)) {
+            prompt += ' Color reminder: body must be muted blue-gray #9DAEB8, belly milk-white #F2F2EC, ' +
+                'outlines deep blue-gray, background pale blue-white watercolor (#EAF4F8 / #DCEBF2 / #F7FBFC). ' +
+                'No vivid or deep marine blue.';
+        }
+        if (/形|かたち|崩れ|体型|人間っぽ|人型/.test(joined)) {
+            prompt += ' Shape reminder: keep the round disc-shaped sunfish body, tiny dot eyes, ' +
+                'tiny line mouth and small round fins exactly as specified. No human body parts.';
+        }
         if (pageTotal && pageTotal > 1) {
-            prompt += ' This is image ' + pageIndex + ' of ' + pageTotal + ' in one carousel series: ' +
-                'keep the exact same character design, colors, line style, and background tone across all images in the series.';
+            prompt += ' This is image ' + pageIndex + ' of ' + pageTotal + ' in the same carousel series. ' +
+                'Keep the exact same Bou character design, face, eyes, mouth, fins, colors, proportions, ' +
+                'line style, line weight, watercolor texture and background tone across all images. ' +
+                'Only the scene changes between images.';
         }
         return prompt;
     }
@@ -312,6 +338,26 @@
         return union ? inter / union : 0;
     }
 
+    /* 生成前セルフチェック。
+     * 「反応されそうか」より先に「ぼぅらしいか」を見る。
+     * 低評価の案はユーザーに出す前に選び直す／作り直す。 */
+
+    /* 名言をつくりにいっている文章の特徴 */
+    var CLICHE_PATTERNS = [
+        /とは、[^。]{0,12}(だ|である)/, /こそ、?[^。]{0,10}(だ|なのだ)/,
+        /人生(は|って)/, /大切な(こと|の)は/, /大事な(こと|の)は/,
+        /ということ。/, /なのだ。/, /ではないだろうか/,
+        /[^。]{2,10}。それが、?[^。]{2,12}。/, /本当の[^。]{1,8}は/,
+        /大切なこと/, /大事なこと/, /人生は/, /べきだ/
+    ];
+    /* 会社員・ビジネス寄りの言い回し（ngWordsより弱い検出） */
+    var BUSINESS_SOFT = ['モード', 'リセット', 'チャージ', 'スイッチ', '稼働', 'ノルマ',
+        'ミッション', '目標', '達成', '完了', '進捗', '対応', '処理'];
+    /* 静かに終わっている最終ページの言い方 */
+    var QUIET_END = /(ここまで|おしまい|明日|おやすみ|眠|それで、?いい|いい。|終わり|ある。|そう。)/;
+    /* 教訓・結論で締めている言い方 */
+    var LESSON_END = /(だから|つまり|大事|大切|べき|しよう|しましょう|はず|きっと[^。]{0,6}なる)/;
+
     function evaluatePost(post, store, character) {
         var usage = store.getUsageStats();
         var strategy = store.getStrategy();
@@ -319,71 +365,120 @@
         var texts = pages.map(function (pg) { return pg.text || ''; });
         var all = texts.join('\n') + '\n' + (post.caption || '');
         var cover = (texts[0] || '').replace(/\n/g, '');
+        var lastText = (texts[texts.length - 1] || '').replace(/\n/g, '');
         var flags = [];
         function clamp(n) { return Math.max(0, Math.min(10, Math.round(n))); }
 
-        /* ぼぅらしさ・元気すぎ */
+        /* --- ぼぅらしさ（NG表現・元気すぎ） --- */
         var bou = 10;
         var ng = findNgWords(all, character);
-        if (ng.length) { bou -= 4 * ng.length; flags.push('使わない表現: ' + ng.join('、')); }
+        if (ng.length) { bou -= 4 * ng.length; flags.push('使わない約束の表現: ' + ng.join('、')); }
         var genki = (all.match(/[！!]|✨|最高|やった[ー〜]|ワクワク|元気出/g) || []).length;
-        if (genki) { bou -= 2 * genki; flags.push('ぼぅが元気すぎる'); }
+        if (genki) { bou -= 3 * genki; flags.push('ぼぅが元気すぎる'); }
 
-        /* 言いすぎ・説教・自己啓発 */
+        /* --- ぼぅの言葉づかい（一人称・関西弁の出すぎ） --- */
+        var wording = 10;
+        var soft = (character.softAvoidWords || []).filter(function (w) { return all.indexOf(w) !== -1; });
+        if (soft.length >= 2) { wording -= 3 * (soft.length - 1); flags.push('関西弁が強すぎる: ' + soft.join('、')); }
+        else if (soft.length === 1) { wording -= 1; }
+        if (/ぼく|わたし|僕|私/.test(all)) { wording -= 5; flags.push('一人称（ぼく・わたし）を使っている'); }
+
+        /* --- 会社員・ビジネス用語に寄っていないか --- */
+        var notBusiness = 10;
+        var biz = BUSINESS_SOFT.filter(function (w) { return all.indexOf(w) !== -1; });
+        if (biz.length) { notBusiness -= 4 * biz.length; flags.push('会社員っぽい言葉: ' + biz.join('、')); }
+        if (ng.some(function (w) { return /業務|実績|タスク|案件|生産性|効率|皆勤|出席点|営業|定休/.test(w); })) {
+            notBusiness -= 6;
+        }
+
+        /* --- 名言をつくろうとしていないか --- */
+        var notCliche = 10;
+        var cliche = CLICHE_PATTERNS.filter(function (re) { return re.test(all); });
+        if (cliche.length) { notCliche -= 4 * cliche.length; flags.push('名言をつくりにいっている'); }
+
+        /* --- 言いすぎていないか（説教・自己啓発・長すぎ） --- */
         var restraint = 10;
-        if (/しましょう|すべき|しなさい|した方がいい/.test(all)) { restraint -= 5; flags.push('説教っぽい表現'); }
+        if (/しましょう|すべき|しなさい|した方がいい|しよう。/.test(all)) { restraint -= 5; flags.push('説教っぽい表現'); }
         if (/前向きに|プラスに|自分次第|変わろう|行動しよう/.test(all)) { restraint -= 4; flags.push('自己啓発・ポジティブの押しつけ'); }
-        var longPages = texts.filter(function (t) { return t.replace(/\n/g, '').length > 32; }).length;
-        if (longPages) { restraint -= 2 * longPages; flags.push('文章が長すぎるページがある'); }
+        var longPages = texts.filter(function (t) { return t.replace(/\n/g, '').length > 28; }).length;
+        if (longPages) { restraint -= 2 * longPages; flags.push('1ページの文が長すぎる'); }
+        var over2Lines = texts.filter(function (t) { return t.split('\n').length > 2; }).length;
+        if (over2Lines) { restraint -= 2 * over2Lines; flags.push('1ページが3行以上になっている'); }
 
-        /* 新鮮さ・既視感（直近30件との文章類似） */
+        /* --- 最後に余白があるか（結論で締めていないか） --- */
+        var ending = 10;
+        if (LESSON_END.test(lastText)) { ending -= 6; flags.push('最後が教訓・結論になっている'); }
+        if (!QUIET_END.test(lastText)) { ending -= 2; }
+        if (lastText.length > 20) { ending -= 2; flags.push('最後のページが長い'); }
+
+        /* --- キャラクターが主役として残っているか --- */
+        var presence = 10;
+        var noScene = pages.filter(function (pg) { return !pg.scene; }).length;
+        if (noScene) { presence -= 3 * noScene; flags.push('シーンのないページがある（ぼぅが不在）'); }
+        var scenes = pages.map(function (pg) { return pg.scene || ''; }).join('／');
+        if (/手で|指で|足で|歩く|走る|立ち上が|腕を/.test(scenes)) {
+            presence -= 4; flags.push('人間の動作になっている（ぼぅはマンボウ）');
+        }
+
+        /* --- 新鮮さ・差別化（過去投稿や参考のなぞりを避ける） --- */
         var recent = store.getPosts().slice(0, 30).filter(function (p) { return p.id !== post.id; });
         var maxSim = 0;
         recent.forEach(function (p) { maxSim = Math.max(maxSim, similarity(post.main_text, p.main_text)); });
         var fresh = clamp(10 - maxSim * 12);
         if (fresh <= 3) flags.push('過去の投稿と似すぎている');
-
-        /* 差別化（同テーマ・同シーンの連続） */
         var diff = usage.recentThemes.indexOf(post.theme) === -1 ? 9 : 4;
         if (diff <= 4) flags.push('同じテーマが続いている');
-        var sceneWord = ((pages[0] || {}).scene || '').match(/布団|ソファ|スマホ|お風呂|デスク|窓|海|水面|電車|マグ|枕/);
+        var sceneWord = ((pages[0] || {}).scene || '').match(/布団|ソファ|スマホ|お風呂|デスク|机|窓|海|水面|電車|マグ|枕/);
         var sceneOveruse = sceneWord && usage.overusedScenes.some(function (s) { return s.key === sceneWord[0]; });
-        var kishikan = clamp(fresh - (sceneOveruse ? 2 : 0));
-        if (sceneOveruse) flags.push('同じ小物・構図が続いている（' + sceneWord[0] + '）');
+        if (sceneOveruse) { diff -= 2; flags.push('同じ小物・構図が続いている（' + sceneWord[0] + '）'); }
 
-        /* 共感度・保存・シェア・フォロー・世界観 */
-        var empathy = clamp(6 + (cover.length <= 20 ? 2 : 0) + (/た。$|ない。$|へん。$|てる。$/.test(cover) ? 1 : 0) + (ng.length ? -3 : 0));
+        /* --- 共感・保存・世界観・また見たいか --- */
+        var empathy = clamp(6 + (cover.length <= 20 ? 2 : 0) + (/た。$|ない。$|てる。$|だけ。$/.test(cover) ? 1 : 0) + (ng.length ? -3 : 0));
         var totalChars = all.replace(/\s/g, '').length;
-        var save = clamp(7 + (totalChars <= 90 ? 2 : totalChars <= 140 ? 0 : -2) + (post.proposal_type === TYPE_LABEL.share ? 1 : 0));
-        var share = clamp(6 + (cover.length <= 15 ? 2 : 0) + (/あなた|きみ|お前/.test(all) ? -2 : 1));
-        var follow = clamp(6 + (pages.length >= 3 && pages.length <= 5 ? 2 : -2) + ((strategy.growThemes || '').indexOf(post.theme) !== -1 ? 1 : 0));
-        var world = clamp(8 - (ng.length ? 4 : 0) - (genki ? 2 : 0) + (pages.length >= 3 && pages.length <= 5 ? 1 : -2));
+        var save = clamp(7 + (totalChars <= 100 ? 2 : totalChars <= 150 ? 0 : -2) + (post.proposal_type === TYPE_LABEL.share ? 1 : 0));
+        var pageOk = pages.length >= 3 && pages.length <= 5;
+        var world = clamp(8 - (ng.length ? 4 : 0) - (genki ? 2 : 0) + (pageOk ? 1 : -3) + (pages.length === 4 ? 1 : 0));
+        /* 「またぼぅを見たい」= 静かに終わり・キャラがいて・言いすぎていない */
+        var again = clamp((clamp(ending) + clamp(presence) + clamp(restraint)) / 3 +
+            ((strategy.growThemes || '').indexOf(post.theme) !== -1 ? 1 : 0));
 
         var scores = {
-            'ぼぅらしさ': clamp(bou), '共感度': empathy, '新鮮さ': fresh,
-            '保存されやすさ': save, 'シェアされやすさ': share, 'フォロー期待': follow,
-            '過去投稿との差別化': diff, '既視感の少なさ': kishikan,
-            '言いすぎていないか': clamp(restraint), '世界観の一貫性': world
+            'ぼぅらしさ': clamp(bou),
+            'ぼぅの言葉づかい': clamp(wording),
+            '名言っぽくないか': clamp(notCliche),
+            '会社員言葉でないか': clamp(notBusiness),
+            '言いすぎていないか': clamp(restraint),
+            '最後の余白': clamp(ending),
+            'キャラクターが主役': clamp(presence),
+            'またぼぅを見たいか': again,
+            '共感度': empathy,
+            '新鮮さ': fresh,
+            '過去投稿との差別化': clamp(diff),
+            '世界観の一貫性': world
         };
         var sum = 0, n = 0;
         for (var k in scores) { sum += scores[k]; n++; }
         var avg = Math.round((sum / n) * 10) / 10;
-        var pass = scores['ぼぅらしさ'] >= 6 && scores['言いすぎていないか'] >= 6 &&
-            scores['新鮮さ'] >= 4 && avg >= 6 && ng.length === 0;
+        /* ぼぅらしさ側の項目は一つでも落ちたら不合格にする */
+        var pass = ng.length === 0 &&
+            scores['ぼぅらしさ'] >= 7 && scores['ぼぅの言葉づかい'] >= 7 &&
+            scores['名言っぽくないか'] >= 7 && scores['会社員言葉でないか'] >= 7 &&
+            scores['言いすぎていないか'] >= 7 && scores['最後の余白'] >= 6 &&
+            scores['キャラクターが主役'] >= 7 && scores['新鮮さ'] >= 4 && avg >= 6.5;
         return { scores: scores, average: avg, flags: flags, pass: pass };
     }
-
     /* ================= 内蔵モード =================
      * A案=王道共感型 / B案=本質型 / C案=保存・シェア型 をそれぞれの型のコーパスから選ぶ。
      * 直近のテーマ・文章・使いすぎシーンを避け、評価が低い案は選び直す。 */
 
     function itemToDraft(store, character, batchId, variant, theme, item) {
         var total = item.pages.length;
+        var visualNotes = store.getVisualFeedback ? store.getVisualFeedback() : [];
         var pages = item.pages.map(function (pg, idx) {
             return {
                 text: pg.text,
                 scene: pg.sceneJa,
-                image_prompt: buildImagePrompt(character, pg.sceneEn, idx + 1, total)
+                image_prompt: buildImagePrompt(character, pg.sceneEn, idx + 1, total, visualNotes)
             };
         });
         return makeDraft(store, character, batchId, variant, theme, pages, item.caption, 'builtin', item.type, item.structure);
@@ -476,7 +571,7 @@
                         structure: { type: 'string', description: '今回使った投稿構造。次のいずれか: 王道共感型 / 本音代弁型 / 意外な視点型 / 保存したい一言型 / 誰かに送りたい型 / 疲れた日の癒し型 / 人間関係の本質型 / 日常あるある型' },
                         pages: {
                             type: 'array', minItems: 3, maxItems: 5,
-                            description: 'カルーセルの各ページ。1枚目=共感の入り口、中間=小さな展開、最後=力の抜けるゆるい着地',
+                            description: 'カルーセルの各ページ。3〜5枚だが、もっとも自然な4枚を優先する。1枚目=小さな価値観の転換、2枚目=小さな行動、3枚目=もう一段だけ深める、最後=静かな終了。枚数を埋めるために文章を増やさない',
                             items: {
                                 type: 'object',
                                 additionalProperties: false,
@@ -488,7 +583,7 @@
                                 }
                             }
                         },
-                        caption: { type: 'string', description: 'Instagramキャプション。短め。画像内の文章を繰り返しすぎない' },
+                        caption: { type: 'string', description: 'Instagramキャプション。画像の内容を説明し直さず、カルーセルで言えなかった感情を少しだけ補う。最後は静かに終える。長文にしない' },
                         hashtags: { type: 'array', maxItems: 5, items: { type: 'string' } }
                     }
                 }
@@ -511,11 +606,28 @@
         lines.push('性格: ' + character.personality.join('、'));
         lines.push('');
         lines.push('# 投稿の形式（カルーセル）');
-        lines.push('- 1投稿 = 3〜5枚の連作画像。スワイプして読む小さな物語。');
-        lines.push('- 1枚目: 共感の入り口。「これ私やん」と手が止まる短い一言（20文字以内）。');
-        lines.push('- 中間: 小さな展開。オチを急がない。1枚に情報を詰めない。');
-        lines.push('- 最後: 力の抜けるゆるい着地。解決しない。説教しない。');
-        lines.push('- 各ページの文は1〜2行。無言のページがあってもよい。');
+        ((character.postRules && character.postRules.carousel) || []).forEach(function (r) { lines.push('- ' + r); });
+        lines.push('');
+        lines.push('# ぼぅらしい投稿の成功基準例（この構造を別テーマに応用する。文章はそのまま使わない）');
+        var baselines = (research.structures || []).filter(function (s) { return s.isBaseline; });
+        if (baselines.length) {
+            baselines.forEach(function (b) {
+                lines.push('テーマ: ' + b.theme);
+                lines.push('構成: ' + b.carousel);
+                lines.push('文章量: ' + b.textAmount);
+                lines.push('共感の作り方: ' + b.empathy);
+                lines.push('キャラの役割: ' + b.charRole);
+                lines.push('抽出する構造: ' + b.extraction);
+                lines.push(b.bouConversion);
+            });
+        } else {
+            lines.push('テーマ: 休むことへの罪悪感を少し軽くする');
+            lines.push('1枚目「休むのも、今日のやること。」… 共感フック。読む人の価値観をほんの少しだけ変える。');
+            lines.push('2枚目「ちゃんと、横になる。」… 大きな解決策ではなく、小さな行動に落とす。');
+            lines.push('3枚目「ちゃんと、目を閉じる。」… 同じ温度で、もう一段だけ深める。');
+            lines.push('4枚目「今日はもう、ここまで。」… 解決・教訓ではなく、静かに終える。');
+            lines.push('抽出する構造:「小さな価値観の転換 → 小さな行動 → もう一段だけ深める → 静かな終了」');
+        }
         lines.push('');
         lines.push('# 3案の役割（この順で1案ずつ作る）');
         lines.push('- A案（王道共感型）: 最も多くの人が「これ私」と感じる内容。');
@@ -530,17 +642,27 @@
         lines.push('# 絶対に使わない表現');
         lines.push(character.ngWords.join('、'));
         lines.push('説教・ポジティブの押しつけ・自己啓発表現・感動の押し売りも禁止。');
+        ((character.speech && character.speech.avoid) || []).forEach(function (a) { lines.push('- ' + a); });
+        lines.push('ぼぅは関西弁キャラではない。自然な日本語を基本にし、やわらかい口語が時々混じる程度にする。');
         lines.push('「役に立つ情報」より「これ私やん」という共感を優先する。1投稿につき1テーマ。');
+        lines.push('');
+        lines.push('# キャプションの作り方');
+        ((character.postRules && character.postRules.caption) || []).forEach(function (r) { lines.push('- ' + r); });
         lines.push('');
         lines.push('# 投稿テーマの候補');
         lines.push(character.themes.join('、'));
 
         lines.push('');
         lines.push('# 投稿構造ライブラリ（最重要の参考情報。表現のコピーは禁止、構造だけ使う）');
-        lines.push('毎回ランダムに書くのではなく、以下の構造から各案に合うものを選んで組み立て、');
+        lines.push('毎回ランダムに書くのではなく、案ごとに次の順で頭の中を通してから書くこと:');
+        lines.push('  ① 参考構造（どう止めて、どう展開して、どう終わるか）');
+        lines.push('  ② なぜそれが刺さるのか');
+        lines.push('  ③ ぼぅならどう言い換えるか（励まさない・説教しない・急がない形に変換）');
+        lines.push('参考アカウントの文章・キャラクター造形・配色・レイアウトは絶対にコピーしない。');
         lines.push('使った構造名を structure フィールドに記録すること。');
         lines.push('ぼぅらしさと矛盾する場合は必ずぼぅらしさを優先する。');
         (research.structures || []).forEach(function (s) {
+            if (s.isBaseline) return;
             lines.push('');
             lines.push('## ' + s.type);
             lines.push('フック: ' + s.hook);
@@ -605,6 +727,13 @@
                 lines.push('- ' + c.text + (c.main_text ? '（対象: ' + c.main_text.replace(/\n/g, '／') + '）' : ''));
             });
         }
+        lines.push('');
+        lines.push('# 出す前の自己検査（すべて満たしてから出力する）');
+        lines.push('- ぼぅらしいか／言いすぎていないか／名言をつくろうとしていないか');
+        lines.push('- 会社員・ビジネス用語に寄っていないか／説教になっていないか');
+        lines.push('- 過去投稿と似すぎていないか／参考アカウントの文章をなぞっていないか');
+        lines.push('- 最後に余白があるか／キャラクターが主役として残っているか');
+        lines.push('- 読んだ人が「またぼぅを見たい」と思えるか');
         return lines.join('\n');
     }
 
@@ -654,11 +783,12 @@
             var batchId = store.makeId('b');
             return parsed.proposals.slice(0, 3).map(function (p, idx) {
                 var total = p.pages.length;
+                var visualNotes = store.getVisualFeedback ? store.getVisualFeedback() : [];
                 var pages = p.pages.slice(0, 5).map(function (pg, pi) {
                     return {
                         text: pg.text || '',
                         scene: pg.scene_ja,
-                        image_prompt: buildImagePrompt(character, pg.scene_en, pi + 1, total)
+                        image_prompt: buildImagePrompt(character, pg.scene_en, pi + 1, total, visualNotes)
                     };
                 });
                 var structTypes = store.getResearch().structureTypes || [];
@@ -705,6 +835,7 @@
         checkPost: checkPost,
         buildImagePrompt: buildImagePrompt,
         evaluatePost: evaluatePost,
+        buildSystemPrompt: buildSystemPrompt,
 
         /* 3案生成。mode未指定時は設定に従う。返り値: Promise<Post[]>（保存はしない） */
         generateBatch: function (store, mode, apiKey) {

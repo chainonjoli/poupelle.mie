@@ -78,6 +78,7 @@
             el.className = 'structure-card';
             el.innerHTML =
                 '<div class="chips"><span class="chip theme">' + esc(s.type) + '</span>' +
+                (s.isBaseline ? '<span class="chip">★ 生成の基準にする</span>' : '') +
                 '<span class="badge-data ' + esc(s.data_type || 'manual') + '">' + (DATA_TYPE_LABEL[s.data_type] || '手動入力') + '</span></div>' +
                 '<div class="structure-hook">' + esc(s.hook || '') + '</div>' +
                 '<div class="structure-flow"><span class="conv-from">' + esc(s.extraction || '') + '</span>' +

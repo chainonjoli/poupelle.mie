@@ -96,12 +96,32 @@
             return this.getPost(id);
         },
 
-        addFeedback: function (id, text) {
+        /* フィードバックは「文章について」と「キャラクター一貫性（色・形）について」を分けて保存する。
+         * 色や形の指摘は文章の評価ではなく、画像生成プロンプトの補強に使う。 */
+        classifyFeedback: function (text) {
+            return /色|カラー|形|かたち|崩れ|人間っぽ|人型|体型|太さ|線|背景/.test(text || '') ? 'visual' : 'text';
+        },
+
+        addFeedback: function (id, text, kind) {
             var post = this.getPost(id);
             if (!post || !text) return null;
             var fb = post.user_feedback || [];
-            fb.push({ at: nowIso(), text: text });
+            fb.push({ at: nowIso(), text: text, kind: kind || this.classifyFeedback(text) });
             return this.updatePost(id, { user_feedback: fb });
+        },
+
+        /* キャラクター一貫性フィードバック（色が違う・形が違う等）の直近まとめ */
+        getVisualFeedback: function () {
+            var self = this;
+            var out = [];
+            this.getPosts().forEach(function (p) {
+                (p.user_feedback || []).forEach(function (f) {
+                    var kind = f.kind || self.classifyFeedback(f.text);
+                    if (kind === 'visual') out.push({ text: f.text, at: f.at });
+                });
+            });
+            out.sort(function (a, b) { return (b.at || '').localeCompare(a.at || ''); });
+            return out.slice(0, 10);
         },
 
         /* 最新バッチ（今日の3案）を返す */
@@ -130,12 +150,19 @@
                 if (st === 'rejected' && p.user_feedback && p.user_feedback.length && bad.length < 5) bad.push(p);
                 if (p.user_feedback) {
                     for (var f = 0; f < p.user_feedback.length; f++) {
-                        comments.push({ text: p.user_feedback[f].text, at: p.user_feedback[f].at, main_text: p.main_text });
+                        var fb = p.user_feedback[f];
+                        var kind = fb.kind || (/色|カラー|形|かたち|崩れ|人間っぽ|人型|体型|太さ|線|背景/.test(fb.text || '') ? 'visual' : 'text');
+                        if (kind === 'visual') continue; /* 見た目の指摘は文章生成には混ぜない */
+                        comments.push({ text: fb.text, at: fb.at, main_text: p.main_text });
                     }
                 }
             }
             comments.sort(function (a, b) { return (b.at || '').localeCompare(a.at || ''); });
-            return { goodExamples: good, badExamples: bad, recentComments: comments.slice(0, 10) };
+            return {
+                goodExamples: good, badExamples: bad,
+                recentComments: comments.slice(0, 10),
+                visualComments: this.getVisualFeedback()
+            };
         },
 
         /* ---- キャラクター設定 ---- */
@@ -148,6 +175,21 @@
             /* 既定値に新しいフィールドが増えても壊れないよう浅くマージ */
             var merged = JSON.parse(JSON.stringify(defaults));
             for (var k in saved) { if (Object.prototype.hasOwnProperty.call(saved, k)) merged[k] = saved[k]; }
+
+            /* ルールの世代が上がったときは「書き方のルール」だけ新しい既定値に更新する。
+             * コンセプト・役割・性格・テーマ・ハッシュタグなど、書き足した内容はそのまま残す。 */
+            if ((saved.version || 1) < defaults.version) {
+                merged.speech = JSON.parse(JSON.stringify(defaults.speech));
+                if (saved.speech && saved.speech.examples && saved.speech.examples.length) {
+                    merged.speech.examples = saved.speech.examples;
+                }
+                merged.ngWords = defaults.ngWords.slice();
+                merged.softAvoidWords = defaults.softAvoidWords.slice();
+                merged.postRules = JSON.parse(JSON.stringify(defaults.postRules));
+                merged.imagePromptTemplate = defaults.imagePromptTemplate;
+                merged.visual = JSON.parse(JSON.stringify(defaults.visual));
+                merged.version = defaults.version;
+            }
             return merged;
         },
 
@@ -204,6 +246,16 @@
             (seed.structures || []).forEach(function (s) {
                 if (!s.data_type) s.data_type = 'manual';
                 if (!s.id) s.id = 'st-' + Math.random().toString(36).slice(2, 8);
+            });
+            /* シード側に増えた構造（成功基準例など）は、保存済みデータを消さずに追加する */
+            var have = {};
+            (seed.structures || []).forEach(function (s) { have[s.id] = true; });
+            (freshSeed.structures || []).forEach(function (s) {
+                if (!have[s.id]) seed.structures.unshift(s);
+            });
+            if (!seed.structureTypes) seed.structureTypes = [];
+            (freshSeed.structureTypes || []).forEach(function (t) {
+                if (seed.structureTypes.indexOf(t) === -1) seed.structureTypes.push(t);
             });
             return seed;
         },

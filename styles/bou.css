@@ -178,6 +178,7 @@ body {
     border: 1px solid var(--border); background: var(--card); color: var(--ink); cursor: pointer;
 }
 .fb-chip:active { background: var(--bou-belly); }
+.fb-chip.fb-visual { background: #F2F6F8; border-color: #D6E3EA; color: #5E7484; }
 .fb-log { font-size: .88rem; color: var(--ink-soft); margin-top: 8px; }
 .fb-log li { margin-left: 1.2em; }
 
