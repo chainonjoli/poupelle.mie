@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>十色神社 TOIRO SHRINE - あなたの「好き」を、ちゃんと残せる神社。</title>
     <meta name="description" content="十色神社（といろじんじゃ）は、推しを好きだった時間そのものを残せる、完全オリジナルの架空の神社です。推しカラーを選び、参拝し、願いを書き、お守りや御朱印を授かって、推しへの想いを記録できます。">
-    <meta name="theme-color" content="#17140f">
+    <meta name="theme-color" content="#faf6ec">
     <meta property="og:title" content="十色神社 TOIRO SHRINE">
     <meta property="og:description" content="あなたの「好き」を、ちゃんと残せる神社。推しカラーを選び、願いを込めて、今日の参拝を思い出に。">
     <meta property="og:type" content="website">
@@ -28,9 +28,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/shrine.css?v=20260711b">
+    <link rel="stylesheet" href="styles/shrine.css?v=20260817a">
 </head>
-<body data-mode="ink">
+<body data-mode="paper">
     <div class="grain" aria-hidden="true"></div>
 
     <!-- ===== 上部バー ===== -->
@@ -115,6 +115,7 @@
                     <a href="#anniversary-section" class="keidai-link"><span class="keidai-no">08</span>記念日</a>
                     <a href="#empathy-section" class="keidai-link"><span class="keidai-no">09</span>同じ色の願い</a>
                     <a href="#saisen-section" class="keidai-link"><span class="keidai-no">10</span>お賽銭</a>
+                    <a href="#mypage-section" class="keidai-link"><span class="keidai-no">11</span>記録の間</a>
                 </div>
             </nav>
         </section>
@@ -131,6 +132,10 @@
                     <input type="text" id="ema-name" maxlength="20" placeholder="例：あず" autocomplete="off">
                 </div>
                 <div class="form-group">
+                    <label for="ema-oshi">推しのお名前（任意）</label>
+                    <input type="text" id="ema-oshi" maxlength="20" placeholder="例：ひかり" autocomplete="off">
+                </div>
+                <div class="form-group">
                     <label for="ema-wish">推しへの願いごと</label>
                     <textarea id="ema-wish" rows="3" maxlength="60" placeholder="例：ライブが当たりますように"></textarea>
                 </div>
@@ -141,7 +146,10 @@
             </div>
 
             <div id="ema-done" class="ema-done hidden" role="status"></div>
-            <button id="btn-ema-share" class="pill-btn ema-share hidden" type="button">この願いをXに投稿・共有する</button>
+            <div class="ema-actions">
+                <a id="btn-ema-save" class="pill-btn hidden" href="#" download="toiro-ema.png">絵馬を画像で保存</a>
+                <button id="btn-ema-share" class="pill-btn hidden" type="button">この願いをXに投稿・共有する</button>
+            </div>
 
             <h3 class="emakake-title">絵馬掛け 〜これまでの願い〜</h3>
             <p class="rack-note">※ 奉納した絵馬は、この端末のブラウザにのみ保存されます。</p>
@@ -156,6 +164,10 @@
 
             <div id="mamori-card" class="mamori-card"></div>
             <button id="btn-mamori-renew" class="btn-main btn-block" type="button">推し守を授かる</button>
+
+            <h3 class="emakake-title">お守り棚 〜これまでの推し守〜</h3>
+            <p class="rack-note">※ お守りは1日1枚。授かった日ごとに、ここに納められていきます。</p>
+            <div id="mamori-shelf" class="mamori-shelf"></div>
         </section>
 
         <!-- ===== 5. 推しみくじページ ===== -->
@@ -265,6 +277,16 @@
                 <p class="rack-note">※ 外部の決済ページ（STORES）が開きます。梅・竹・松の三種からお選びいただけます。<br>お礼として、十色神社の「デジタル御礼札」（スマートフォン用壁紙）をお渡しします。<br>いただいたお賽銭は、新しい意匠づくりとサイトの運営に大切に使わせていただきます。</p>
             </div>
         </section>
+
+        <!-- ===== 11. 記録の間（マイページ） ===== -->
+        <section id="mypage-section" class="section reveal">
+            <p class="section-kicker">11 — TOIRO SHRINE</p>
+            <h2 class="section-title">記録の間</h2>
+            <p class="section-lead">あなたと推しの、これまでのあゆみです。</p>
+
+            <div id="mypage-grid" class="mypage-grid"></div>
+            <p id="mypage-since" class="rack-note mypage-since"></p>
+        </section>
     </main>
 
     <button id="btn-backtotop" class="back-to-top" type="button">⛩ 参道へもどる</button>
@@ -293,7 +315,7 @@
     <footer class="footer">
         <p>「十色神社」は完全オリジナルの架空の神社です。<br>実在するアイドル・アーティスト・キャラクター・作品・団体とは一切関係ありません。</p>
         <p class="footer-sns"><a href="https://x.com/toiro_shrine" target="_blank" rel="noopener">公式X ＠toiro_shrine</a> ・ <a href="#privacy-section">このアプリについて</a></p>
-        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260711b</span></p>
+        <p class="footer-copy">&copy; 2026 十色神社 — TOIRO SHRINE <span id="app-version" class="app-version">v20260817a</span></p>
     </footer>
 
     <noscript>
@@ -302,6 +324,6 @@
         </p>
     </noscript>
 
-    <script src="scripts/shrine.js?v=20260711b"></script>
+    <script src="scripts/shrine.js?v=20260817a"></script>
 </body>
 </html>

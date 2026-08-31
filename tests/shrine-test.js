@@ -45,8 +45,8 @@ const path = require('path');
     const todayMsg = await page.textContent('#today-message');
     if (!todayMsg || todayMsg.trim().length < 5) errors.push('今日のひとことが出ない');
 
-    // 境内のご案内：8セクションへのリンクマップと「参道へもどる」ボタン
-    if (await page.locator('.keidai-link').count() !== 8) errors.push('境内のご案内が8件出ない');
+    // 境内のご案内：9セクションへのリンクマップと「参道へもどる」ボタン
+    if (await page.locator('.keidai-link').count() !== 9) errors.push('境内のご案内が9件出ない');
     await page.click('.keidai-link[href="#empathy-section"]');
     await page.waitForTimeout(700);
     const empathyBox = await page.locator('#empathy-section .section-title').boundingBox();
@@ -61,11 +61,12 @@ const path = require('path');
     await page.click('#btn-sanpai');
     await page.waitForTimeout(600);
 
-    // 墨／紙の切替
+    // 既定は紙（白基調）。墨／紙の切替
+    if (await page.getAttribute('body', 'data-mode') !== 'paper') errors.push('初期状態が紙モードでない');
     await page.click('#btn-mode');
-    if (await page.getAttribute('body', 'data-mode') !== 'paper') errors.push('紙モードにならない');
+    if (await page.getAttribute('body', 'data-mode') !== 'ink') errors.push('墨モードにならない');
     await page.click('#btn-mode');
-    if (await page.getAttribute('body', 'data-mode') !== 'ink') errors.push('墨モードに戻らない');
+    if (await page.getAttribute('body', 'data-mode') !== 'paper') errors.push('紙モードに戻らない');
 
     // 文字サイズ切替
     await page.click('#btn-fontsize');
@@ -79,12 +80,20 @@ const path = require('path');
 
     // 絵馬：例チップから願いを入れて奉納
     await page.fill('#ema-name', 'あず');
+    await page.fill('#ema-oshi', 'ひかり');
     await page.click('.wish-chip >> nth=0');
     await page.click('#btn-dedicate');
     if (!(await page.textContent('#ema-done')).includes('あずさんの絵馬を奉納しました')) errors.push('奉納完了メッセージが出ない');
     const rackText = await page.textContent('#ema-rack');
     if (!rackText.includes('ライブが当たりますように')) errors.push('絵馬掛けに願いが出ない');
     if (!rackText.includes('あず より')) errors.push('絵馬掛けに名前が出ない');
+    if (!rackText.includes('ひかり へ')) errors.push('絵馬掛けに推し名が出ない');
+
+    // 絵馬の画像化：保存ボタンに画像データが入る
+    await page.waitForFunction(() => {
+        const a = document.getElementById('btn-ema-save');
+        return a && !a.classList.contains('hidden') && a.href.startsWith('data:image/png');
+    }, { timeout: 10000 });
 
     // 絵馬の共有：奉納後に投稿ボタンが現れ、共有APIのない環境ではXの投稿画面URLが開く
     if (await page.locator('#btn-ema-share:not(.hidden)').count() !== 1) errors.push('奉納後に絵馬の投稿ボタンが出ない');
@@ -118,6 +127,14 @@ const path = require('path');
     if (!mamoriText.includes('推し守')) errors.push('推し守カードが出ない');
     if (!mamoriText.includes('ライブが当たりますように')) errors.push('お守りに願いのテーマが反映されない');
     if (!mamoriText.includes('パープル')) errors.push('お守りに推しカラーが反映されない');
+    if (await page.locator('.mamori-mini').count() !== 1) errors.push('お守り棚に今日の1枚が納まらない');
+    await page.click('#btn-mamori-renew');
+    if (await page.locator('.mamori-mini').count() !== 1) errors.push('授かり直しでお守り棚が増殖している');
+
+    // 11. 記録の間：あゆみの数字が並ぶ
+    if (await page.locator('.mypage-stat').count() !== 7) errors.push('記録の間の項目が7つ出ない');
+    const mypageText = await page.textContent('#mypage-grid');
+    if (!mypageText.includes('絵馬')) errors.push('記録の間に絵馬の項目がない');
 
     // 7. 記念日登録ページ：今日の日付を登録すると「今日」表示になり、御朱印にも反映される
     const now = new Date();
@@ -176,6 +193,8 @@ const path = require('path');
     const mikujiRank = (await page.textContent('.mikuji-rank')).trim();
     if (!/吉/.test(mikujiRank)) errors.push('みくじの結果が出ない');
     if (await page.locator('.mikuji-row').count() !== 5) errors.push('みくじの運勢項目が5件出ない');
+    if (await page.locator('.mikuji-advice').count() !== 1) errors.push('みくじのひとことが出ない');
+    if (!(await page.textContent('.mikuji-advice')).includes('ひとこと')) errors.push('ひとことのラベルが出ない');
     if (await page.locator('#btn-mikuji-draw').count() !== 0) errors.push('みくじを同日に引き直せてしまう');
 
     // みくじの共有：結果に投稿ボタンが付き、投稿文に結果の運勢が入る
