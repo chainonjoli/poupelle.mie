@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/bou.css?v=8">
+    <link rel="stylesheet" href="styles/bou.css?v=9">
 </head>
 <body>
 <div class="wrap">
@@ -48,6 +48,10 @@
     <section id="view-dashboard" class="view active">
 
         <div class="card generate-area">
+            <div class="field gen-theme-field">
+                <label for="gen-theme">テーマ（おまかせ／悩みリストから指定）</label>
+                <select id="gen-theme"><option value="">おまかせ（テーマ違いで3案）</option></select>
+            </div>
             <button id="generate-btn" class="btn btn-primary">今日のぼぅ投稿を作って</button>
             <div class="mode-note" id="mode-note"></div>
             <div class="gen-status" id="gen-status"></div>
@@ -205,6 +209,11 @@
             <div class="field"><label>口ぐせの例（1行に1つ）</label><textarea id="ch-examples" class="tall"></textarea></div>
             <div class="field"><label>絶対に使わない表現（1行に1つ）</label><textarea id="ch-ng" class="tall"></textarea></div>
             <div class="field"><label>投稿テーマ（1行に1つ）</label><textarea id="ch-themes" class="tall"></textarea></div>
+            <div class="field">
+                <label>あなたの悩みリスト（1行に1つ。「テーマ名｜悩みの言葉」）</label>
+                <textarea id="ch-worries" class="tall"></textarea>
+                <p class="hint">ダッシュボードの「テーマ」で選べるようになります。ぼぅはこの悩みを解決も励ましもせず、隣にいる投稿を作ります。</p>
+            </div>
             <div class="field"><label>ハッシュタグ候補（1行に1つ）</label><textarea id="ch-hashtags" class="tall"></textarea></div>
 
             <div class="field">
@@ -291,11 +300,11 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="scripts/bou/character.js?v=8"></script>
-<script src="scripts/bou/research-data.js?v=8"></script>
-<script src="scripts/bou/store.js?v=8"></script>
-<script src="scripts/bou/generator.js?v=8"></script>
-<script src="scripts/bou/app.js?v=8"></script>
-<script src="scripts/bou/insights.js?v=8"></script>
+<script src="scripts/bou/character.js?v=9"></script>
+<script src="scripts/bou/research-data.js?v=9"></script>
+<script src="scripts/bou/store.js?v=9"></script>
+<script src="scripts/bou/generator.js?v=9"></script>
+<script src="scripts/bou/app.js?v=9"></script>
+<script src="scripts/bou/insights.js?v=9"></script>
 </body>
 </html>

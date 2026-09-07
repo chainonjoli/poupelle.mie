@@ -188,8 +188,18 @@
                 merged.postRules = JSON.parse(JSON.stringify(defaults.postRules));
                 merged.imagePromptTemplate = defaults.imagePromptTemplate;
                 merged.visual = JSON.parse(JSON.stringify(defaults.visual));
+                /* v3: 悩みリストは新しい項目なので既定値を入れ、そのテーマ名だけを投稿テーマに追加する
+                 * （ユーザーが消した既存テーマは復活させない） */
+                if (!saved.worryThemes) {
+                    merged.worryThemes = JSON.parse(JSON.stringify(defaults.worryThemes));
+                    merged.themes = (merged.themes || []).slice();
+                    merged.worryThemes.forEach(function (w) {
+                        if (merged.themes.indexOf(w.theme) === -1) merged.themes.push(w.theme);
+                    });
+                }
                 merged.version = defaults.version;
             }
+            if (!merged.worryThemes) merged.worryThemes = [];
             return merged;
         },
 

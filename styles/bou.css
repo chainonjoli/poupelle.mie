@@ -58,6 +58,8 @@ body {
 
 /* ---- 生成ボタン ---- */
 .generate-area { text-align: center; padding: 26px 18px; }
+.gen-theme-field { max-width: 420px; margin: 0 auto 14px; text-align: left; }
+.gen-theme-field label { font-size: .9rem; color: var(--ink-soft); }
 .btn {
     display: inline-block; border: none; border-radius: 999px; cursor: pointer;
     font-family: inherit; transition: all .18s; white-space: nowrap;

@@ -65,10 +65,11 @@
         status.classList.remove('gen-error');
         status.textContent = 'ぼぅが考え中……（急がせないであげてください）';
 
-        gen.generateBatch(store, settings.mode, settings.apiKey)
+        var fixedTheme = $('gen-theme') ? $('gen-theme').value : '';
+        gen.generateBatch(store, settings.mode, settings.apiKey, { theme: fixedTheme || null })
             .then(function (drafts) {
                 store.addPosts(drafts);
-                status.textContent = '3案できました。ゆっくり選んでください。';
+                status.textContent = (fixedTheme ? '「' + fixedTheme + '」で' : '') + '3案できました。ゆっくり選んでください。';
                 renderBatch();
                 renderPostList();
             })
@@ -430,8 +431,44 @@
         renderModeNote();
     });
 
+    /* ダッシュボードのテーマ選択（悩みリスト → いつものテーマ） */
+    function renderThemeSelect() {
+        var sel = $('gen-theme');
+        if (!sel) return;
+        var c = store.getCharacter();
+        var current = sel.value;
+        sel.innerHTML = '<option value="">おまかせ（テーマ違いで3案）</option>';
+        var worries = c.worryThemes || [];
+        if (worries.length) {
+            var g1 = document.createElement('optgroup');
+            g1.label = 'あなたの悩みリスト';
+            worries.forEach(function (w, i) {
+                var o = document.createElement('option');
+                o.value = w.theme;
+                o.textContent = (i + 1) + '. ' + w.worry;
+                g1.appendChild(o);
+            });
+            sel.appendChild(g1);
+        }
+        var worryNames = worries.map(function (w) { return w.theme; });
+        var rest = (c.themes || []).filter(function (t) { return worryNames.indexOf(t) === -1; });
+        if (rest.length) {
+            var g2 = document.createElement('optgroup');
+            g2.label = 'いつものテーマ';
+            rest.forEach(function (t) {
+                var o = document.createElement('option');
+                o.value = t; o.textContent = t;
+                g2.appendChild(o);
+            });
+            sel.appendChild(g2);
+        }
+        sel.value = current;
+        if (sel.value !== current) sel.value = '';
+    }
+
     function renderCharacterForm() {
         var c = store.getCharacter();
+        $('ch-worries').value = (c.worryThemes || []).map(function (w) { return w.theme + '｜' + w.worry; }).join('\n');
         $('ch-concept').value = c.concept;
         $('ch-role').value = c.role;
         $('ch-personality').value = c.personality.join('\n');
@@ -466,10 +503,18 @@
         c.speech.examples = lines($('ch-examples').value);
         c.ngWords = lines($('ch-ng').value);
         c.themes = lines($('ch-themes').value);
+        c.worryThemes = lines($('ch-worries').value).map(function (l) {
+            var parts = l.split(/[｜|]/);
+            var theme = parts[0].trim();
+            var worry = (parts[1] || parts[0]).trim();
+            return { theme: theme, worry: worry };
+        }).filter(function (w) { return w.theme; });
+        c.worryThemes.forEach(function (w) { if (c.themes.indexOf(w.theme) === -1) c.themes.push(w.theme); });
         c.hashtagPool = lines($('ch-hashtags').value);
         c.visual.forbidden = lines($('ch-forbidden').value);
         c.imagePromptTemplate = $('ch-template').value.trim();
         store.saveCharacter(c);
+        renderThemeSelect();
         toast('ぼぅの設定を保存しました');
     });
 
@@ -477,6 +522,7 @@
         if (!confirm('ぼぅの設定を初期設定に戻します。よろしいですか？')) return;
         store.resetCharacter();
         renderCharacterForm();
+        renderThemeSelect();
         toast('初期設定に戻しました');
     });
 
@@ -493,4 +539,5 @@
     renderPostList();
     renderSettingsForm();
     renderCharacterForm();
+    renderThemeSelect();
 })();

@@ -44,6 +44,26 @@ const gen = require('../scripts/bou/generator.js');
     ok(!!restTheme && restTheme.items[0].pages.length === 4 &&
         restTheme.items[0].pages[0].text.indexOf('休むのも') === 0, '成功基準例の4枚構成がコーパスにない');
 
+    /* 悩みリスト: 10項目が登録され、各テーマに3話（A/B/C）あり、テーマ固定で3案作れること */
+    ok(DEFAULT_CHARACTER.worryThemes.length === 10, '悩みリストが10項目でない（' + DEFAULT_CHARACTER.worryThemes.length + '）');
+    DEFAULT_CHARACTER.worryThemes.forEach(w => {
+        ok(DEFAULT_CHARACTER.themes.includes(w.theme), '悩みリストのテーマが投稿テーマにない: ' + w.theme);
+        const t = gen.CORPUS.find(t => t.theme === w.theme);
+        ok(!!t && t.items.length >= 3, '悩みテーマ「' + w.theme + '」の話が3つない');
+        if (t) {
+            const types = t.items.map(it => it.type);
+            ['empathy', 'essence', 'share'].forEach(ty => ok(types.includes(ty), '悩みテーマ「' + w.theme + '」に ' + ty + ' の話がない'));
+        }
+    });
+    for (const w of DEFAULT_CHARACTER.worryThemes.slice(0, 3)) {
+        const fixed = await gen.generateBatch(store, 'builtin', null, { theme: w.theme });
+        ok(fixed.length === 3 && fixed.every(d => d.theme === w.theme), '「' + w.theme + '」固定で3案がそのテーマにならない');
+        ok(new Set(fixed.map(d => d.main_text)).size === 3, '「' + w.theme + '」固定で同じ話が重複した');
+        ok(fixed.map(d => d.proposal_type).join('/') === '王道共感型/本質型/保存・シェア型',
+            '「' + w.theme + '」固定でA/B/Cの型が崩れた: ' + fixed.map(d => d.proposal_type).join('/'));
+        ok(fixed.every(d => d.evaluation.pass), '「' + w.theme + '」固定の案が評価を通っていない');
+    }
+
     /* キャラクター設定: 投稿ルール・使わない言い回し・人間化禁止が入っていること */
     ok(DEFAULT_CHARACTER.version >= 2, 'キャラクター設定のバージョンが上がっていない');
     ok(DEFAULT_CHARACTER.postRules.carousel.length >= 5 && DEFAULT_CHARACTER.postRules.caption.length >= 3,
@@ -256,6 +276,9 @@ const gen = require('../scripts/bou/generator.js');
     ok(migrated.imagePromptTemplate.includes('mola mola'), '移行後に新しい画像プロンプトが入らない');
     ok(migrated.concept === 'ユーザーが書き換えたコンセプト', '移行でユーザー独自の設定が消えている');
     ok(migrated.speech.examples.includes('まあ、いっか。'), '移行でユーザーの口ぐせが消えている');
+    ok(migrated.worryThemes.length === 10, '移行で悩みリストが入らない');
+    ok(migrated.themes.includes('報われない日'), '移行で悩みテーマが投稿テーマに追加されない');
+    ok(!migrated.themes.includes('返信'), '移行でユーザーが消したテーマが復活している');
     store.resetCharacter();
 
     console.log('ロジックテスト: ' + (errors.length ? 'NG' : 'OK'));
@@ -269,6 +292,10 @@ const gen = require('../scripts/bou/generator.js');
 
     await page.goto('file://' + path.resolve(__dirname, '../bou.html'));
     ok(await page.locator('.bou-header h1').textContent() === 'ぼぅ 投稿スタジオ', 'ヘッダーが表示されない');
+
+    /* テーマ選択: 悩みリスト10項目＋いつものテーマが出る */
+    ok(await page.locator('#gen-theme optgroup[label="あなたの悩みリスト"] option').count() === 10, 'テーマ選択に悩みリスト10項目が出ない');
+    ok(await page.locator('#gen-theme optgroup[label="いつものテーマ"] option').count() >= 10, 'テーマ選択にいつものテーマが出ない');
 
     /* 生成 → 3案表示（枚数チップとページドット付き） */
     await page.click('#generate-btn');
@@ -313,6 +340,14 @@ const gen = require('../scripts/bou/generator.js');
     await page.reload();
     await page.waitForSelector('.draft-card');
     ok(await page.locator('.draft-card').count() === 3, 'リロード後に3案が復元されない');
+
+    /* 悩みリストからテーマ固定で生成 → 3案とも同じテーマ */
+    await page.selectOption('#gen-theme', '報われない日');
+    await page.click('#generate-btn');
+    await page.waitForFunction(() => document.querySelector('#gen-status').textContent.includes('「報われない日」で'), null, { timeout: 5000 });
+    const fixedThemes = await page.locator('.draft-card .chip.theme').allTextContents();
+    ok(fixedThemes.filter(t => t === '報われない日').length === 3, 'テーマ固定で3案が「報われない日」にならない: ' + fixedThemes.join('/'));
+    await page.selectOption('#gen-theme', '');
 
     /* 詳細モーダルに内部評価が出る */
     await page.locator('.draft-card').first().click();

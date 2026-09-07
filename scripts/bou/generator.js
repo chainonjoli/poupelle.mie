@@ -169,6 +169,12 @@
                 { text: '座れた。', sceneJa: '椅子にいる', sceneEn: 'resting on the chair, round and still' },
                 { text: 'そのあとは、なにもない。', sceneJa: 'じっと座っている', sceneEn: 'sitting quietly, doing nothing at all' },
                 { text: 'それでも、座った。', sceneJa: 'ふわりと浮く', sceneEn: 'floating up softly from the chair, calm' }
+            ] },
+            { caption: 'やる気がないのは、なにもないんじゃない。', pages: [
+                { text: 'やる気が出ない。', sceneJa: '空のコップの前にいる', sceneEn: 'sitting in front of an almost empty glass' },
+                { text: '出ないんじゃなくて、\n使い切った。', sceneJa: 'コップをのぞく', sceneEn: 'peeking into the glass' },
+                { text: '昨日か、その前に。', sceneJa: '底に少しだけ残っている', sceneEn: 'a tiny bit of water left at the bottom of the glass' },
+                { text: '残りぶんで、\n今日はここまで。', sceneJa: 'コップを抱えて眠る', sceneEn: 'sleeping with the glass hugged by its small fins' }
             ] }
         ] },
         { theme: '何もしたくない日', items: [
@@ -197,6 +203,12 @@
                 { text: '追いかけない。', sceneJa: 'その場にとどまる', sceneEn: 'staying still as the fish disappear into the distance' },
                 { text: '追いつく用事も、ない。', sceneJa: 'ゆっくり漂う', sceneEn: 'drifting slowly and contentedly at its own pace' },
                 { text: '海は、広い。', sceneJa: '静かな海に浮かぶ', sceneEn: 'floating alone in a wide calm pale sea' }
+            ] },
+            { caption: '落ち込んだのは、ちゃんと見ていたから。', pages: [
+                { text: '周りを見て、\n落ち込んだ。', sceneJa: 'スマホをスクロールしている', sceneEn: 'scrolling a phone slowly on a dim sofa' },
+                { text: '見なきゃよかった、\nとは思わない。', sceneJa: 'スマホを伏せる', sceneEn: 'placing the phone face down beside it' },
+                { text: '見たら、落ち込む。\nそれだけのこと。', sceneJa: '窓の外を見る', sceneEn: 'looking out the window at a quiet night sky' },
+                { text: '見るのは、また明日。', sceneJa: '明かりを消す', sceneEn: 'turning off a small lamp, room going soft and dark' }
             ] }
         ] },
         { theme: '明日に回したいこと', items: [
@@ -212,6 +224,169 @@
                 { text: 'いつも、そう。', sceneJa: '静かに息をする', sceneEn: 'breathing quietly, eyes almost closed' },
                 { text: '今日は、おやすみ。', sceneJa: '灯りを消すところ', sceneEn: 'reaching to turn off a small warm lamp at night' }
             ] }
+        ] },
+        /* ---- ユーザー本人の悩みリストから作ったテーマ（10項目のうち新規8つ）----
+         * どれも「小さな価値観の転換 → 小さな行動 → もう一段だけ深める → 静かな終了」の4枚構成。
+         * 1話目=A案（王道共感）/ 2話目=B案（本質）/ 3話目=C案（保存・シェア） */
+        { theme: '報われない日', items: [
+            { caption: 'ちゃんとやった日ほど、静かに帰りたくなる。', pages: [
+                { text: 'ちゃんとやった。\nそれだけの日。', sceneJa: '夕方の帰り道を漂う', sceneEn: 'drifting slowly along a quiet path in soft evening light' },
+                { text: '返ってくるものは、\nまだない。', sceneJa: '空っぽのポストをのぞく', sceneEn: 'peeking into an empty little mailbox' },
+                { text: 'なかったことには、\nならない。', sceneJa: '通ってきた道を振り返る', sceneEn: 'looking back at the long calm path it came along' },
+                { text: '今日は、ここまで。', sceneJa: '部屋の明かりをつける', sceneEn: 'switching on a small warm lamp in a quiet room' }
+            ] },
+            { caption: '見えないところは、見えないまま。それでも、あった。', pages: [
+                { text: '報われるって、\n誰が決めるんだろう。', sceneJa: '水面を見上げる', sceneEn: 'looking up at the faint light on the water surface from below' },
+                { text: '外からは、\n見えない量がある。', sceneJa: '深いところで漂う', sceneEn: 'floating in deep quiet water where no one can see' },
+                { text: '見えなかった分も、\nやった。', sceneJa: '通ってきた海を振り返る', sceneEn: 'turning to look back at the calm water behind it' },
+                { text: 'それは、ある。', sceneJa: '静かに目を閉じる', sceneEn: 'closing its eyes quietly, drifting in place' }
+            ] },
+            { caption: 'やった分だけ、ちゃんと疲れている。', pages: [
+                { text: '報われてないんじゃなくて。', sceneJa: 'ソファに沈む', sceneEn: 'sinking into a soft sofa after a long day' },
+                { text: 'まだ、\n届いてないだけ。', sceneJa: '窓の外の夕焼けを見る', sceneEn: 'gazing at a pale sunset through the window' },
+                { text: '届くのが、遅い日もある。', sceneJa: 'クッションにもたれる', sceneEn: 'leaning against a cushion, eyes half closed' },
+                { text: '待つのは、明日にする。', sceneJa: '毛布をかける', sceneEn: 'pulling a soft blanket over its round body' }
+            ] }
+        ] },
+        { theme: 'やろうと思ってるのにできない', items: [
+            { caption: '思っているあいだも、時間は流れている。', pages: [
+                { text: 'やろうとは、\n思ってる。', sceneJa: 'スマホを置いてソファにいる', sceneEn: 'sitting on a sofa with a phone set face down beside it' },
+                { text: '思ってるだけで、\n今日が終わりそう。', sceneJa: '時計を見る', sceneEn: 'glancing at a small round wall clock' },
+                { text: '思ってた時間も、\n一応、ここにいた。', sceneJa: '天井を見る', sceneEn: 'lying back and looking at the ceiling calmly' },
+                { text: '思っただけの日も、\nある。', sceneJa: '目を閉じる', sceneEn: 'eyes gently closed, sinking into the sofa' }
+            ] },
+            { caption: 'やる気の問題じゃない日も、ある。', pages: [
+                { text: 'できないのは、\nやる気の問題じゃない。', sceneJa: '机の前で止まっている', sceneEn: 'sitting motionless in front of a small desk' },
+                { text: 'もう、いっぱいなだけ。', sceneJa: 'なみなみのコップを見る', sceneEn: 'looking at a glass filled right up to the brim' },
+                { text: '入らないところに、\n入れなくていい。', sceneJa: 'コップの横で漂う', sceneEn: 'floating quietly beside the full glass' },
+                { text: 'あくのを待つ日も、\nある。', sceneJa: '窓の外の夕方を見る', sceneEn: 'looking out at a dim quiet evening sky' }
+            ] },
+            { caption: 'できなかった、じゃなくて。今日は、やらなかった。', pages: [
+                { text: 'やらなかった。\nそれだけ。', sceneJa: '閉じたノートの横にいる', sceneEn: 'resting beside a closed notebook' },
+                { text: '責める材料には、\nしない。', sceneJa: 'ノートを枕元に置く', sceneEn: 'setting the notebook gently beside a pillow' },
+                { text: 'やる日は、\n別の日にある。', sceneJa: '明かりを消す', sceneEn: 'turning off a small lamp, room going dim and soft' },
+                { text: '今日は、それで、いい。', sceneJa: '眠る', sceneEn: 'sleeping soundly under a soft blanket' }
+            ] }
+        ] },
+        { theme: '続かない日', items: [
+            { caption: '三日でも、三日はやった。', pages: [
+                { text: '三日目で、止まった。', sceneJa: 'カレンダーに印が3つ', sceneEn: 'looking at a small calendar with three little marks on it' },
+                { text: 'いつものこと。', sceneJa: 'カレンダーを眺める', sceneEn: 'staring at the calendar with tiny calm eyes' },
+                { text: 'でも、三日はやった。', sceneJa: '3つの印をヒレでなでる', sceneEn: 'touching the three marks softly with a small fin' },
+                { text: '四日目は、\n明日でもいい。', sceneJa: 'カレンダーを閉じる', sceneEn: 'closing the calendar gently and drifting away' }
+            ] },
+            { caption: '続かないんじゃなくて、何度も始めている。', pages: [
+                { text: '続かないんじゃなくて。', sceneJa: '水面から顔を出す', sceneEn: 'poking its round face up above the calm water surface' },
+                { text: '何回も、\n始めてる。', sceneJa: 'また同じ場所に戻ってくる', sceneEn: 'coming back to the same quiet spot again' },
+                { text: '始めるほうが、\nたぶん、むずかしい。', sceneJa: '静かな海に浮かぶ', sceneEn: 'floating in a wide pale calm sea' },
+                { text: 'はじめかたは、\nもう知ってる。', sceneJa: '目を閉じる', sceneEn: 'eyes closed, resting on the still water' }
+            ] },
+            { caption: 'やめた、じゃなくて、休んでる。', pages: [
+                { text: '続いてない。\nでも、やめてない。', sceneJa: 'ノートを開いたまま止まっている', sceneEn: 'sitting still with a notebook left open' },
+                { text: 'いま、休んでるだけ。', sceneJa: 'ノートの上で休む', sceneEn: 'resting its round body on the open notebook' },
+                { text: '休みが、少し長いだけ。', sceneJa: 'ノートを枕にする', sceneEn: 'using the notebook as a small pillow' },
+                { text: 'やめてないなら、\nそれで、いい。', sceneJa: '眠る', sceneEn: 'sleeping peacefully on the notebook' }
+            ] }
+        ] },
+        { theme: '結果が出ない不安', items: [
+            { caption: '出るまでの時間も、ちゃんと過ぎている。', pages: [
+                { text: '結果、まだ出ない。', sceneJa: '芽の出ない鉢の横にいる', sceneEn: 'sitting beside a small flowerpot with no sprout yet' },
+                { text: '出ないあいだが、\nいちばん長い。', sceneJa: '鉢をのぞく', sceneEn: 'peeking into the pot, looking at the soil' },
+                { text: 'この長さは、\n誰にも見えない。', sceneJa: '鉢の横で漂う', sceneEn: 'floating quietly next to the pot' },
+                { text: '途中のまま、\n今日はここまで。', sceneJa: '鉢の横で眠る', sceneEn: 'sleeping curled up beside the little pot' }
+            ] },
+            { caption: '不安なのは、ちゃんと本気だから。', pages: [
+                { text: '不安になるのは、\nどうでもよくないから。', sceneJa: '夜、天井を見る', sceneEn: 'lying awake at night looking at the ceiling' },
+                { text: 'どうでもよかったら、\n不安にもならない。', sceneJa: '布団の中で目が開いている', sceneEn: 'tucked in a futon with tiny eyes still open' },
+                { text: '不安の分だけ、\n本気だった。', sceneJa: '目を閉じかける', sceneEn: 'eyes slowly beginning to close' },
+                { text: '本気のまま、\n少し眠る。', sceneJa: '眠る', sceneEn: 'sleeping soundly, a tiny sleep bubble floating up' }
+            ] },
+            { caption: '出ていないのは、結果だけ。', pages: [
+                { text: '出てないのは、\n結果だけ。', sceneJa: '水面下をゆっくり進む', sceneEn: 'swimming slowly just below the water surface' },
+                { text: 'やったことは、\nもう出てる。', sceneJa: '通った跡に泡が残る', sceneEn: 'a soft trail of tiny bubbles left behind it' },
+                { text: '見えにくいだけで。', sceneJa: '泡を見る', sceneEn: 'turning to look at the small bubbles' },
+                { text: '見えにくいだけで、\nある。', sceneJa: '静かに浮かぶ', sceneEn: 'floating still and calm in pale water' }
+            ] }
+        ] },
+        { theme: '正解がわからない', items: [
+            { caption: '止まっているのは、ちゃんと考えているから。', pages: [
+                { text: '正解がわからなくて、\n止まった。', sceneJa: '二つの流れの前で止まる', sceneEn: 'pausing in front of two gentle currents going different ways' },
+                { text: '止まるのは、\n考えてる証拠。', sceneJa: '流れを見比べる', sceneEn: 'looking from one current to the other slowly' },
+                { text: '考えるのに、\n時間はかかる。', sceneJa: 'その場で漂う', sceneEn: 'drifting in place between the two currents' },
+                { text: 'つづきは、明日。', sceneJa: '眠る', sceneEn: 'sleeping quietly right where it stopped' }
+            ] },
+            { caption: '正解は、あとから決まることが多い。', pages: [
+                { text: '正解って、\n先に置いてない。', sceneJa: '霧のかかった海にいる', sceneEn: 'floating in a soft misty pale sea' },
+                { text: '選んだあとに、\nできてくる。', sceneJa: '少しだけ進む', sceneEn: 'moving forward just a little through the mist' },
+                { text: 'いまわからないのは、\nふつう。', sceneJa: '振り返ると道ができている', sceneEn: 'looking back at a faint path appearing behind it in the water' },
+                { text: 'わからないまま、\n今日はここまで。', sceneJa: '目を閉じる', sceneEn: 'closing its eyes in the quiet mist' }
+            ] },
+            { caption: '間違えてもいい、じゃなくて。まだ、決めてないだけ。', pages: [
+                { text: 'まだ、決めてないだけ。', sceneJa: '二つの貝殻の前にいる', sceneEn: 'sitting in front of two small seashells' },
+                { text: '間違えたんじゃない。', sceneJa: '貝殻を見比べる', sceneEn: 'looking at one shell, then the other' },
+                { text: '決める前の時間に、\nいる。', sceneJa: '二つの間に座る', sceneEn: 'resting between the two shells, calm' },
+                { text: 'そこに、いてもいい。', sceneJa: 'ふわりと浮く', sceneEn: 'floating up softly, leaving both shells where they are' }
+            ] }
+        ] },
+        { theme: '自信が持てない日', items: [
+            { caption: '自信があってもなくても、やることは同じだった。', pages: [
+                { text: '自信が、ない。', sceneJa: '朝の光の中で起きる', sceneEn: 'waking up slowly in soft morning light' },
+                { text: 'なくても、\n朝は来た。', sceneJa: '窓の外の朝を見る', sceneEn: 'looking out at a pale quiet morning' },
+                { text: '自信なしで、\nここまで来てる。', sceneJa: '通ってきた海を振り返る', sceneEn: 'looking back at the calm water it has crossed' },
+                { text: 'なしのまま、\nここまで。', sceneJa: '静かに浮かぶ', sceneEn: 'floating still in the morning light' }
+            ] },
+            { caption: '自信がなくても、今日はここにいた。', pages: [
+                { text: '自信がある人も、\n中はわからない。', sceneJa: '魚の群れを見る', sceneEn: 'watching a school of small fish pass by' },
+                { text: '外から見ると、\nみんなありそう。', sceneJa: '群れが通り過ぎる', sceneEn: 'the fish gliding past confidently into the distance' },
+                { text: '自分の中だけ、\nよく見えるだけ。', sceneJa: '自分のおなかを見る', sceneEn: 'looking down at its own round milk-white belly' },
+                { text: 'たぶん、みんなそう。', sceneJa: '静かに漂う', sceneEn: 'drifting calmly alone in pale water' }
+            ] },
+            { caption: '自信がなくても、続きはできる。', pages: [
+                { text: '自信は、\nあとから来る。', sceneJa: '机で小さな作業をしている', sceneEn: 'doing a tiny bit of work at a small desk' },
+                { text: '来ないこともある。', sceneJa: 'ヒレを止める', sceneEn: 'pausing, small fins resting on the desk' },
+                { text: 'どっちでも、\n続きはできる。', sceneJa: '机を離れる', sceneEn: 'drifting away from the desk slowly' },
+                { text: '今日の分は、\nもうした。おしまい。', sceneJa: '明かりを消す', sceneEn: 'switching off the lamp, room dim and quiet' }
+            ] }
+        ] },
+        { theme: '時間がなくて焦る', items: [
+            { caption: '焦っているあいだ、息を止めていた。', pages: [
+                { text: '時間が、ない。', sceneJa: '時計を見る', sceneEn: 'staring at a small round clock' },
+                { text: 'ないのに、\n焦る時間はある。', sceneJa: '時計から目をそらす', sceneEn: 'turning its eyes away from the clock' },
+                { text: '焦ってた分、\n息を止めてた。', sceneJa: '泡をひとつ吐く', sceneEn: 'letting out one small bubble slowly' },
+                { text: 'ひとつ吸って、\n今日はここまで。', sceneJa: '静かに浮かぶ', sceneEn: 'floating still, calm and quiet' }
+            ] },
+            { caption: '間に合わないと、決まったわけじゃない。', pages: [
+                { text: '時間がないのと、\n間に合わないのは、別。', sceneJa: '砂時計の横にいる', sceneEn: 'sitting beside a small hourglass' },
+                { text: 'まだ、間に合ってる。', sceneJa: '砂時計を見る', sceneEn: 'watching the sand fall slowly' },
+                { text: 'ぎりぎりも、\n間に合ううち。', sceneJa: 'まだ砂が残っている', sceneEn: 'the hourglass still has sand in the top' },
+                { text: 'ゆっくり急いで、\n今日はここまで。', sceneJa: '砂時計の横で漂う', sceneEn: 'drifting gently next to the hourglass' }
+            ] },
+            { caption: '焦りは、荷物にしなくていい。', pages: [
+                { text: '急ぐ用事、\nあった。', sceneJa: '玄関で止まる', sceneEn: 'pausing at a small front door' },
+                { text: 'でも、焦りまでは\n持っていかない。', sceneJa: '小さなかばんを見る', sceneEn: 'looking at a tiny bag by the door' },
+                { text: '用事だけ、持っていく。', sceneJa: 'かばんをヒレで引き寄せる', sceneEn: 'pulling the tiny bag close with a small fin' },
+                { text: '焦りは、\nここに置いていく。', sceneJa: '玄関を出ていく', sceneEn: 'drifting out through the door into soft light' }
+            ] }
+        ] },
+        { theme: 'やっても意味あるのか', items: [
+            { caption: '意味は、あとから来る日もあれば、来ない日もある。', pages: [
+                { text: 'これ、意味あるのかな。', sceneJa: '小石をひとつ積む', sceneEn: 'placing one small pebble on a tiny pile with its fin' },
+                { text: 'わからないまま、\nやってる。', sceneJa: '積んだ小石を見る', sceneEn: 'looking at the small pile of pebbles' },
+                { text: 'わからないままでも、\nやれてる。', sceneJa: 'もうひとつ積む', sceneEn: 'adding one more pebble carefully' },
+                { text: '意味のことは、\nまた明日。', sceneJa: '小石の横で眠る', sceneEn: 'sleeping beside the little pile of pebbles' }
+            ] },
+            { caption: '意味がわからないうちが、いちばん長い。', pages: [
+                { text: '意味があるかは、\n終わってから決まる。', sceneJa: '先の見えない海にいる', sceneEn: 'floating in a long pale stretch of sea with no end in sight' },
+                { text: 'やってる途中では、\nたいてい、わからない。', sceneJa: '少し進む', sceneEn: 'moving forward slowly through the pale water' },
+                { text: 'わからない時期を、\nいま通ってる。', sceneJa: 'ゆっくり漂う', sceneEn: 'drifting calmly, eyes half closed' },
+                { text: '通ってるだけで、\nいい。', sceneJa: '目を閉じる', sceneEn: 'closing its eyes and letting the water carry it' }
+            ] },
+            { caption: '意味は、なくてもいい日がある。', pages: [
+                { text: '意味がなくても、\nやっていい。', sceneJa: '小さな貝を並べる', sceneEn: 'lining up tiny seashells in a row' },
+                { text: 'やったことに、\n意味を足さなくていい。', sceneJa: '並べた貝を見る', sceneEn: 'looking at the neat little row of shells' },
+                { text: 'やった。それだけ。', sceneJa: 'ひとつ足す', sceneEn: 'adding one more shell to the row' },
+                { text: 'それだけで、\n今日はおしまい。', sceneJa: '貝の横で眠る', sceneEn: 'sleeping beside the row of shells' }
+            ] }
         ] }
     ];
 
@@ -222,9 +397,14 @@
         '疲れ': ['empathy', 'share'], '仕事': ['share', 'essence'], '人間関係': ['empathy', 'essence'],
         'SNS': ['empathy', 'essence'], '返信': ['empathy', 'share'], '予定': ['essence', 'empathy'],
         '休息': ['share', 'empathy'], '自己肯定': ['empathy', 'essence'], 'ひとり時間': ['empathy', 'essence'],
-        '考えすぎ': ['empathy', 'share'], 'やる気が出ない日': ['empathy', 'share'],
-        '何もしたくない日': ['share', 'empathy'], '比べてしまう日': ['essence', 'share'],
-        '明日に回したいこと': ['empathy', 'share']
+        '考えすぎ': ['empathy', 'share'], 'やる気が出ない日': ['empathy', 'share', 'essence'],
+        '何もしたくない日': ['share', 'empathy'], '比べてしまう日': ['essence', 'share', 'empathy'],
+        '明日に回したいこと': ['empathy', 'share'],
+        /* 悩みリスト由来（3話ずつ: A/B/C） */
+        '報われない日': ['empathy', 'essence', 'share'], 'やろうと思ってるのにできない': ['empathy', 'essence', 'share'],
+        '続かない日': ['empathy', 'essence', 'share'], '結果が出ない不安': ['empathy', 'essence', 'share'],
+        '正解がわからない': ['empathy', 'essence', 'share'], '自信が持てない日': ['empathy', 'essence', 'share'],
+        '時間がなくて焦る': ['empathy', 'essence', 'share'], 'やっても意味あるのか': ['empathy', 'essence', 'share']
     };
     /* 各話が使っている「投稿構造」（リサーチの構造ライブラリの8型に対応） */
     var STRUCTURE_BY_THEME = {
@@ -233,8 +413,16 @@
         '返信': ['本音代弁型', '誰かに送りたい型'], '予定': ['意外な視点型', '日常あるある型'],
         '休息': ['保存したい一言型', '疲れた日の癒し型'], '自己肯定': ['王道共感型', '意外な視点型'],
         'ひとり時間': ['王道共感型', '疲れた日の癒し型'], '考えすぎ': ['日常あるある型', '誰かに送りたい型'],
-        'やる気が出ない日': ['本音代弁型', '保存したい一言型'], '何もしたくない日': ['保存したい一言型', '日常あるある型'],
-        '比べてしまう日': ['意外な視点型', '誰かに送りたい型'], '明日に回したいこと': ['日常あるある型', '保存したい一言型']
+        'やる気が出ない日': ['本音代弁型', '保存したい一言型', '意外な視点型'], '何もしたくない日': ['保存したい一言型', '日常あるある型'],
+        '比べてしまう日': ['意外な視点型', '誰かに送りたい型', '王道共感型'], '明日に回したいこと': ['日常あるある型', '保存したい一言型'],
+        '報われない日': ['王道共感型', '意外な視点型', '保存したい一言型'],
+        'やろうと思ってるのにできない': ['本音代弁型', '意外な視点型', '保存したい一言型'],
+        '続かない日': ['日常あるある型', '意外な視点型', '保存したい一言型'],
+        '結果が出ない不安': ['王道共感型', '意外な視点型', '保存したい一言型'],
+        '正解がわからない': ['王道共感型', '意外な視点型', '誰かに送りたい型'],
+        '自信が持てない日': ['王道共感型', '意外な視点型', '保存したい一言型'],
+        '時間がなくて焦る': ['日常あるある型', '意外な視点型', '誰かに送りたい型'],
+        'やっても意味あるのか': ['本音代弁型', '意外な視点型', '保存したい一言型']
     };
     CORPUS.forEach(function (t) {
         t.items.forEach(function (it, i) {
@@ -344,7 +532,7 @@
 
     /* 名言をつくりにいっている文章の特徴 */
     var CLICHE_PATTERNS = [
-        /とは、[^。]{0,12}(だ|である)/, /こそ、?[^。]{0,10}(だ|なのだ)/,
+        /とは、[^。]{0,12}(だ|である|なのだ)。/, /こそ、?[^。]{0,10}(だ|なのだ)/,
         /人生(は|って)/, /大切な(こと|の)は/, /大事な(こと|の)は/,
         /ということ。/, /なのだ。/, /ではないだろうか/,
         /[^。]{2,10}。それが、?[^。]{2,12}。/, /本当の[^。]{1,8}は/,
@@ -484,7 +672,9 @@
         return makeDraft(store, character, batchId, variant, theme, pages, item.caption, 'builtin', item.type, item.structure);
     }
 
-    function generateBuiltin(character, store) {
+    function generateBuiltin(character, store, options) {
+        options = options || {};
+        var fixedTheme = options.theme || null;
         var rng = Math.random;
         var learning = store.getLearningContext();
         var usage = store.getUsageStats();
@@ -502,12 +692,17 @@
         var structurePref = store.getStructurePreference();
 
         /* 型ごとの候補リスト（{theme, item}） */
+        var usedTexts = {};
         function candidatesOf(type, usedThemes) {
             var list = [];
             CORPUS.forEach(function (t) {
+                if (fixedTheme && t.theme !== fixedTheme) return;
                 t.items.forEach(function (it) {
-                    if (it.type !== type) return;
-                    if (usedThemes.indexOf(t.theme) !== -1) return;
+                    if (usedTexts[it.pages[0].text]) return;
+                    /* テーマ指定時は同じテーマから3案出すので、型が足りなければ他の型の話も使う */
+                    if (it.type !== type && !fixedTheme) return;
+                    if (it.type !== type && fixedTheme && type !== 'any') return;
+                    if (!fixedTheme && usedThemes.indexOf(t.theme) !== -1) return;
                     var penalty = (recentTexts[it.pages[0].text] ? 2 : 0) +
                         (usage.recentThemes.indexOf(t.theme) !== -1 ? 1 : 0) +
                         (usage.recentStructures.indexOf(it.structure) !== -1 ? 1 : 0) -
@@ -531,6 +726,7 @@
 
         plan.forEach(function (p) {
             var cands = candidatesOf(p.type, usedThemes);
+            if (!cands.length && fixedTheme) cands = candidatesOf('any', []);
             if (!cands.length) cands = candidatesOf(p.type, []);
             /* 評価が通る候補を上から探す（最大4候補）。通らなければ最高評価を採用 */
             var best = null, bestEval = null;
@@ -542,6 +738,7 @@
             }
             if (best) {
                 usedThemes.push(best._cand.theme);
+                usedTexts[best._cand.item.pages[0].text] = true;
                 delete best._cand;
                 best.evaluation = bestEval;
                 drafts.push(best);
@@ -651,6 +848,14 @@
         lines.push('');
         lines.push('# 投稿テーマの候補');
         lines.push(character.themes.join('、'));
+        if (character.worryThemes && character.worryThemes.length) {
+            lines.push('');
+            lines.push('# この投稿を読む人（＝作っている本人）の悩みリスト');
+            lines.push('読者像はこの悩みを抱えている人。解決も励ましもせず、この悩みの隣に静かにいる投稿を優先する。');
+            character.worryThemes.forEach(function (w, i) {
+                lines.push((i + 1) + '. ' + w.worry + '（テーマ名: ' + w.theme + '）');
+            });
+        }
 
         lines.push('');
         lines.push('# 投稿構造ライブラリ（最重要の参考情報。表現のコピーは禁止、構造だけ使う）');
@@ -737,13 +942,19 @@
         return lines.join('\n');
     }
 
-    function callApi(character, store, apiKey, extraNote) {
+    function callApi(character, store, apiKey, extraNote, options) {
+        options = options || {};
         var learning = store.getLearningContext();
+        var worry = (character.worryThemes || []).filter(function (w) { return w.theme === options.theme; })[0];
         var userMsg = '今日のぼぅ投稿の案を3つ作ってください。' +
             '1つ目=A案（王道共感型）、2つ目=B案（本質型）、3つ目=C案（保存・シェア型）。' +
             '各案は3〜5枚のカルーセル（連作）で、案ごとに枚数を変えてもかまいません。' +
             '3案はテーマ・文章・シーンを少しずつ変えること。' +
             'ハッシュタグは最大5個で、次の候補から選ぶか近い雰囲気で: ' + character.hashtagPool.join(' ') +
+            (options.theme ? '\n\n今回はテーマを「' + options.theme + '」に固定してください。' +
+                (worry ? '（本人の悩みの言葉: ' + worry.worry + '）' : '') +
+                '3案ともこのテーマで、切り口（王道共感／本質／保存・シェア）だけを変えること。' +
+                'theme フィールドには「' + options.theme + '」と入れること。' : '') +
             (extraNote ? '\n\n前回の案は次の理由で基準を満たしませんでした。修正して作り直してください:\n' + extraNote : '');
 
         return fetch(API_URL, {
@@ -801,19 +1012,19 @@
     }
 
     /* 評価が低い案があれば、理由を伝えて1回だけ作り直す */
-    function generateApi(character, store, apiKey) {
+    function generateApi(character, store, apiKey, options) {
         function evaluated(drafts) {
             drafts.forEach(function (d) { d.evaluation = evaluatePost(d, store, character); });
             return drafts;
         }
-        return callApi(character, store, apiKey).then(function (drafts) {
+        return callApi(character, store, apiKey, null, options).then(function (drafts) {
             evaluated(drafts);
             var failed = drafts.filter(function (d) { return !d.evaluation.pass; });
             if (!failed.length) return drafts;
             var note = failed.map(function (d) {
                 return d.variant + '案「' + (d.main_text || '').replace(/\n/g, '／') + '」: ' + (d.evaluation.flags.join('、') || '評価基準を下回った');
             }).join('\n');
-            return callApi(character, store, apiKey, note).then(function (retry) {
+            return callApi(character, store, apiKey, note, options).then(function (retry) {
                 evaluated(retry);
                 /* 再生成でも通らない案は、初回と再生成の良い方を残す */
                 return retry.map(function (d, i) {
@@ -838,13 +1049,14 @@
         buildSystemPrompt: buildSystemPrompt,
 
         /* 3案生成。mode未指定時は設定に従う。返り値: Promise<Post[]>（保存はしない） */
-        generateBatch: function (store, mode, apiKey) {
+        /* options.theme を渡すと、そのテーマに固定して3案作る（悩みリストからの指定用） */
+        generateBatch: function (store, mode, apiKey, options) {
             var character = store.getCharacter();
             if (mode === 'api') {
                 if (!apiKey) return Promise.reject(new Error('Claude APIキーが設定されていません（キャラクター設定画面から設定できます）'));
-                return generateApi(character, store, apiKey);
+                return generateApi(character, store, apiKey, options);
             }
-            return generateBuiltin(character, store);
+            return generateBuiltin(character, store, options);
         },
 
         registerImageAdapter: function (adapter) {
