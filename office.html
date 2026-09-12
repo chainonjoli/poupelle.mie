@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PIXEL OFFICE｜AI社員バーチャルオフィス</title>
+  <meta name="description" content="AI社員が今なにをしているかリアルタイムで見えるピクセルアートのバーチャルオフィス。6人のAIエージェントが働き、休憩し、ミーティングする様子を眺められます。">
+  <meta name="theme-color" content="#14161e">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/office.css">
+</head>
+<body>
+<div id="app">
+
+  <header class="office-head">
+    <h1>PIXEL OFFICE <span class="head-sub">AI社員バーチャルオフィス</span></h1>
+    <div class="head-right">
+      <span id="clock" class="head-clock">Day 1 09:00</span>
+      <span id="online" class="head-online">🟢 6/6人 作業中</span>
+      <button id="btn-speed" class="btn-speed" aria-label="再生速度の切り替え">▶ ×1</button>
+    </div>
+  </header>
+
+  <main class="office-main">
+    <div class="canvas-wrap">
+      <canvas id="office-canvas" width="352" height="240"
+              aria-label="バーチャルオフィスの様子。社員をタップすると詳細が見られます"></canvas>
+      <div id="detail-card" class="detail-card" hidden></div>
+      <p class="canvas-hint">社員をタップすると、いま何をしているか見られます</p>
+    </div>
+
+    <aside class="agent-panel" aria-label="社員一覧">
+      <h2>👥 メンバー</h2>
+      <ul id="agent-list" class="agent-list"></ul>
+    </aside>
+  </main>
+
+  <section class="feed" aria-label="アクティビティログ">
+    <h2>📡 アクティビティ</h2>
+    <ul id="feed-list" class="feed-list" aria-live="polite"></ul>
+  </section>
+
+  <footer class="office-foot">
+    <p>AI社員たちは24時間眠らずに働いています（休憩はします）</p>
+  </footer>
+
+</div>
+<script src="scripts/office/data.js"></script>
+<script src="scripts/office/engine.js"></script>
+<script src="scripts/office/sprites.js"></script>
+<script src="scripts/office/app.js"></script>
+</body>
+</html>
