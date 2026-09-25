@@ -759,8 +759,49 @@ body[data-mode="paper"] .ema-error { color: #c0392b; }
 .mikuji-row:last-child { border-bottom: none; }
 .mikuji-stars { color: var(--oshi-deep); letter-spacing: 0.1em; }
 .mikuji-note { text-align: center; font-size: 0.78rem; color: var(--text-muted); }
+.mikuji-advice {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-left: 2px solid var(--oshi);
+    background: color-mix(in srgb, var(--oshi) 6%, transparent);
+    font-size: 0.86rem;
+    line-height: 1.8;
+}
+.mikuji-advice-label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--oshi-deep);
+    margin-bottom: 2px;
+}
+body[data-mode="ink"] .mikuji-advice-label { color: var(--oshi); }
 .mikuji-share { display: block; margin: 16px auto 10px; }
-.ema-share { display: block; margin: 12px auto 0; }
+.ema-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.ema-actions .pill-btn { text-decoration: none; display: inline-flex; align-items: center; }
+.ema-oshi-text { font-size: 0.72rem; color: var(--oshi-deep); margin-top: 2px; }
+body[data-mode="ink"] .ema-oshi-text { color: var(--oshi); }
+
+.mamori-shelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+.mamori-mini {
+    position: relative;
+    padding: 14px 12px 12px;
+    border: 1px solid var(--surface-border);
+    border-top: 3px solid var(--mamori, var(--gold));
+    border-radius: var(--radius-paper);
+    background: var(--surface);
+}
+.mamori-mini-date {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+.mamori-mini-blessing { font-size: 0.78rem; line-height: 1.7; }
 
 /* ============================================================
    6. 御朱印
@@ -1051,6 +1092,32 @@ body[data-mode="ink"] .anniv-card-count { color: var(--oshi); } /* 墨地では�
     opacity: 0.85;
 }
 .saisen-box-wrap .rack-note { margin-top: 14px; }
+
+/* ============================================================
+   11. 記録の間（マイページ）
+   ============================================================ */
+.mypage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+.mypage-stat {
+    text-align: center;
+    padding: 20px 8px 16px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+}
+.mypage-num {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 2rem;
+    line-height: 1.2;
+    color: var(--oshi-deep);
+}
+body[data-mode="ink"] .mypage-num { color: var(--oshi); }
+.mypage-unit { font-size: 0.85rem; margin-left: 2px; color: var(--text-muted); }
+.mypage-label { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.08em; margin-top: 4px; }
+.mypage-since { margin-top: 18px; text-align: center; }
 .saisen-preparing {
     display: inline-block;
     padding: 12px 28px;

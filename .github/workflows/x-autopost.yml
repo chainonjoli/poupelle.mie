@@ -1,8 +1,8 @@
-name: X自動投稿（毎朝8時）
+name: X自動投稿（毎晩21時）
 
 on:
   schedule:
-    - cron: '0 23 * * *' # 23:00 UTC = 翌朝 8:00 JST（数分〜数十分遅れることがあります）
+    - cron: '0 12 * * *' # 12:00 UTC = 21:00 JST（数分〜数十分遅れることがあります）
   workflow_dispatch:
     inputs:
       dry_run:

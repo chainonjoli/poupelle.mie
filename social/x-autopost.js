@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /* 十色神社 公式X（@toiro_shrine）自動投稿スクリプト
  *
- * 毎朝 GitHub Actions（.github/workflows/x-autopost.yml）から実行される。
+ * 毎晩21時（日本時間）に GitHub Actions（.github/workflows/x-autopost.yml）から実行される。
  * social/x-posts.json から「今日の投稿」を選び、X API v2 で投稿する。
  *
  * 選び方:
+ *   - special に今日の日付があれば最優先（当落発表日などの特定日）
  *   - 毎月1日（日本時間）は朔日の投稿（tsuitachi）
  *   - それ以外は曜日の投稿を週替わりのローテーションで選ぶ
  *
@@ -40,6 +41,12 @@ function dayOfYear(t) {
 
 /* ---- 今日の投稿を選ぶ ---- */
 function pickPost(posts, t) {
+    /* 特定日（推し活の大きな日：当落発表日など）は最優先。
+       social/x-posts.json の special に "YYYY-MM-DD": "本文" で追加する */
+    var key = t.y + '-' + String(t.m).padStart(2, '0') + '-' + String(t.d).padStart(2, '0');
+    if (posts.special && posts.special[key]) {
+        return posts.special[key];
+    }
     if (t.d === 1 && posts.tsuitachi && posts.tsuitachi.length) {
         return posts.tsuitachi[(t.m - 1) % posts.tsuitachi.length];
     }
