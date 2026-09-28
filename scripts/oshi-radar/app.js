@@ -452,6 +452,29 @@
     function renderOshi() {
         var list = S.listOshi().sort(function (a, b) { return a.priority - b.priority; });
         var prioLabel = { 1: '最推し', 2: '高', 3: '通常' };
+
+        /* 推しカタログ（タップで追加・解除） */
+        var cat = S.catalog();
+        var catalogSection = '';
+        if (cat && cat.oshi) {
+            var rows = cat.oshi.map(function (c) {
+                var registered = list.some(function (o) { return o.name === c.name; });
+                return '<div class="row"><div class="row-head">' +
+                    '<div class="row-title">' + esc(c.name) +
+                    (c.autoResearch ? ' <span class="auto-chip">⚡自動リサーチ中</span>' : '') + '</div>' +
+                    (registered
+                        ? '<button class="btn btn-small" data-act="cat-remove" data-name="' + esc(c.name) + '">✓ 登録済み</button>'
+                        : '<button class="btn btn-small btn-outline-gold" data-act="cat-add" data-name="' + esc(c.name) + '">＋ 追加</button>') +
+                    '</div>' +
+                    (c.description ? '<div class="row-sub">' + esc(c.description) + '</div>' : '') +
+                '</div>';
+            }).join('');
+            catalogSection = '<section class="sec"><div class="sec-title">カタログから選ぶ</div>' + rows +
+                '<p class="settings-note">⚡自動リサーチ中＝1日数回の自動巡回でイベント・新作情報を収集している対象。' +
+                'それ以外は表示のみです（自動リサーチ対象にしたい推しはリクエストしてください）。' +
+                'カタログに無い推しは上の「＋ 推しを登録」から自由に追加できます。</p></section>';
+        }
+
         view.innerHTML =
             '<div class="add-row"><button class="btn btn-gold btn-wide" data-act="add-oshi">＋ 推しを登録</button></div>' +
             '<section class="sec"><div class="sec-title">推し・興味ジャンル<span class="count">' + list.length + '</span></div>' +
@@ -464,8 +487,9 @@
                     ((o.keywords || []).length ? '<div class="row-sub">関連: ' + o.keywords.map(esc).join('、') + '</div>' : '') +
                     ((o.excludeKeywords || []).length ? '<div class="row-sub">除外: ' + o.excludeKeywords.map(esc).join('、') + '</div>' : '') +
                 '</div>';
-            }).join('') : '<div class="empty">推しを登録してください</div>') +
-            '</section>';
+            }).join('') : '<div class="empty">まだ推しが登録されていません。<br>下のカタログから選ぶと、その推しのイベント・情報だけが表示されるようになります。</div>') +
+            '</section>' +
+            catalogSection;
     }
 
     function oshiForm(o) {
@@ -790,6 +814,7 @@
 
     /* ---------- ルーティング ---------- */
     function render() {
+        S.refreshFeed(); /* 推し登録の変化に合わせてフィード由来イベントを組み直す */
         if (currentTab === 'home') renderHome();
         else if (currentTab === 'events') renderEvents();
         else if (currentTab === 'oshi') renderOshi();
@@ -820,6 +845,25 @@
         else if (act === 'add-oshi') oshiForm(null);
         else if (act === 'add-sched') scheduleForm(null);
         else if (act === 'edit-sched') scheduleForm(S.listSchedules().find(function (s) { return s.id === id; }));
+        else if (act === 'cat-add') {
+            var cat = S.catalog();
+            var preset = cat && (cat.oshi || []).find(function (c) { return c.name === el.dataset.name; });
+            if (preset) {
+                S.upsertOshi({
+                    id: '', name: preset.name, group: preset.group || '', category: preset.category || '',
+                    priority: preset.priority || 2, notify: true,
+                    keywords: (preset.keywords || []).slice(), excludeKeywords: []
+                });
+                render();
+            }
+        }
+        else if (act === 'cat-remove') {
+            var target = S.listOshi().find(function (o) { return o.name === el.dataset.name; });
+            if (target && confirm('「' + target.name + '」を推しから外しますか？（この推しのイベント表示も消えます）')) {
+                S.deleteOshi(target.id);
+                render();
+            }
+        }
         else if (act === 'scan-sched') {
             var sc = S.listSchedules().find(function (s) { return s.id === id; });
             var slot2 = el.closest('.row').querySelector('.scan-slot');

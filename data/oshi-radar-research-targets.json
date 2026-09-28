@@ -33,17 +33,17 @@
     },
     {
       "name": "Disney（単独・大型のみ）",
-      "enabled": true,
+      "enabled": false,
       "priority": 3,
       "queries": ["Disney THE MARKET 開催地", "ディズニーストア 期間限定 POP-UP 大阪 京都"],
-      "notes": "Disney THE MARKET級の大型公式イベントのみ。ツイステ等の関連作品単独イベントは対象外"
+      "notes": "ユーザー指示（2026-09-28）によりOFF。King & Prince×Disneyコラボは別対象で継続"
     },
     {
       "name": "えんとつ町のプペル",
-      "enabled": true,
+      "enabled": false,
       "priority": 3,
       "queries": ["えんとつ町のプペル イベント 展示 上映会"],
-      "notes": ""
+      "notes": "ユーザー指示（2026-09-28）によりOFF"
     }
   ]
 }

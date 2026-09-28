@@ -59,68 +59,10 @@
         });
     }
 
-    /* ---- 初期データ（シード。ローカルモード初回のみ） ---- */
+    /* ---- 初期データ（ローカルモード初回のみ） ----
+       推しは空で開始し、推しタブの「カタログから選ぶ」から登録してもらう。
+       イベントは配信フィード（data/oshi-radar-events.json）が供給する。 */
     function seedData() {
-        var oshiKing = {
-            id: uid('oshi'), name: 'King & Prince', group: 'King & Prince', category: 'アイドル',
-            priority: 1, notify: true,
-            keywords: ['キンプリ', 'King&Prince', 'King and Prince', 'KING & PRINCE'],
-            excludeKeywords: [], createdAt: nowIso()
-        };
-        var oshiRen = {
-            id: uid('oshi'), name: '永瀬廉', group: 'King & Prince', category: 'アイドル',
-            priority: 1, notify: true,
-            keywords: ['廉', 'Ren Nagase', 'King & Prince'],
-            excludeKeywords: [], createdAt: nowIso()
-        };
-        var oshiKaito = {
-            id: uid('oshi'), name: '髙橋海人', group: 'King & Prince', category: 'アイドル',
-            priority: 1, notify: true,
-            keywords: ['高橋海人', 'Kaito Takahashi', 'King & Prince'],
-            excludeKeywords: [], createdAt: nowIso()
-        };
-        var oshiDisney = {
-            id: uid('oshi'), name: 'Disney', group: '', category: 'ブランド',
-            priority: 2, notify: true,
-            keywords: ['ディズニー', 'disney'],
-            excludeKeywords: [], createdAt: nowIso()
-        };
-        var oshiPoupelle = {
-            id: uid('oshi'), name: 'えんとつ町のプペル', group: '', category: '作品',
-            priority: 3, notify: true,
-            keywords: ['プペル', 'poupelle'],
-            excludeKeywords: [], createdAt: nowIso()
-        };
-        var oshiArt = {
-            id: uid('oshi'), name: 'アート・展示・POP-UP', group: '', category: 'ジャンル',
-            priority: 3, notify: false,
-            keywords: ['展示会', '美術館', 'POP-UP', 'ポップアップ', '期間限定'],
-            excludeKeywords: [], createdAt: nowIso()
-        };
-
-        var sampleEvent = {
-            id: uid('ev'), name: 'King & Prince × Disney イベント（見本データ）',
-            organizer: 'タワーレコード',
-            category: 'POP-UP',
-            oshiLinks: [
-                { oshiId: oshiKing.id, matchType: 'コラボ' },
-                { oshiId: oshiDisney.id, matchType: 'コラボ' }
-            ],
-            prefecture: '大阪府', city: '大阪市阿倍野区',
-            venue: 'タワーレコード あべのHoop店', area: '天王寺・あべの',
-            startDate: '2026-08-08', endDate: '2026-08-24',
-            openTime: '11:00', closeTime: '21:00', lastEntry: '20:30',
-            fee: '無料', needsReservation: false, needsNumberedTicket: true,
-            sameDayTicket: true, freeEntry: true, freeEntryFrom: '16:00',
-            officialUrl: '',
-            sources: [
-                { url: 'https://tower.jp/', name: 'タワーレコード（要確認：見本のため未裏取り）', official: false, fetchedAt: nowIso(), verifiedAt: '' }
-            ],
-            status: '開催中',
-            notes: '※これは使い方を示す見本データです。実際の開催期間・入場方法は必ず公式情報で確認してから更新してください。',
-            createdAt: nowIso(), updatedAt: nowIso(), lastVerifiedAt: ''
-        };
-
         return {
             version: 1,
             settings: {
@@ -128,8 +70,8 @@
                 searchRangeMin: 30,
                 defaultStayMin: 30
             },
-            oshi: [oshiKing, oshiRen, oshiKaito, oshiDisney, oshiPoupelle, oshiArt],
-            events: [sampleEvent],
+            oshi: [],
+            events: [],
             schedules: []
         };
     }
@@ -145,6 +87,7 @@
        - 同じ identity（名前×会場×開始日×主催者）の別イベントがある → 追加しない */
     var FEED_URL = 'data/oshi-radar-events.json';
     var feedInfo = { updatedAt: '', added: 0 };
+    var lastFeedData = null;
 
     function resolveOshiHints(hints) {
         var links = [];
@@ -190,9 +133,32 @@
             if (!res.ok) return null;
             return res.json();
         }).then(function (feed) {
-            if (feed) mergeFeed(feed);
+            if (feed) { lastFeedData = feed; mergeFeed(feed); }
         }).catch(function (e) {
             console.warn('feed fetch skipped', e); /* オフライン等は無視して続行 */
+        });
+    }
+
+    /* 推しの追加・削除後にフィード由来イベントを現在の推し登録に合わせて組み直す。
+       ユーザー編集済み（feedフラグなし）のイベントは対象外。 */
+    function refreshFeed() {
+        if (!cache) return;
+        cache.events = cache.events.filter(function (e) { return !e.feed; });
+        if (lastFeedData) mergeFeed(lastFeedData);
+    }
+
+    /* ---- 推しカタログ（タップで推しを選べるプリセット） ---- */
+    var CATALOG_URL = 'data/oshi-radar-catalog.json';
+    var catalog = null;
+
+    function fetchCatalog() {
+        return fetch(CATALOG_URL + '?t=' + Date.now()).then(function (res) {
+            if (!res.ok) return null;
+            return res.json();
+        }).then(function (data) {
+            if (data && data.version === 1) catalog = data;
+        }).catch(function (e) {
+            console.warn('catalog fetch skipped', e);
         });
     }
 
@@ -242,8 +208,9 @@
                 }
             });
         }
-        /* どちらのモードでも配信フィード・新作情報をマージしてから描画開始 */
-        return ready.then(fetchFeed).then(fetchReleaseWatch).then(function () { initialized = true; });
+        /* どちらのモードでも配信フィード・カタログ・新作情報を読み込んでから描画開始
+           （フィードのマージは推し解決に依存するためカタログと独立） */
+        return ready.then(fetchCatalog).then(fetchFeed).then(fetchReleaseWatch).then(function () { initialized = true; });
     }
 
     function loadLocal() {
@@ -441,6 +408,8 @@
         exportJson: exportJson, importJson: importJson,
         feedInfo: function () { return feedInfo; },
         releaseWatch: function () { return releaseWatch; },
+        catalog: function () { return catalog; },
+        refreshFeed: refreshFeed,
         /* クラウド関連 */
         isRemote: isRemote,
         remoteStatus: function () { return remoteStatus; },

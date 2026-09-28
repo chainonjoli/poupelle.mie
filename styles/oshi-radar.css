@@ -218,6 +218,18 @@ body {
     border: 1px solid var(--line);
 }
 .row-sub a { color: var(--gold-deep); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--gold-soft); }
+.auto-chip {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--gold-deep);
+    background: var(--gold-faint);
+    border: 1px solid rgba(179, 144, 63, 0.25);
+    border-radius: 999px;
+    padding: 0 7px;
+    vertical-align: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+}
 .release-checked {
     font-size: 0.68rem;
     color: var(--muted);
