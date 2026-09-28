@@ -137,36 +137,90 @@
     var cache = null;
     var initialized = false;
 
+    /* ---- 配信イベントフィード ----
+       data/oshi-radar-events.json はClaudeの定期リサーチで更新され、
+       GitHub Pages経由で全ユーザーに配信される。マージ規則:
+       - 同idのローカルコピーが feed 由来のまま → フィードの最新内容で置き換え（更新が届く）
+       - 同idでもユーザーが編集済み（feedフラグが消えている）→ 触らない（手動編集優先）
+       - 同じ identity（名前×会場×開始日×主催者）の別イベントがある → 追加しない */
+    var FEED_URL = 'data/oshi-radar-events.json';
+    var feedInfo = { updatedAt: '', added: 0 };
+
+    function resolveOshiHints(hints) {
+        var links = [];
+        (hints || []).forEach(function (h) {
+            var hit = (cache.oshi || []).find(function (o) {
+                return o.name === h.name || (o.keywords || []).indexOf(h.name) >= 0;
+            });
+            if (hit) links.push({ oshiId: hit.id, matchType: h.matchType || '関連作品' });
+        });
+        return links;
+    }
+
+    function mergeFeed(feed) {
+        if (!feed || !Array.isArray(feed.events)) return;
+        feedInfo.updatedAt = feed.updatedAt || '';
+        feed.events.forEach(function (fe) {
+            var byId = cache.events.findIndex(function (e) { return e.id === fe.id; });
+            if (byId >= 0) {
+                if (cache.events[byId].feed) {
+                    var upd = Object.assign({}, fe, { oshiLinks: resolveOshiHints(fe.oshiHints), feed: true });
+                    delete upd.oshiHints;
+                    cache.events[byId] = upd;
+                }
+                return; /* ユーザー編集済みはフィードで上書きしない */
+            }
+            var dupKey = eventKey(fe);
+            if (cache.events.some(function (e) { return eventKey(e) === dupKey; })) return;
+            var ev = Object.assign({}, fe, { oshiLinks: resolveOshiHints(fe.oshiHints), feed: true });
+            delete ev.oshiHints;
+            cache.events.push(ev);
+            feedInfo.added++;
+        });
+    }
+
+    function fetchFeed() {
+        return fetch(FEED_URL + '?t=' + Date.now()).then(function (res) {
+            if (!res.ok) return null;
+            return res.json();
+        }).then(function (feed) {
+            if (feed) mergeFeed(feed);
+        }).catch(function (e) {
+            console.warn('feed fetch skipped', e); /* オフライン等は無視して続行 */
+        });
+    }
+
     /* 初期化。クラウドモードならAPIから状態を取得してから解決する。
        app.js は init() の完了後に描画を始めること。 */
     function init() {
         if (initialized) return Promise.resolve();
+        var ready;
         if (!isRemote()) {
             loadLocal();
             remoteStatus = 'local';
-            initialized = true;
-            return Promise.resolve();
+            ready = Promise.resolve();
+        } else {
+            ready = apiFetch('GET', '/api/state').then(function (data) {
+                cache = data;
+                remoteStatus = 'online';
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) { /* 容量超過は無視 */ }
+            }).catch(function (e) {
+                console.error('cloud load failed', e);
+                var mirror = null;
+                try { mirror = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e2) { }
+                if (mirror) {
+                    cache = mirror;
+                    remoteStatus = 'offline';
+                    alert('クラウドに接続できないため、前回同期したデータを表示しています（閲覧のみ推奨）。');
+                } else {
+                    loadLocal();
+                    remoteStatus = 'offline';
+                    alert('クラウドに接続できません。ローカルデータを表示しています。');
+                }
+            });
         }
-        return apiFetch('GET', '/api/state').then(function (data) {
-            cache = data;
-            remoteStatus = 'online';
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) { /* 容量超過は無視 */ }
-            initialized = true;
-        }).catch(function (e) {
-            console.error('cloud load failed', e);
-            var mirror = null;
-            try { mirror = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e2) { }
-            if (mirror) {
-                cache = mirror;
-                remoteStatus = 'offline';
-                alert('クラウドに接続できないため、前回同期したデータを表示しています（閲覧のみ推奨）。');
-            } else {
-                loadLocal();
-                remoteStatus = 'offline';
-                alert('クラウドに接続できません。ローカルデータを表示しています。');
-            }
-            initialized = true;
-        });
+        /* どちらのモードでも配信フィードをマージしてから描画開始 */
+        return ready.then(fetchFeed).then(function () { initialized = true; });
     }
 
     function loadLocal() {
@@ -362,6 +416,7 @@
         upsertSchedule: upsertSchedule, deleteSchedule: deleteSchedule,
         getSettings: getSettings, saveSettings: saveSettings,
         exportJson: exportJson, importJson: importJson,
+        feedInfo: function () { return feedInfo; },
         /* クラウド関連 */
         isRemote: isRemote,
         remoteStatus: function () { return remoteStatus; },

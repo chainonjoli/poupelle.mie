@@ -157,9 +157,15 @@
             '</div>';
         }
 
+        var feedInfo = S.feedInfo();
+        var feedLine = feedInfo.updatedAt
+            ? '<p style="text-align:center;font-size:0.68rem;color:var(--muted);margin-top:6px">配信イベント情報 最終更新: ' + esc(feedInfo.updatedAt.slice(0, 10)) + '</p>'
+            : '';
+
         view.innerHTML =
             morning +
             '<div class="now-btn-wrap"><button class="btn btn-gold btn-wide" id="btn-now">🔍 今から何かある？</button></div>' +
+            feedLine +
             '<div id="now-results"></div>' +
             (goNow.length ? '<section class="sec"><div class="sec-title">🔥 今から行けます<span class="count">' + goNow.length + '</span></div>' + cards(goNow) + '</section>' : '') +
             '<section class="sec"><div class="sec-title">今日開催中<span class="count">' + todayList.length + '</span></div>' + cards(todayList) + '</section>' +
