@@ -161,18 +161,24 @@
         if (!feed || !Array.isArray(feed.events)) return;
         feedInfo.updatedAt = feed.updatedAt || '';
         feed.events.forEach(function (fe) {
+            var links = resolveOshiHints(fe.oshiHints);
+            /* 「誰の情報を見るか」は推し登録で決まる:
+               フィード側が推しを指定しているのに自分が登録していなければ表示しない */
+            var notMine = (fe.oshiHints || []).length > 0 && links.length === 0;
             var byId = cache.events.findIndex(function (e) { return e.id === fe.id; });
             if (byId >= 0) {
                 if (cache.events[byId].feed) {
-                    var upd = Object.assign({}, fe, { oshiLinks: resolveOshiHints(fe.oshiHints), feed: true });
+                    if (notMine) { cache.events.splice(byId, 1); return; }
+                    var upd = Object.assign({}, fe, { oshiLinks: links, feed: true });
                     delete upd.oshiHints;
                     cache.events[byId] = upd;
                 }
                 return; /* ユーザー編集済みはフィードで上書きしない */
             }
+            if (notMine) return;
             var dupKey = eventKey(fe);
             if (cache.events.some(function (e) { return eventKey(e) === dupKey; })) return;
-            var ev = Object.assign({}, fe, { oshiLinks: resolveOshiHints(fe.oshiHints), feed: true });
+            var ev = Object.assign({}, fe, { oshiLinks: links, feed: true });
             delete ev.oshiHints;
             cache.events.push(ev);
             feedInfo.added++;

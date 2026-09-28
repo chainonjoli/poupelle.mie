@@ -69,11 +69,21 @@
             ? '<span class="badge-verify">要確認</span>'
             : '<span class="badge-official">公式確認済</span>';
 
+        /* 誰の（どの推しの）イベントかをチップで明示する */
+        var oshiChips = (ev.oshiLinks || []).map(function (l) {
+            var o = ctx.oshiList.find(function (x) { return x.id === l.oshiId; });
+            if (!o) return '';
+            return '<span class="oshi-chip">♡ ' + esc(o.name) + '<small>' + esc(l.matchType) + '</small></span>';
+        }).filter(Boolean).join('');
+        if (!oshiChips) oshiChips = '<span class="oshi-chip none">推し未設定</span>';
+
         return '<div class="card' + (hot ? ' hot' : '') + '" data-ev="' + ev.id + '">' +
             '<div class="card-top">' +
               '<div class="score-badge' + (score.total >= 80 ? ' hot' : '') + '">' + score.total + '<small>点</small></div>' +
               '<div class="card-title">' + esc(ev.name) + badge + '</div>' +
             '</div>' +
+            (ev.summary ? '<div class="card-summary">' + esc(ev.summary) + '</div>' : '') +
+            '<div class="oshi-chips">' + oshiChips + '</div>' +
             (level.label ? '<div class="notify-label">' + level.label + '</div>' : '') +
             (boost.length ? '<div class="boost-reasons">⚡ ' + boost.map(esc).join(' ／ ') + '</div>' : '') +
             '<div class="card-meta">' + meta.join('') + '</div>' +
@@ -269,6 +279,7 @@
             '<h2>' + (ev.id ? 'イベントを編集' : 'イベントを登録') + '</h2>' +
             '<div id="dup-warn"></div>' +
             '<div class="f-group"><label>イベント名 *</label><input type="text" id="f-name" value="' + esc(ev.name) + '"></div>' +
+            '<div class="f-group"><label>一行説明 <span class="hint">（どんな・誰のイベントか。カードに表示されます）</span></label><input type="text" id="f-summary" value="' + esc(ev.summary || '') + '"></div>' +
             '<div class="f-inline">' +
               '<div class="f-group"><label>主催者 <span class="hint">（誤認防止のため必須推奨）</span></label><input type="text" id="f-organizer" value="' + esc(ev.organizer) + '"></div>' +
               '<div class="f-group"><label>カテゴリ</label><select id="f-category">' +
@@ -364,6 +375,7 @@
             var out = {
                 id: ev.id || '',
                 name: document.getElementById('f-name').value.trim(),
+                summary: document.getElementById('f-summary').value.trim(),
                 organizer: document.getElementById('f-organizer').value.trim(),
                 category: document.getElementById('f-category').value,
                 oshiLinks: links,
