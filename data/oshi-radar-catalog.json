@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "note": "推しカタログ。アプリの推しタブで『タップで追加』できるプリセット。autoResearch=true のものは定期巡回の自動リサーチ対象（data/oshi-radar-research-targets.json と対応させること）。",
+  "updatedAt": "2026-09-28T16:00:00+09:00",
+  "oshi": [
+    {
+      "name": "King & Prince",
+      "group": "King & Prince",
+      "category": "アイドル",
+      "priority": 1,
+      "keywords": ["キンプリ", "King&Prince", "King and Prince", "KING & PRINCE"],
+      "description": "グループ活動全般（リリース施策・POP-UP・コラボ含む）",
+      "autoResearch": true
+    },
+    {
+      "name": "永瀬廉",
+      "group": "King & Prince",
+      "category": "アイドル",
+      "priority": 1,
+      "keywords": ["廉", "Ren Nagase", "King & Prince"],
+      "description": "個人仕事も対象（映画・ドラマ・ファンミ等）",
+      "autoResearch": true
+    },
+    {
+      "name": "髙橋海人",
+      "group": "King & Prince",
+      "category": "アイドル",
+      "priority": 1,
+      "keywords": ["高橋海人", "Kaito Takahashi", "King & Prince"],
+      "description": "個人仕事も対象（ドラマ・配信番組等）",
+      "autoResearch": true
+    },
+    {
+      "name": "Disney",
+      "group": "",
+      "category": "ブランド",
+      "priority": 2,
+      "keywords": ["ディズニー", "disney"],
+      "description": "K&P×Disneyコラボは自動リサーチ対象。Disney単独イベントの自動収集は現在OFF",
+      "autoResearch": false
+    },
+    {
+      "name": "えんとつ町のプペル",
+      "group": "",
+      "category": "作品",
+      "priority": 3,
+      "keywords": ["プペル", "poupelle"],
+      "description": "自動収集は現在OFF（表示のみ）",
+      "autoResearch": false
+    },
+    {
+      "name": "Snow Man",
+      "group": "Snow Man",
+      "category": "アイドル",
+      "priority": 2,
+      "keywords": ["スノーマン", "すのー", "SnowMan"],
+      "description": "自動収集は未対応（表示のみ）。対象化はリクエストで追加可能",
+      "autoResearch": false
+    },
+    {
+      "name": "SixTONES",
+      "group": "SixTONES",
+      "category": "アイドル",
+      "priority": 2,
+      "keywords": ["ストーンズ", "すとーんず"],
+      "description": "自動収集は未対応（表示のみ）。対象化はリクエストで追加可能",
+      "autoResearch": false
+    },
+    {
+      "name": "なにわ男子",
+      "group": "なにわ男子",
+      "category": "アイドル",
+      "priority": 2,
+      "keywords": ["なにわ", "naniwa danshi"],
+      "description": "自動収集は未対応（表示のみ）。対象化はリクエストで追加可能",
+      "autoResearch": false
+    },
+    {
+      "name": "アート・展示・POP-UP",
+      "group": "",
+      "category": "ジャンル",
+      "priority": 3,
+      "keywords": ["展示会", "美術館", "POP-UP", "ポップアップ", "期間限定"],
+      "description": "ジャンルとして興味がある場合に（自動収集は未対応）",
+      "autoResearch": false
+    }
+  ]
+}
