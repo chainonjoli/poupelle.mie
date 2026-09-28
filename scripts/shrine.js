@@ -1238,6 +1238,10 @@
         return cv.toDataURL('image/png');
     }
 
+    /* 公式Xの毎日投稿用の窓口（social/render-daily-goshuin.js が呼ぶ）。
+       サイト本体の動作では使わない */
+    window.__toiroMakeGoshuin = function (rec, opts) { return makeGoshuin(rec, opts); };
+
     function recordVisit(dateStr) {
         var log = load(STORAGE_GOSHUIN_LOG, []);
         if (log.indexOf(dateStr) === -1) {
