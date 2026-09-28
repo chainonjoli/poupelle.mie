@@ -18,6 +18,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # 今日の御朱印を画像に描く（失敗しても本文だけで投稿は続ける）
+      - name: 描画環境の準備（Playwright + Chromium）
+        id: pw
+        continue-on-error: true
+        run: |
+          npm init -y > /dev/null
+          npm install --no-save playwright@1.49.0 > /dev/null
+          npx playwright install --with-deps chromium > /dev/null
+      - name: 今日の御朱印を描く
+        if: steps.pw.outcome == 'success'
+        continue-on-error: true
+        run: node social/render-daily-goshuin.js
+      - name: 御朱印画像を保管（確認用・7日）
+        if: hashFiles('social/out/goshuin-today.png') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: goshuin-today
+          path: social/out/goshuin-today.png
+          retention-days: 7
       - name: 今日の投稿
         run: node social/x-autopost.js ${{ inputs.dry_run == true && '--dry-run' || '' }}
         env:

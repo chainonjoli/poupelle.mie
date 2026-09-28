@@ -20,6 +20,7 @@ var fs = require('fs');
 var path = require('path');
 
 var API_URL = 'https://api.twitter.com/2/tweets';
+var MEDIA_URL = 'https://upload.twitter.com/1.1/media/upload.json';
 
 /* ---- 日本時間の今日 ---- */
 function jstToday(dateArg) {
@@ -79,15 +80,54 @@ function oauthHeader(method, url, keys) {
     return 'OAuth ' + Object.keys(p).sort().map(function (k) { return pct(k) + '="' + pct(p[k]) + '"'; }).join(', ');
 }
 
+/* ---- 画像アップロード（v1.1 media/upload・multipart） ---- */
+async function uploadMedia(filePath, keys) {
+    var data = fs.readFileSync(filePath);
+    var boundary = '----toiro' + crypto.randomBytes(12).toString('hex');
+    var body = Buffer.concat([
+        Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="media"; filename="goshuin.png"\r\nContent-Type: image/png\r\n\r\n'),
+        data,
+        Buffer.from('\r\n--' + boundary + '--\r\n')
+    ]);
+    var res = await fetch(MEDIA_URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': oauthHeader('POST', MEDIA_URL, keys),
+            'Content-Type': 'multipart/form-data; boundary=' + boundary
+        },
+        body: body
+    });
+    var text = await res.text();
+    if (res.status < 200 || res.status >= 300) {
+        throw new Error('画像アップロードに失敗 (HTTP ' + res.status + '): ' + text.slice(0, 300));
+    }
+    var id = JSON.parse(text).media_id_string;
+    /* 代替テキスト（読み上げ用）。失敗しても投稿は続ける */
+    try {
+        var metaUrl = 'https://upload.twitter.com/1.1/media/metadata/create.json';
+        await fetch(metaUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': oauthHeader('POST', metaUrl, keys),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ media_id: id, alt_text: { text: '十色神社の今日の御朱印。日付ごとに絵柄と色が変わります。' } })
+        });
+    } catch (e) { /* 代替テキストは任意 */ }
+    return id;
+}
+
 /* ---- 投稿 ---- */
-async function postTweet(text, keys) {
+async function postTweet(text, keys, mediaIds) {
+    var payload = { text: text };
+    if (mediaIds && mediaIds.length) payload.media = { media_ids: mediaIds };
     var res = await fetch(API_URL, {
         method: 'POST',
         headers: {
             'Authorization': oauthHeader('POST', API_URL, keys),
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ text: text })
+        body: JSON.stringify(payload)
     });
     var body = await res.text();
     if (res.status === 201) {
@@ -105,7 +145,8 @@ async function postTweet(text, keys) {
                 'Authorization': oauthHeader('POST', API_URL, keys),
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text: text + '\n— ' + t.y + '.' + t.m + '.' + t.d })
+            body: JSON.stringify(Object.assign({ text: text + '\n— ' + t.y + '.' + t.m + '.' + t.d },
+                (mediaIds && mediaIds.length) ? { media: { media_ids: mediaIds } } : {}))
         });
         if (res2.status === 201) {
             var data2 = JSON.parse(await res2.text());
@@ -123,8 +164,19 @@ async function postTweet(text, keys) {
 (async function () {
     var args = process.argv.slice(2);
     var dryRun = args.indexOf('--dry-run') !== -1 || process.env.X_DRY_RUN === '1';
-    var dateArg = null;
-    args.forEach(function (a) { if (a.indexOf('--date=') === 0) dateArg = a.slice(7); });
+    var dateArg = null, imageArg = null;
+    args.forEach(function (a) {
+        if (a.indexOf('--date=') === 0) dateArg = a.slice(7);
+        if (a.indexOf('--image=') === 0) imageArg = a.slice(8);
+    });
+    /* 画像が用意できていれば添付する（無ければ本文だけで投稿） */
+    if (!imageArg && fs.existsSync(path.join(__dirname, 'out', 'goshuin-today.png'))) {
+        imageArg = path.join(__dirname, 'out', 'goshuin-today.png');
+    }
+    if (imageArg && !fs.existsSync(imageArg)) {
+        console.log('画像が見つからないため本文のみで投稿します: ' + imageArg);
+        imageArg = null;
+    }
 
     var posts = JSON.parse(fs.readFileSync(path.join(__dirname, 'x-posts.json'), 'utf8'));
     var t = jstToday(dateArg);
@@ -132,6 +184,7 @@ async function postTweet(text, keys) {
 
     console.log('日付(JST): ' + t.y + '-' + t.m + '-' + t.d + '（曜日 ' + '日月火水木金土'[t.weekday] + (t.d === 1 ? '・朔日' : '') + '）');
     console.log('--- 投稿本文 ---\n' + text + '\n----------------');
+    if (imageArg) console.log('添付画像: ' + imageArg + '（' + Math.round(fs.statSync(imageArg).size / 1024) + 'KB）');
 
     if (dryRun) { console.log('（dry-run のため投稿はしていません）'); return; }
 
@@ -145,5 +198,14 @@ async function postTweet(text, keys) {
         console.error('APIキーが設定されていません。リポジトリの Settings → Secrets and variables → Actions に X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_SECRET を登録してください（手順: social/README.md）');
         process.exit(1);
     }
-    await postTweet(text, keys);
+    var mediaIds = [];
+    if (imageArg) {
+        try {
+            mediaIds.push(await uploadMedia(imageArg, keys));
+        } catch (e) {
+            console.error(String(e.message || e));
+            console.error('→ 画像なしで本文のみ投稿します');
+        }
+    }
+    await postTweet(text, keys, mediaIds);
 })();
