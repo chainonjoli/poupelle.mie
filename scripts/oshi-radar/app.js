@@ -172,6 +172,32 @@
             ? '<p style="text-align:center;font-size:0.68rem;color:var(--muted);margin-top:6px">配信イベント情報 最終更新: ' + esc(feedInfo.updatedAt.slice(0, 10)) + '</p>'
             : '';
 
+        /* 新作・リリース情報（新作情報チェックの状態ファイルから） */
+        var rw = S.releaseWatch();
+        var releaseSection = '';
+        if (rw) {
+            var relRow = function (title, badge, badgeCls, body, url, sourceName) {
+                return '<div class="row"><div class="row-head">' +
+                    '<div class="row-title">' + esc(title) + '</div>' +
+                    '<span class="rel-badge' + badgeCls + '">' + badge + '</span></div>' +
+                    '<div class="row-sub">' + esc(body || '') +
+                    (url ? ' <a href="' + esc(url) + '" target="_blank" rel="noopener">公式ページ</a>'
+                         : (sourceName ? '（出典: ' + esc(sourceName) + '）' : '')) +
+                    '</div></div>';
+            };
+            var relItems = (rw.notified || []).map(function (n) {
+                return relRow(n.work, '発表済み', '', (n.type ? n.type + '｜' : '') + (n.notifiedContent || ''), n.url, n.officialSource);
+            }).join('') + (rw.known || []).map(function (k) {
+                return relRow(k.work, '継続確認中', ' track', k.status, k.url, '');
+            }).join('');
+            var checked = rw.lastCheckedAt ? String(rw.lastCheckedAt).slice(0, 16).replace('T', ' ') : '';
+            releaseSection = '<section class="sec"><div class="sec-title">📀 新作・リリース情報<span class="count">' +
+                ((rw.notified || []).length + (rw.known || []).length) + '</span></div>' +
+                (relItems || '<div class="empty">情報なし</div>') +
+                (checked ? '<p class="release-checked">最終確認: ' + esc(checked) + '｜毎日朝・夜に自動チェック（新着があれば通知されます）</p>' : '') +
+                '</section>';
+        }
+
         view.innerHTML =
             morning +
             '<div class="now-btn-wrap"><button class="btn btn-gold btn-wide" id="btn-now">🔍 今から何かある？</button></div>' +
@@ -180,6 +206,7 @@
             (goNow.length ? '<section class="sec"><div class="sec-title">🔥 今から行けます<span class="count">' + goNow.length + '</span></div>' + cards(goNow) + '</section>' : '') +
             '<section class="sec"><div class="sec-title">今日開催中<span class="count">' + todayList.length + '</span></div>' + cards(todayList) + '</section>' +
             '<section class="sec"><div class="sec-title">見逃し注意（80点以上）<span class="count">' + warnList.length + '</span></div>' + cards(warnList) + '</section>' +
+            releaseSection +
             '<section class="sec"><div class="sec-title">終了間近（7日以内）<span class="count">' + endingSoon.length + '</span></div>' + cards(endingSoon) + '</section>' +
             '<section class="sec"><div class="sec-title">遠征予定と一致<span class="count">' + tripMatch.length + '</span></div>' + cards(tripMatch) + '</section>' +
             '<section class="sec"><div class="sec-title">新着（24時間以内）<span class="count">' + newList.length + '</span></div>' + cards(newList) + '</section>';

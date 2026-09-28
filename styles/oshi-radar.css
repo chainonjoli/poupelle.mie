@@ -200,6 +200,31 @@ body {
 }
 .oshi-chip small { font-size: 0.6rem; font-weight: 500; color: var(--gold); }
 .oshi-chip.none { color: var(--muted); background: var(--bg-soft); border-color: var(--line); }
+
+/* ---- 新作・リリース情報 ---- */
+.rel-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    border-radius: 999px;
+    padding: 1px 9px;
+    white-space: nowrap;
+    background: linear-gradient(140deg, #c9a755, #97782f);
+    color: #fffbef;
+}
+.rel-badge.track {
+    background: var(--bg-soft);
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+}
+.row-sub a { color: var(--gold-deep); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--gold-soft); }
+.release-checked {
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+}
 .badge-verify, .badge-official {
     display: inline-block;
     font-size: 0.62rem;

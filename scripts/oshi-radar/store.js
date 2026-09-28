@@ -196,6 +196,23 @@
         });
     }
 
+    /* ---- 新作・リリース情報（新作情報チェックの状態ファイル） ----
+       data/kp-release-watch.json は「新作情報チェック」ルーチンが更新する。
+       アプリでは読み取り専用で表示する。 */
+    var RELEASE_URL = 'data/kp-release-watch.json';
+    var releaseWatch = null;
+
+    function fetchReleaseWatch() {
+        return fetch(RELEASE_URL + '?t=' + Date.now()).then(function (res) {
+            if (!res.ok) return null;
+            return res.json();
+        }).then(function (data) {
+            if (data && data.version === 1) releaseWatch = data;
+        }).catch(function (e) {
+            console.warn('release watch fetch skipped', e);
+        });
+    }
+
     /* 初期化。クラウドモードならAPIから状態を取得してから解決する。
        app.js は init() の完了後に描画を始めること。 */
     function init() {
@@ -225,8 +242,8 @@
                 }
             });
         }
-        /* どちらのモードでも配信フィードをマージしてから描画開始 */
-        return ready.then(fetchFeed).then(function () { initialized = true; });
+        /* どちらのモードでも配信フィード・新作情報をマージしてから描画開始 */
+        return ready.then(fetchFeed).then(fetchReleaseWatch).then(function () { initialized = true; });
     }
 
     function loadLocal() {
@@ -423,6 +440,7 @@
         getSettings: getSettings, saveSettings: saveSettings,
         exportJson: exportJson, importJson: importJson,
         feedInfo: function () { return feedInfo; },
+        releaseWatch: function () { return releaseWatch; },
         /* クラウド関連 */
         isRemote: isRemote,
         remoteStatus: function () { return remoteStatus; },
