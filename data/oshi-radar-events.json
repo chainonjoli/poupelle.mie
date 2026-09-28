@@ -1,8 +1,111 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-28T15:00:00+09:00",
+  "updatedAt": "2026-09-28T15:30:00+09:00",
   "note": "推し活レーダーOS 配信イベントフィード。Claudeの定期リサーチで更新される。verificationは公式ソースの有無で判定。",
   "events": [
+    {
+      "id": "feed_nagase_fm2026_tachikawa",
+      "name": "Nagase Ren 1st Fan Meeting 2026（東京・立川）",
+      "summary": "永瀬廉 初のソロファンミーティング東京公演。10/13は18時開演、10/14は14時/18時の2公演。入場時に全員本人確認あり",
+      "organizer": "NAGASE REN OFFICIAL FAN CLUB",
+      "category": "イベント",
+      "oshiHints": [
+        { "name": "永瀬廉", "matchType": "本人" },
+        { "name": "King & Prince", "matchType": "グループ" }
+      ],
+      "prefecture": "東京都",
+      "city": "立川市",
+      "venue": "立川ステージガーデン",
+      "area": "立川",
+      "startDate": "2026-10-13",
+      "endDate": "2026-10-14",
+      "openTime": "17:00",
+      "closeTime": "",
+      "lastEntry": "",
+      "fee": "有料（FC会員限定）",
+      "needsReservation": true,
+      "needsNumberedTicket": false,
+      "sameDayTicket": false,
+      "freeEntry": false,
+      "freeEntryFrom": "",
+      "officialUrl": "https://nagaseren-official.com/contents/1073356",
+      "sources": [
+        { "url": "https://nagaseren-official.com/contents/1073356", "name": "永瀬廉オフィシャルファンクラブ（公演詳細）", "official": true, "fetchedAt": "2026-09-28T15:30:00+09:00", "verifiedAt": "" },
+        { "url": "https://natalie.mu/music/news/676867", "name": "音楽ナタリー", "official": false, "fetchedAt": "2026-09-28T15:30:00+09:00", "verifiedAt": "" }
+      ],
+      "status": "開催予定",
+      "notes": "チケットはファンクラブ会員向け。開演時間・入場方法の詳細はFCサイトで確認。全国5都市開催のうち大阪(9/8-10)・愛知(9/25-26)は終了済み。",
+      "createdAt": "2026-09-28T15:30:00+09:00",
+      "updatedAt": "2026-09-28T15:30:00+09:00",
+      "lastVerifiedAt": ""
+    },
+    {
+      "id": "feed_nagase_fm2026_sendai",
+      "name": "Nagase Ren 1st Fan Meeting 2026（仙台）",
+      "summary": "永瀬廉 初のソロファンミーティング仙台公演。10/22は14時/18時の2公演、10/23は昼公演。入場時に全員本人確認あり",
+      "organizer": "NAGASE REN OFFICIAL FAN CLUB",
+      "category": "イベント",
+      "oshiHints": [
+        { "name": "永瀬廉", "matchType": "本人" },
+        { "name": "King & Prince", "matchType": "グループ" }
+      ],
+      "prefecture": "宮城県",
+      "city": "仙台市",
+      "venue": "仙台サンプラザホール",
+      "area": "",
+      "startDate": "2026-10-22",
+      "endDate": "2026-10-23",
+      "openTime": "",
+      "closeTime": "",
+      "lastEntry": "",
+      "fee": "有料（FC会員限定）",
+      "needsReservation": true,
+      "needsNumberedTicket": false,
+      "sameDayTicket": false,
+      "freeEntry": false,
+      "freeEntryFrom": "",
+      "officialUrl": "https://nagaseren-official.com/contents/1073356",
+      "sources": [
+        { "url": "https://nagaseren-official.com/contents/1073356", "name": "永瀬廉オフィシャルファンクラブ（公演詳細）", "official": true, "fetchedAt": "2026-09-28T15:30:00+09:00", "verifiedAt": "" }
+      ],
+      "status": "開催予定",
+      "notes": "仙台はエリアマトリクス外のため移動時間計算は非対応。遠征予定として検討する場合は新幹線ルートを別途確認。",
+      "createdAt": "2026-09-28T15:30:00+09:00",
+      "updatedAt": "2026-09-28T15:30:00+09:00",
+      "lastVerifiedAt": ""
+    },
+    {
+      "id": "feed_kp_sohoney_tower_campaign",
+      "name": "King & Prince『So Honey EP』発売記念施策（タワーレコード）",
+      "summary": "9/2発売の1st EP『So Honey EP』のリリース記念キャンペーン。実施店舗・特典・パネル展示の有無は公式ページで要確認",
+      "organizer": "タワーレコード",
+      "category": "その他",
+      "oshiHints": [{ "name": "King & Prince", "matchType": "本人" }],
+      "prefecture": "",
+      "city": "",
+      "venue": "タワーレコード各店・オンライン",
+      "area": "",
+      "startDate": "2026-09-02",
+      "endDate": "",
+      "openTime": "",
+      "closeTime": "",
+      "lastEntry": "",
+      "fee": "",
+      "needsReservation": false,
+      "needsNumberedTicket": false,
+      "sameDayTicket": false,
+      "freeEntry": true,
+      "freeEntryFrom": "",
+      "officialUrl": "https://tower.jp/article/feature_item/2026/08/28/0705",
+      "sources": [
+        { "url": "https://tower.jp/article/feature_item/2026/08/28/0705", "name": "タワーレコード（発売記念施策ページ）", "official": true, "fetchedAt": "2026-09-28T15:30:00+09:00", "verifiedAt": "" }
+      ],
+      "status": "開催中",
+      "notes": "終了日・対象店舗（あべのHoop店を含むか）は公式ページで確認してください。",
+      "createdAt": "2026-09-28T15:30:00+09:00",
+      "updatedAt": "2026-09-28T15:30:00+09:00",
+      "lastVerifiedAt": ""
+    },
     {
       "id": "feed_dtm2026_kyoto",
       "name": "Disney THE MARKET 2026 in ジェイアール京都伊勢丹",
@@ -30,41 +133,9 @@
         { "url": "https://dtm-official.jp/event/", "name": "Disney THE MARKET 公式サイト（開催地情報）", "official": true, "fetchedAt": "2026-09-28T00:00:00+09:00", "verifiedAt": "" }
       ],
       "status": "開催中",
-      "notes": "ディズニー最大級のショッピングイベントの全国巡回・京都会場。最終日は閉場時間が早まる可能性・混雑時は入場整理の可能性があるため、行く前に公式サイトで当日の入場方法を確認してください。",
+      "notes": "最終日は閉場時間が早まる可能性・混雑時は入場整理の可能性があるため、行く前に公式サイトで当日の入場方法を確認してください。",
       "createdAt": "2026-09-28T00:00:00+09:00",
-      "updatedAt": "2026-09-28T00:00:00+09:00",
-      "lastVerifiedAt": ""
-    },
-    {
-      "id": "feed_twst2026_namba",
-      "name": "ツイステッドワンダーランド プレミアムバースデー2026 POP-UP SHOP in OIOI（大阪会場）",
-      "summary": "ディズニーのヴィランズ（悪役）をモチーフにした人気ゲーム『ツイステ』の誕生日記念グッズPOP-UP。ディズニー関連だが King & Prince とは無関係",
-      "organizer": "（要確認）",
-      "category": "POP-UP",
-      "oshiHints": [{ "name": "Disney", "matchType": "関連作品" }],
-      "prefecture": "大阪府",
-      "city": "大阪市中央区",
-      "venue": "なんばマルイ",
-      "area": "難波",
-      "startDate": "2026-09-18",
-      "endDate": "2026-10-04",
-      "openTime": "",
-      "closeTime": "",
-      "lastEntry": "",
-      "fee": "",
-      "needsReservation": false,
-      "needsNumberedTicket": false,
-      "sameDayTicket": false,
-      "freeEntry": true,
-      "freeEntryFrom": "",
-      "officialUrl": "",
-      "sources": [
-        { "url": "https://collabo-cafe.com/events/collabo/twisted-wonderland-premium-birthday-popup-shop-shibuya-namba-2026/", "name": "コラボカフェ（アグリゲータ）", "official": false, "fetchedAt": "2026-09-28T00:00:00+09:00", "verifiedAt": "" }
-      ],
-      "status": "開催中",
-      "notes": "ディズニー『ツイステッドワンダーランド』のPOP-UP。非公式ソースのみのため開催時間・入場方法は公式（マルイ）で要確認。",
-      "createdAt": "2026-09-28T00:00:00+09:00",
-      "updatedAt": "2026-09-28T00:00:00+09:00",
+      "updatedAt": "2026-09-28T15:30:00+09:00",
       "lastVerifiedAt": ""
     },
     {
@@ -94,9 +165,9 @@
         { "url": "https://poupelle.com/news/", "name": "映画公式サイト ニュース", "official": true, "fetchedAt": "2026-09-28T00:00:00+09:00", "verifiedAt": "" }
       ],
       "status": "開催予定",
-      "notes": "映画上映×フルオーケストラ生演奏。会場・時間・チケットは公式サイトで確認してください。",
+      "notes": "会場・時間・チケットは公式サイトで確認してください。",
       "createdAt": "2026-09-28T00:00:00+09:00",
-      "updatedAt": "2026-09-28T00:00:00+09:00",
+      "updatedAt": "2026-09-28T15:30:00+09:00",
       "lastVerifiedAt": ""
     }
   ]

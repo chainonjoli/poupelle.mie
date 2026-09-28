@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "note": "巡回リサーチの対象定義。enabledをfalseにするとその対象は探さない。変更はClaudeへの指示かGitHub上の編集で行う。",
+  "updatedAt": "2026-09-28T15:00:00+09:00",
+  "targets": [
+    {
+      "name": "King & Prince",
+      "enabled": true,
+      "priority": 1,
+      "queries": ["King & Prince イベント ポップアップ 開催", "キンプリ 展示 コラボ キャンペーン", "King & Prince リリース記念 特典 タワーレコード HMV"],
+      "notes": "グループ活動全般。リリース施策・パネル展・コラボ企画を含む"
+    },
+    {
+      "name": "永瀬廉",
+      "enabled": true,
+      "priority": 1,
+      "queries": ["永瀬廉 イベント ファンミーティング 展示", "永瀬廉 映画 ドラマ 出演 発表"],
+      "notes": "個人仕事も対象（映画・ドラマ・雑誌連動イベント等）"
+    },
+    {
+      "name": "髙橋海人",
+      "enabled": true,
+      "priority": 1,
+      "queries": ["髙橋海人 イベント ファンミーティング 展示", "髙橋海人 ドラマ 舞台 出演 発表"],
+      "notes": "個人仕事も対象"
+    },
+    {
+      "name": "King & Prince × Disney",
+      "enabled": true,
+      "priority": 2,
+      "queries": ["King & Prince ディズニー コラボ", "キンプリ ミッキー POP-UP"],
+      "notes": "コラボ企画。MAGIC STAGEのような再開催・新展開を監視"
+    },
+    {
+      "name": "Disney（単独・大型のみ）",
+      "enabled": true,
+      "priority": 3,
+      "queries": ["Disney THE MARKET 開催地", "ディズニーストア 期間限定 POP-UP 大阪 京都"],
+      "notes": "Disney THE MARKET級の大型公式イベントのみ。ツイステ等の関連作品単独イベントは対象外"
+    },
+    {
+      "name": "えんとつ町のプペル",
+      "enabled": true,
+      "priority": 3,
+      "queries": ["えんとつ町のプペル イベント 展示 上映会"],
+      "notes": ""
+    }
+  ]
+}
