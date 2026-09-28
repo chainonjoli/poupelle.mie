@@ -176,6 +176,30 @@ body {
 }
 
 .card-title { font-size: 0.98rem; font-weight: 700; flex: 1; line-height: 1.5; }
+.card-summary {
+    margin-top: 8px;
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    padding-left: 10px;
+    border-left: 2px solid var(--gold-faint);
+}
+.oshi-chips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.oshi-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--gold-deep);
+    background: var(--gold-faint);
+    border: 1px solid rgba(179, 144, 63, 0.25);
+    border-radius: 999px;
+    padding: 1px 10px;
+    letter-spacing: 0.04em;
+}
+.oshi-chip small { font-size: 0.6rem; font-weight: 500; color: var(--gold); }
+.oshi-chip.none { color: var(--muted); background: var(--bg-soft); border-color: var(--line); }
 .badge-verify, .badge-official {
     display: inline-block;
     font-size: 0.62rem;

@@ -1,11 +1,12 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-28T00:00:00+09:00",
+  "updatedAt": "2026-09-28T15:00:00+09:00",
   "note": "推し活レーダーOS 配信イベントフィード。Claudeの定期リサーチで更新される。verificationは公式ソースの有無で判定。",
   "events": [
     {
       "id": "feed_dtm2026_kyoto",
       "name": "Disney THE MARKET 2026 in ジェイアール京都伊勢丹",
+      "summary": "ディズニー最大級のショッピングイベントの京都巡回。約5000点規模のグッズ販売（春に阪急うめだで開催されたものの巡回）",
       "organizer": "ウォルト・ディズニー・ジャパン",
       "category": "POP-UP",
       "oshiHints": [{ "name": "Disney", "matchType": "本人" }],
@@ -37,6 +38,7 @@
     {
       "id": "feed_twst2026_namba",
       "name": "ツイステッドワンダーランド プレミアムバースデー2026 POP-UP SHOP in OIOI（大阪会場）",
+      "summary": "ディズニーのヴィランズ（悪役）をモチーフにした人気ゲーム『ツイステ』の誕生日記念グッズPOP-UP。ディズニー関連だが King & Prince とは無関係",
       "organizer": "（要確認）",
       "category": "POP-UP",
       "oshiHints": [{ "name": "Disney", "matchType": "関連作品" }],
@@ -68,6 +70,7 @@
     {
       "id": "feed_poupelle_cinema_symphony_20261031",
       "name": "映画 えんとつ町のプペル〜約束の時計台〜 シネマ・シンフォニー",
+      "summary": "映画本編の上映にフルオーケストラの生演奏を重ねる特別上映イベント",
       "organizer": "（要確認）",
       "category": "イベント",
       "oshiHints": [{ "name": "えんとつ町のプペル", "matchType": "本人" }],
